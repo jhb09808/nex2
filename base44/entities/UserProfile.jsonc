@@ -1,0 +1,122 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "profile_photo": {
+      "type": "string",
+      "format": "uri"
+    },
+    "age": {
+      "type": "number"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "non-binary",
+        "prefer_not_to_say"
+      ]
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "anonymous",
+        "first_name",
+        "full_profile"
+      ],
+      "default": "full_profile"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "is_online": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_premium": {
+      "type": "boolean",
+      "default": false
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "plus",
+        "pro"
+      ],
+      "default": "free"
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "invisible_mode": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_suspended": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_banned": {
+      "type": "boolean",
+      "default": false
+    },
+    "onboarding_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "blocked_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notification_settings": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "boolean",
+          "default": true
+        },
+        "nearby": {
+          "type": "boolean",
+          "default": true
+        },
+        "events": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  },
+  "required": [
+    "username"
+  ]
+}

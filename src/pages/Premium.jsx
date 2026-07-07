@@ -1,0 +1,137 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, Check, Crown, Award, Zap, X } from "lucide-react";
+import GlassCard from "@/components/nex/GlassCard";
+
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    icon: Zap,
+    color: "text-white/50",
+    features: [
+      { label: "5 mile radius", included: true },
+      { label: "Limited daily chats", included: true },
+      { label: "Basic filters", included: true },
+      { label: "Unlimited radius", included: false },
+      { label: "Invisible mode", included: false },
+      { label: "Profile analytics", included: false },
+    ],
+  },
+  {
+    name: "Plus",
+    price: "$9.99",
+    period: "/month",
+    icon: Award,
+    color: "text-blue-400",
+    popular: true,
+    features: [
+      { label: "Unlimited radius", included: true },
+      { label: "Unlimited chats", included: true },
+      { label: "Advanced filters", included: true },
+      { label: "Invisible mode", included: true },
+      { label: "Profile insights", included: true },
+      { label: "Priority placement", included: false },
+    ],
+  },
+  {
+    name: "Pro",
+    price: "$19.99",
+    period: "/month",
+    icon: Crown,
+    color: "text-yellow-400",
+    features: [
+      { label: "Everything in Plus", included: true },
+      { label: "Priority placement", included: true },
+      { label: "Boost profile", included: true },
+      { label: "Custom themes", included: true },
+      { label: "Analytics dashboard", included: true },
+      { label: "Priority support", included: true },
+    ],
+  },
+];
+
+export default function Premium() {
+  const navigate = useNavigate();
+  const [selected, setSelected] = useState(1);
+
+  return (
+    <div className="px-4 pt-4 safe-top pb-8 max-w-lg mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl glass flex items-center justify-center">
+          <ArrowLeft className="w-5 h-5 text-white/60" />
+        </button>
+        <h1 className="text-xl font-bold text-white">Premium</h1>
+      </div>
+
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Unlock NEX2</h2>
+        <p className="text-white/40 text-sm">Get more connections, more features, more reach</p>
+      </div>
+
+      <div className="space-y-4">
+        {plans.map((plan, i) => {
+          const Icon = plan.icon;
+          const isSelected = selected === i;
+          return (
+            <motion.div key={plan.name} whileTap={{ scale: 0.98 }}>
+              <GlassCard
+                strong={isSelected}
+                className={`relative ${isSelected ? "ring-1 ring-blue-500/40" : ""}`}
+                onClick={() => setSelected(i)}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full gradient-blue text-[10px] font-semibold text-white uppercase tracking-wider">
+                    Most Popular
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? "gradient-blue" : "bg-white/5"}`}>
+                    <Icon className={`w-5 h-5 ${isSelected ? "text-white" : plan.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">{plan.name}</p>
+                    <p className="text-white/40 text-xs">
+                      <span className="text-white text-lg font-bold">{plan.price}</span>
+                      <span className="text-white/30">{plan.period}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  {plan.features.map((feature) => (
+                    <div key={feature.label} className="flex items-center gap-2.5">
+                      {feature.included ? (
+                        <div className="w-5 h-5 rounded-full gradient-blue flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
+                          <X className="w-3 h-3 text-white/20" />
+                        </div>
+                      )}
+                      <span className={`text-sm ${feature.included ? "text-white/70" : "text-white/20"}`}>
+                        {feature.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {selected > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
+          <button className="w-full py-4 rounded-2xl gradient-blue text-white font-semibold text-base glow-blue active:scale-[0.98] transition-transform">
+            Subscribe to {plans[selected].name}
+          </button>
+        </motion.div>
+      )}
+    </div>
+  );
+}

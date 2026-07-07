@@ -1,0 +1,40 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "message",
+        "nearby",
+        "event",
+        "system",
+        "match"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "related_id": {
+      "type": "string"
+    },
+    "sender_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "title"
+  ]
+}

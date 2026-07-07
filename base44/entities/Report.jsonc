@@ -1,0 +1,43 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "reporter_id": {
+      "type": "string"
+    },
+    "reported_user_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "harassment",
+        "spam",
+        "inappropriate",
+        "fake_profile",
+        "other"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "pending"
+    },
+    "conversation_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reporter_id",
+    "reported_user_id",
+    "reason"
+  ]
+}
