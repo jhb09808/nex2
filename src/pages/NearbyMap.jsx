@@ -1,22 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Filter, MessageCircle, ChevronDown, Sliders } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { X, MessageCircle, Sliders } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+
+const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
+
+function MapController({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([center.lat, center.lng], 14, { duration: 1.2 });
+  }, [center.lat, center.lng, map]);
+  return null;
+}
 
 export default function NearbyMap() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ distance: 5, onlineOnly: false, interests: [] });
+  const [filters, setFilters] = useState({ distance: 5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
 
   useEffect(() => {
     loadUsers();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
   }, []);
 
   const loadUsers = async () => {
@@ -31,18 +52,48 @@ export default function NearbyMap() {
     }
   };
 
-  // Generate consistent random positions for the map visualization
-  const getUserPosition = (userId) => {
+  // Deterministic lat/lng offset from user's location
+  const getUserLatLng = (userId) => {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       hash = ((hash << 5) - hash) + userId.charCodeAt(i);
       hash = hash & hash;
     }
-    return {
-      x: 10 + Math.abs(hash % 80),
-      y: 10 + Math.abs((hash * 31) % 80),
-    };
+    const latOffset = (Math.abs(hash % 1000) / 1000 - 0.5) * 0.04;
+    const lngOffset = (Math.abs((hash * 31) % 1000) / 1000 - 0.5) * 0.04;
+    return [userLocation.lat + latOffset, userLocation.lng + lngOffset];
   };
+
+  const createUserIcon = (user) => {
+    const isOnline = user.is_online;
+    const photoHtml = user.profile_photo
+      ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
+      : `<div style="width:100%;height:100%;background:${isOnline ? "linear-gradient(135deg,#3B82F6,#60A5FA)" : "rgba(255,255,255,0.1)"};"></div>`;
+    return L.divIcon({
+      className: "",
+      html: `<div style="position:relative;width:36px;height:36px;">
+        ${isOnline ? '<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.3);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>' : ""}
+        <div style="position:relative;width:36px;height:36px;border-radius:9999px;border:2px solid ${isOnline ? "#60A5FA" : "rgba(255,255,255,0.2)"};overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
+          ${photoHtml}
+        </div>
+      </div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+    });
+  };
+
+  const userLocationIcon = L.divIcon({
+    className: "",
+    html: `<div style="position:relative;width:16px;height:16px;">
+      <div style="position:absolute;inset:-14px;border-radius:9999px;background:rgba(59,130,246,0.15);animation:nex-marker-ping 3s ease-out infinite;"></div>
+      <div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.25);"></div>
+      <div style="position:relative;width:16px;height:16px;border-radius:9999px;background:linear-gradient(135deg,#3B82F6,#60A5FA);box-shadow:0 0 20px rgba(59,130,246,0.6);"></div>
+    </div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+
+  const filteredUsers = users.filter((u) => !filters.onlineOnly || u.is_online);
 
   if (loading) {
     return (
@@ -53,7 +104,7 @@ export default function NearbyMap() {
   }
 
   return (
-    <div className="min-h-screen safe-top relative">
+    <div className="relative overflow-hidden" style={{ height: "100vh" }}>
       {/* Header */}
       <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between safe-top">
         <h1 className="text-xl font-bold text-white">Nearby</h1>
@@ -65,65 +116,34 @@ export default function NearbyMap() {
         </button>
       </div>
 
-      {/* Map Area */}
-      <div className="relative w-full h-screen bg-[hsl(0,0%,4%)] overflow-hidden">
-        {/* Grid overlay */}
-        <div className="absolute inset-0 opacity-5">
-          <svg width="100%" height="100%">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-        </div>
+      {/* Map */}
+      <div className="absolute inset-0 z-0">
+        <MapContainer
+          center={[userLocation.lat, userLocation.lng]}
+          zoom={14}
+          className="w-full h-full"
+          zoomControl={false}
+          attributionControl={false}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+          />
+          <MapController center={userLocation} />
 
-        {/* Center glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-blue-500/10 blur-[60px]" />
+          {/* Your location */}
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon} />
 
-        {/* User dots */}
-        {users.map((user) => {
-          const pos = getUserPosition(user.id);
-          const isOnline = user.is_online;
-          return (
-            <motion.button
+          {/* User markers */}
+          {filteredUsers.map((user) => (
+            <Marker
               key={user.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: Math.random() * 0.3 }}
-              className="absolute"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              onClick={() => setSelectedUser(user)}
-            >
-              <div className="relative">
-                {isOnline && (
-                  <div className="absolute -inset-3 rounded-full bg-blue-500/20 animate-pulse" />
-                )}
-                <div
-                  className={`w-8 h-8 rounded-full border-2 overflow-hidden ${
-                    isOnline ? "border-blue-400 glow-blue-sm" : "border-white/20"
-                  }`}
-                >
-                  {user.profile_photo ? (
-                    <img src={user.profile_photo} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className={`w-full h-full ${isOnline ? "gradient-blue" : "bg-white/10"}`} />
-                  )}
-                </div>
-              </div>
-            </motion.button>
-          );
-        })}
-
-        {/* Your location */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-full bg-blue-500/10 animate-ping" style={{ animationDuration: "3s" }} />
-            <div className="absolute -inset-3 rounded-full bg-blue-500/20" />
-            <div className="w-4 h-4 rounded-full gradient-blue glow-blue" />
-          </div>
-        </div>
+              position={getUserLatLng(user.id)}
+              icon={createUserIcon(user)}
+              eventHandlers={{ click: () => setSelectedUser(user) }}
+            />
+          ))}
+        </MapContainer>
       </div>
 
       {/* Filters Panel */}
