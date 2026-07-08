@@ -7,6 +7,7 @@ import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
+import NetworkRankCard from "@/components/nex/ai/NetworkRankCard";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -109,6 +110,9 @@ export default function Profile() {
           <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
         </GlassCard>
       </div>
+
+      {/* Global Network Rank & Leaderboard */}
+      <NetworkRankCard />
 
       {/* Networking Streak Visualizer */}
       <StreakVisualizer profile={profile} />
