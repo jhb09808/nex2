@@ -100,7 +100,7 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
         className="fixed inset-0 z-[100] flex items-center justify-center px-4"
       >
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={status === "waiting" ? onClose : undefined} />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={status === "accepted" ? undefined : onClose} />
 
         {/* Modal */}
         <motion.div
@@ -112,11 +112,9 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
         >
           <div className="glass-strong rounded-3xl p-8 text-center">
             {/* Close */}
-            {status === "waiting" && (
-              <button onClick={onClose} className="absolute top-4 right-4">
-                <X className="w-5 h-5 text-white/40" />
-              </button>
-            )}
+            <button onClick={onClose} className="absolute top-4 right-4">
+              <X className="w-5 h-5 text-white/40" />
+            </button>
 
             {/* Avatar */}
             <div className="relative inline-block mb-4">
@@ -191,14 +189,16 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
               {status === "rejected" && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <p className="text-red-400 font-semibold text-base mb-1">Request declined</p>
-                  <p className="text-white/40 text-xs">They're not available right now</p>
+                  <p className="text-white/40 text-xs mb-3">They're not available right now</p>
+                  <button onClick={onClose} className="px-6 py-2 rounded-xl glass text-white/70 text-sm font-medium active:scale-95 transition-transform">Dismiss</button>
                 </motion.div>
               )}
 
               {status === "timeout" && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <p className="text-amber-400 font-semibold text-base mb-1">No response</p>
-                  <p className="text-white/40 text-xs">They didn't respond in time</p>
+                  <p className="text-white/40 text-xs mb-3">They didn't respond in time</p>
+                  <button onClick={onClose} className="px-6 py-2 rounded-xl glass text-white/70 text-sm font-medium active:scale-95 transition-transform">Dismiss</button>
                 </motion.div>
               )}
             </div>
