@@ -89,6 +89,8 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
     return <UserAvatar src={user.profile_photo} size="lg" isOnline={user.is_online} />;
   };
 
+  if (!user) return null;
+
   return (
     <AnimatePresence>
       <motion.div
