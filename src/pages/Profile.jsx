@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -108,6 +109,9 @@ export default function Profile() {
           <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
         </GlassCard>
       </div>
+
+      {/* Networking Streak Visualizer */}
+      <StreakVisualizer profile={profile} />
 
       {/* Menu */}
       <div className="space-y-1">
