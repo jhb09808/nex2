@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import NearbyNudge from "@/components/nex/NearbyNudge";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -70,6 +71,9 @@ export default function Home() {
         <Search className="w-5 h-5 text-white/30" />
         <span className="text-white/30 text-sm">Search people, interests, events...</span>
       </GlassCard>
+
+      {/* Nearby shared-interest nudge */}
+      <NearbyNudge />
 
       {/* Nearby People */}
       <div>
