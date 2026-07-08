@@ -4,14 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock } from "lucide-react";
+import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock, MessageCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
-import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
@@ -480,14 +479,42 @@ export default function NearbyMap() {
                     <Lock className="w-4 h-4" /> Chat limit reached
                   </button>
                 ) : (
-                  <WaveButton
-                    targetUser={selectedUser}
-                    compact
-                    onMutualMatch={(convoId) => {
-                      setSelectedUser(null);
-                      navigate(`/chat/${convoId}`);
+                  <button
+                    onClick={async () => {
+                      try {
+                        const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
+                        if (!enforceRes.data?.allowed) {
+                          setPaywallVariant("chat_limit");
+                          return;
+                        }
+                        const existing = await base44.entities.Conversation.filter({});
+                        const convo = existing.find(
+                          (c) =>
+                            c.participants?.includes(selectedUser.created_by_id) ||
+                            c.participants?.includes(selectedUser.id)
+                        );
+                        let conversationId;
+                        if (convo) {
+                          conversationId = convo.id;
+                        } else {
+                          const me = await base44.auth.me();
+                          const newConvo = await base44.entities.Conversation.create({
+                            participants: [me.id, selectedUser.created_by_id || selectedUser.id],
+                            last_message: "",
+                            is_active: true,
+                          });
+                          conversationId = newConvo.id;
+                        }
+                        setSelectedUser(null);
+                        navigate(`/chat/${conversationId}`);
+                      } catch (err) {
+                        console.error(err);
+                      }
                     }}
-                  />
+                    className="flex-1 py-3 rounded-xl gradient-blue text-white font-medium text-sm flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
+                  >
+                    <MessageCircle className="w-4 h-4" /> Message
+                  </button>
                 )}
                 <button
                   onClick={() => setSafetyUser(selectedUser)}
