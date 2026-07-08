@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Crown, Award, Zap, X } from "lucide-react";
+import { ArrowLeft, Check, Crown, Award, Zap, X, Diamond, Globe, Trophy } from "lucide-react";
 import GlassCard from "@/components/nex/GlassCard";
 
 const plans = [
@@ -51,6 +51,23 @@ const plans = [
       { label: "Priority support", included: true },
     ],
   },
+  {
+    name: "Platinum",
+    price: "$1,000",
+    period: "/month",
+    icon: Diamond,
+    color: "text-cyan-300",
+    exclusive: true,
+    features: [
+      { label: "Everything in Pro", included: true },
+      { label: "Global networking unlocked", included: true },
+      { label: "Unlimited worldwide radius", included: true },
+      { label: "Global leaderboard access", included: true },
+      { label: "Exclusive top-tier badge", included: true },
+      { label: "Direct intro to top networkers", included: true },
+      { label: "Dedicated concierge", included: true },
+    ],
+  },
 ];
 
 export default function Premium() {
@@ -71,6 +88,19 @@ export default function Premium() {
         <p className="text-white/40 text-sm">Get more connections, more features, more reach</p>
       </div>
 
+      {selected === 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-5 flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-violet-500/10 border border-cyan-500/15"
+        >
+          <Globe className="w-5 h-5 text-cyan-300 flex-shrink-0" />
+          <p className="text-cyan-200/80 text-xs leading-relaxed">
+            Platinum unlocks <span className="font-semibold">global networking</span> — connect with anyone, anywhere in the world. No radius limits.
+          </p>
+        </motion.div>
+      )}
+
       <div className="space-y-4">
         {plans.map((plan, i) => {
           const Icon = plan.icon;
@@ -79,12 +109,18 @@ export default function Premium() {
             <motion.div key={plan.name} whileTap={{ scale: 0.98 }}>
               <GlassCard
                 strong={isSelected}
-                className={`relative ${isSelected ? "ring-1 ring-blue-500/40" : ""}`}
+                className={`relative ${isSelected ? (plan.exclusive ? "ring-1 ring-cyan-400/40" : "ring-1 ring-blue-500/40") : ""} ${plan.exclusive ? "border-cyan-500/10" : ""}`}
                 onClick={() => setSelected(i)}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full gradient-blue text-[10px] font-semibold text-white uppercase tracking-wider">
                     Most Popular
+                  </div>
+                )}
+                {plan.exclusive && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1">
+                    <Trophy className="w-2.5 h-2.5" />
+                    Exclusive
                   </div>
                 )}
 
@@ -127,7 +163,13 @@ export default function Premium() {
 
       {selected > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <button className="w-full py-4 rounded-2xl gradient-blue text-white font-semibold text-base glow-blue active:scale-[0.98] transition-transform">
+          <button
+            className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform ${
+              plans[selected].exclusive
+                ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_24px_rgba(34,211,238,0.25),0_0_60px_rgba(59,130,246,0.12)]"
+                : "gradient-blue glow-blue"
+            }`}
+          >
             Subscribe to {plans[selected].name}
           </button>
         </motion.div>
