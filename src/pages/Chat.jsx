@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Send, Image, Mic, Smile, MoreVertical } from "lucide-react";
+import { ArrowLeft, Send, Image, Mic, Smile } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
+import ChatWingman from "@/components/nex/ai/ChatWingman";
 import moment from "moment";
 
 export default function Chat() {
@@ -25,6 +26,12 @@ export default function Chat() {
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const handler = (e) => setNewMessage(e.detail);
+    window.addEventListener("wingman-icebreaker", handler);
+    return () => window.removeEventListener("wingman-icebreaker", handler);
+  }, []);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -92,9 +99,7 @@ export default function Chat() {
           <p className="text-white font-medium text-sm truncate">{otherUser?.username || "User"}</p>
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>
         </div>
-        <button className="w-9 h-9 rounded-xl glass flex items-center justify-center">
-          <MoreVertical className="w-5 h-5 text-white/60" />
-        </button>
+        <ChatWingman otherUser={otherUser} recentMessages={messages.map((m) => ({ ...m, sender_id: m.sender_id === me?.id ? "me" : m.sender_id }))} />
       </div>
 
       {/* Messages */}
