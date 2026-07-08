@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 5,
+      "interval_unit": "minutes",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Proximity Match Scan",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "proximity_match_scan",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_proximity": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkProximityMatches",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan for nearby high-compatibility matches",
+            "description": "500ft radius check"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Scans every 5 minutes for high-compatibility users within 500 feet and sends subtle match notifications"
+}

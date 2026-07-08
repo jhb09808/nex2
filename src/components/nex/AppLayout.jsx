@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import NavMenu from "@/components/nex/NavMenu";
+import ProximityMatchNudge from "@/components/nex/ProximityMatchNudge";
 import VerificationGate from "@/components/nex/safety/VerificationGate";
 import { base44 } from "@/api/base44Client";
 
@@ -44,6 +45,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,4%)] max-w-lg mx-auto relative overflow-hidden">
+      <ProximityMatchNudge />
       <Outlet />
       <NavMenu />
     </div>
