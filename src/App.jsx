@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import PasswordGate, { hasAccess } from '@/components/PasswordGate';
 
 // Auth pages
 import Login from '@/pages/Login';
@@ -85,6 +86,10 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
+  if (!hasAccess()) {
+    return <PasswordGate />;
+  }
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
