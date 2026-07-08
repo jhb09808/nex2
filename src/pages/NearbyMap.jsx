@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, MessageCircle, Sliders } from "lucide-react";
+import { X, MessageCircle, Sliders, EyeOff, Shield, Crown, BadgeCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
 
@@ -44,7 +45,10 @@ export default function NearbyMap() {
     try {
       const allUsers = await base44.entities.UserProfile.list("-created_date", 50);
       const me = await base44.auth.me();
-      setUsers(allUsers.filter((u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended));
+      const realUsers = allUsers
+        .filter((u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended)
+        .map((u) => ({ ...u, isMock: false }));
+      setUsers(realUsers);
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,11 +56,21 @@ export default function NearbyMap() {
     }
   };
 
-  // Deterministic lat/lng offset from user's location
-  const getUserLatLng = (userId) => {
+  // Combine real users with mock profiles centered on user's location
+  const allProfiles = [...users, ...generateMockProfiles(userLocation).map((u) => ({ ...u, isMock: true }))];
+
+  const getDisplayName = (user) => {
+    if (user.visibility === "anonymous") return "Anonymous";
+    if (user.visibility === "first_name") return user.username;
+    return user.username;
+  };
+
+  // Use explicit lat/lng for mock profiles, deterministic offset for real users
+  const getUserLatLng = (user) => {
+    if (user.lat != null && user.lng != null) return [user.lat, user.lng];
     let hash = 0;
-    for (let i = 0; i < userId.length; i++) {
-      hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+    for (let i = 0; i < user.id.length; i++) {
+      hash = ((hash << 5) - hash) + user.id.charCodeAt(i);
       hash = hash & hash;
     }
     const latOffset = (Math.abs(hash % 1000) / 1000 - 0.5) * 0.04;
@@ -64,21 +78,51 @@ export default function NearbyMap() {
     return [userLocation.lat + latOffset, userLocation.lng + lngOffset];
   };
 
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
   const createUserIcon = (user) => {
     const isOnline = user.is_online;
-    const photoHtml = user.profile_photo
-      ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
-      : `<div style="width:100%;height:100%;background:${isOnline ? "linear-gradient(135deg,#3B82F6,#60A5FA)" : "rgba(255,255,255,0.1)"};"></div>`;
+    const visibility = user.visibility || "full_profile";
+    const size = visibility === "anonymous" ? 32 : 36;
+
+    let innerHtml;
+    if (visibility === "anonymous") {
+      // Mystery avatar — blurred gradient with eye-off icon
+      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(255,255,255,0.05));display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+      </div>`;
+    } else if (visibility === "first_name") {
+      // Initial letter avatar
+      const initial = (user.username || "?").charAt(0).toUpperCase();
+      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(96,165,250,0.15));display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.85);">${escapeHtml(initial)}</div>`;
+    } else {
+      // Full profile photo
+      innerHtml = user.profile_photo
+        ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
+        : `<div style="width:100%;height:100%;background:${isOnline ? "linear-gradient(135deg,#3B82F6,#60A5FA)" : "rgba(255,255,255,0.1)"};"></div>`;
+    }
+
+    // Badge stack (verified + premium)
+    const badges = [];
+    if (user.is_verified) badges.push(`<div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:#3B82F6;border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`);
+    if (user.is_premium) badges.push(`<div style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:linear-gradient(135deg,#F59E0B,#FBBF24);border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V8l5 4 3-6 3 6 5-4v12"/></svg></div>`);
+    const badgesHtml = badges.join("");
+
+    const borderColor = isOnline
+      ? (visibility === "anonymous" ? "rgba(59,130,246,0.4)" : "#60A5FA")
+      : "rgba(255,255,255,0.2)";
+
     return L.divIcon({
       className: "",
-      html: `<div style="position:relative;width:36px;height:36px;">
-        ${isOnline ? '<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.3);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>' : ""}
-        <div style="position:relative;width:36px;height:36px;border-radius:9999px;border:2px solid ${isOnline ? "#60A5FA" : "rgba(255,255,255,0.2)"};overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-          ${photoHtml}
+      html: `<div style="position:relative;width:${size}px;height:${size}px;">
+        ${isOnline ? `<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,${visibility === "anonymous" ? 0.15 : 0.3});animation:nex-marker-pulse 2s ease-in-out infinite;"></div>` : ""}
+        <div style="position:relative;width:${size}px;height:${size}px;border-radius:9999px;border:2px solid ${borderColor};overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4);${visibility === "anonymous" ? "filter:blur(0.5px);" : ""}">
+          ${innerHtml}
         </div>
+        ${badgesHtml}
       </div>`,
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
     });
   };
 
@@ -93,7 +137,7 @@ export default function NearbyMap() {
     iconAnchor: [8, 8],
   });
 
-  const filteredUsers = users.filter((u) => !filters.onlineOnly || u.is_online);
+  const filteredUsers = allProfiles.filter((u) => !filters.onlineOnly || u.is_online);
 
   if (loading) {
     return (
@@ -138,7 +182,7 @@ export default function NearbyMap() {
           {filteredUsers.map((user) => (
             <Marker
               key={user.id}
-              position={getUserLatLng(user.id)}
+              position={getUserLatLng(user)}
               icon={createUserIcon(user)}
               eventHandlers={{ click: () => setSelectedUser(user) }}
             />
@@ -205,14 +249,40 @@ export default function NearbyMap() {
                 <X className="w-5 h-5 text-white/40" />
               </button>
               <div className="flex items-center gap-4 mb-4">
-                <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} />
-                <div>
-                  <p className="text-white font-semibold text-lg">{selectedUser.username}</p>
+                {selectedUser.visibility === "anonymous" ? (
+                  <div className="w-14 h-14 rounded-full glass flex items-center justify-center">
+                    <EyeOff className="w-6 h-6 text-white/40" />
+                  </div>
+                ) : selectedUser.visibility === "first_name" ? (
+                  <div className="w-14 h-14 rounded-full gradient-blue flex items-center justify-center">
+                    <span className="text-xl font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
+                  </div>
+                ) : (
+                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-white font-semibold text-lg truncate">{getDisplayName(selectedUser)}</p>
+                    {selectedUser.is_verified && <BadgeCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+                    {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
+                  </div>
                   <p className="text-white/40 text-sm">{(Math.random() * 5).toFixed(1)} miles away</p>
+                  {selectedUser.visibility === "anonymous" && (
+                    <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
+                      <Shield className="w-3 h-3" /> Anonymous mode
+                    </p>
+                  )}
+                  {selectedUser.visibility === "first_name" && (
+                    <p className="text-white/30 text-xs mt-0.5">First name only</p>
+                  )}
                 </div>
               </div>
 
-              {selectedUser.interests?.length > 0 && (
+              {selectedUser.visibility !== "anonymous" && selectedUser.bio && (
+                <p className="text-white/50 text-sm mb-4">{selectedUser.bio}</p>
+              )}
+
+              {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {selectedUser.interests.slice(0, 5).map((interest) => (
                     <InterestTag key={interest} label={interest} size="sm" />
