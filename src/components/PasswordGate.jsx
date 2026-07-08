@@ -37,9 +37,11 @@ export default function PasswordGate() {
     <div className="fixed inset-0 flex items-center justify-center px-6 bg-[hsl(0,0%,4%)]">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl gradient-blue flex items-center justify-center mx-auto mb-5 glow-blue">
-            <Lock className="w-7 h-7 text-white" />
-          </div>
+          <img
+            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/9543f7f80_34ACD837-07A0-4A28-B17B-6719BDE5C0C3.png"
+            alt="nexa"
+            className="h-12 mx-auto mb-6 object-contain"
+          />
           <h1 className="text-2xl font-bold text-white mb-2">Enter to continue</h1>
           <p className="text-white/40 text-sm">This site is invite-only. Enter the access code to explore.</p>
         </div>
