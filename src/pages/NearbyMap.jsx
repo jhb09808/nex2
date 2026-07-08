@@ -108,8 +108,9 @@ export default function NearbyMap() {
     const size = 36;
     let innerHtml;
     if (visibility === "first_name") {
+      // First-name-only: frosted indigo glass with initial
       const initial = (user.username || "?").charAt(0).toUpperCase();
-      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(96,165,250,0.15));display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.85);">${escapeHtml(initial)}</div>`;
+      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(99,102,241,0.35),rgba(139,92,246,0.15));backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.9);">${escapeHtml(initial)}</div>`;
     } else {
       innerHtml = user.profile_photo
         ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
@@ -118,23 +119,29 @@ export default function NearbyMap() {
 
     // Outer glow layers — stacked for richer effect
     let glowLayers = "";
-    if (isOnline && !isVerified) {
-      glowLayers = `<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.25);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>`;
-    } else if (isVerified) {
+    if (isVerified) {
       // Gold glow for verified users
       const goldGlow = isPremium
         ? "rgba(245,158,11,0.35)"
         : "rgba(250,204,21,0.3)";
       glowLayers = `<div style="position:absolute;inset:-8px;border-radius:9999px;background:radial-gradient(circle, ${goldGlow} 30%, transparent 70%);animation:nex-marker-pulse 2.5s ease-in-out infinite;"></div>
         <div style="position:absolute;inset:-3px;border-radius:9999px;background:${goldGlow};opacity:0.4;filter:blur(6px);"></div>`;
+    } else if (visibility === "first_name") {
+      // Indigo glow for first-name-only users
+      glowLayers = `<div style="position:absolute;inset:-6px;border-radius:9999px;background:radial-gradient(circle, rgba(139,92,246,${isOnline ? 0.3 : 0.15}) 30%, transparent 70%);${isOnline ? "animation:nex-marker-pulse 2.5s ease-in-out infinite;" : ""}"></div>`;
+    } else if (isOnline) {
+      // Blue glow for online full-profile users
+      glowLayers = `<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.25);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>`;
     }
 
     // Border color by status
     const borderColor = isVerified
       ? "rgba(250,204,21,0.7)"
-      : isOnline
-        ? "#60A5FA"
-        : "rgba(255,255,255,0.2)";
+      : visibility === "first_name"
+        ? "rgba(139,92,246,0.6)"
+        : isOnline
+          ? "#60A5FA"
+          : "rgba(255,255,255,0.2)";
 
     // Badge stack (verified checkmark + premium crown)
     const badges = [];
