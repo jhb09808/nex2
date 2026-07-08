@@ -85,40 +85,68 @@ export default function NearbyMap() {
   const createUserIcon = (user) => {
     const isOnline = user.is_online;
     const visibility = user.visibility || "full_profile";
-    const size = visibility === "anonymous" ? 32 : 36;
+    const isVerified = user.is_verified;
+    const isPremium = user.is_premium;
 
-    let innerHtml;
+    // ---- ANONYMOUS: subtle expanding pulse rings, no solid avatar ----
     if (visibility === "anonymous") {
-      // Mystery avatar — blurred gradient with eye-off icon
-      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(255,255,255,0.05));display:flex;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
-      </div>`;
-    } else if (visibility === "first_name") {
-      // Initial letter avatar
+      const ringColor = isOnline ? "rgba(59,130,246,0.5)" : "rgba(255,255,255,0.25)";
+      return L.divIcon({
+        className: "",
+        html: `<div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+          <div style="position:absolute;inset:0;border-radius:9999px;border:1.5px solid ${ringColor};animation:nex-marker-ping 3s ease-out infinite;"></div>
+          <div style="position:absolute;inset:4px;border-radius:9999px;border:1px solid ${ringColor};animation:nex-marker-ping 3s ease-out 1s infinite;"></div>
+          <div style="position:absolute;inset:8px;border-radius:9999px;border:1px solid ${ringColor};opacity:0.4;"></div>
+          <div style="position:relative;width:8px;height:8px;border-radius:9999px;background:${ringColor};opacity:0.6;"></div>
+        </div>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      });
+    }
+
+    // ---- Named profiles: avatar with status-based glow ----
+    const size = 36;
+    let innerHtml;
+    if (visibility === "first_name") {
       const initial = (user.username || "?").charAt(0).toUpperCase();
       innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(96,165,250,0.15));display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.85);">${escapeHtml(initial)}</div>`;
     } else {
-      // Full profile photo
       innerHtml = user.profile_photo
         ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
         : `<div style="width:100%;height:100%;background:${isOnline ? "linear-gradient(135deg,#3B82F6,#60A5FA)" : "rgba(255,255,255,0.1)"};"></div>`;
     }
 
-    // Badge stack (verified + premium)
-    const badges = [];
-    if (user.is_verified) badges.push(`<div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:#3B82F6;border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`);
-    if (user.is_premium) badges.push(`<div style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:linear-gradient(135deg,#F59E0B,#FBBF24);border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V8l5 4 3-6 3 6 5-4v12"/></svg></div>`);
-    const badgesHtml = badges.join("");
+    // Outer glow layers — stacked for richer effect
+    let glowLayers = "";
+    if (isOnline && !isVerified) {
+      glowLayers = `<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,0.25);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>`;
+    } else if (isVerified) {
+      // Gold glow for verified users
+      const goldGlow = isPremium
+        ? "rgba(245,158,11,0.35)"
+        : "rgba(250,204,21,0.3)";
+      glowLayers = `<div style="position:absolute;inset:-8px;border-radius:9999px;background:radial-gradient(circle, ${goldGlow} 30%, transparent 70%);animation:nex-marker-pulse 2.5s ease-in-out infinite;"></div>
+        <div style="position:absolute;inset:-3px;border-radius:9999px;background:${goldGlow};opacity:0.4;filter:blur(6px);"></div>`;
+    }
 
-    const borderColor = isOnline
-      ? (visibility === "anonymous" ? "rgba(59,130,246,0.4)" : "#60A5FA")
-      : "rgba(255,255,255,0.2)";
+    // Border color by status
+    const borderColor = isVerified
+      ? "rgba(250,204,21,0.7)"
+      : isOnline
+        ? "#60A5FA"
+        : "rgba(255,255,255,0.2)";
+
+    // Badge stack (verified checkmark + premium crown)
+    const badges = [];
+    if (isVerified) badges.push(`<div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:linear-gradient(135deg,#F59E0B,#FBBF24);border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`);
+    if (isPremium) badges.push(`<div style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:9999px;background:linear-gradient(135deg,#F59E0B,#FBBF24);border:2px solid hsl(0,0%,8%);display:flex;align-items:center;justify-content:center;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V8l5 4 3-6 3 6 5-4v12"/></svg></div>`);
+    const badgesHtml = badges.join("");
 
     return L.divIcon({
       className: "",
       html: `<div style="position:relative;width:${size}px;height:${size}px;">
-        ${isOnline ? `<div style="position:absolute;inset:-6px;border-radius:9999px;background:rgba(59,130,246,${visibility === "anonymous" ? 0.15 : 0.3});animation:nex-marker-pulse 2s ease-in-out infinite;"></div>` : ""}
-        <div style="position:relative;width:${size}px;height:${size}px;border-radius:9999px;border:2px solid ${borderColor};overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4);${visibility === "anonymous" ? "filter:blur(0.5px);" : ""}">
+        ${glowLayers}
+        <div style="position:relative;width:${size}px;height:${size}px;border-radius:9999px;border:2px solid ${borderColor};overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
           ${innerHtml}
         </div>
         ${badgesHtml}
