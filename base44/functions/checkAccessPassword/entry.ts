@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const accessPassword = Deno.env.get("ACCESS_PASSWORD");
-    const valid = accessPassword && password === accessPassword;
+    const valid = accessPassword && password.trim() === accessPassword.trim();
 
     return Response.json({ valid });
   } catch (error) {
