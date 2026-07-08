@@ -123,6 +123,98 @@
   display: none !important;
 }
 
+/* ===== 2055 Futuristic UI Effects ===== */
+
+/* Holographic gradient orbs */
+.holo-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Animated gradient text shimmer */
+@keyframes holo-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.holo-text {
+  background: linear-gradient(90deg, #60A5FA, #A78BFA, #22D3EE, #60A5FA);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: holo-shimmer 5s ease-in-out infinite;
+}
+
+/* Neon glass card */
+.neon-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.04), 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+.neon-card:hover {
+  border-color: rgba(96, 165, 250, 0.2);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.12), 0 0 30px rgba(59, 130, 246, 0.08), 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.neon-card-active {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(96, 165, 250, 0.25);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.15), 0 0 40px rgba(59, 130, 246, 0.12);
+}
+
+/* Conic border glow */
+@keyframes conic-spin {
+  to { transform: rotate(360deg); }
+}
+.conic-border {
+  position: relative;
+  overflow: hidden;
+}
+.conic-border::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(96, 165, 250, 0.3) 25%, transparent 50%, rgba(167, 139, 250, 0.2) 75%, transparent 100%);
+  animation: conic-spin 6s linear infinite;
+  z-index: 0;
+}
+.conic-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1;
+}
+
+/* Floating animation */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Radar sweep */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); opacity: 0.5; }
+  100% { transform: rotate(360deg); opacity: 0.5; }
+}
+
+/* Pulsing ring */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* Scrollbar hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Leaflet marker animations */
 @keyframes nex-marker-pulse {
   0%, 100% { opacity: 0.5; transform: scale(1); }
