@@ -37,11 +37,16 @@ export default function PasswordGate() {
     <div className="fixed inset-0 flex items-center justify-center px-6 bg-[hsl(0,0%,4%)]">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img
-            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/9543f7f80_34ACD837-07A0-4A28-B17B-6719BDE5C0C3.png"
-            alt="nexa"
-            className="h-12 mx-auto mb-6 object-contain"
-          />
+          <div className="relative inline-block mb-8">
+            <img
+              src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/f4c72f83e_EDDD7796-9A98-4FF7-996F-D8D601E854B6.png"
+              alt="nexa"
+              className="h-28 sm:h-32 object-contain relative z-10"
+            />
+            <div className="absolute inset-0 z-0 flex items-center justify-center">
+              <div className="w-48 h-48 rounded-full blur-3xl opacity-40" style={{ background: "radial-gradient(circle, rgba(59,130,246,0.6), transparent 70%)" }} />
+            </div>
+          </div>
           <h1 className="text-2xl font-bold text-white mb-2">Enter to continue</h1>
           <p className="text-white/40 text-sm">This site is invite-only. Enter the access code to explore.</p>
         </div>
