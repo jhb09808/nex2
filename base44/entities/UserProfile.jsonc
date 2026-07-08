@@ -106,15 +106,47 @@
       ],
       "default": "free"
     },
+    "radius_miles": {
+      "type": "number",
+      "default": 1
+    },
+    "daily_chat_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_chat_reset_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invisible_mode": {
+      "type": "boolean",
+      "default": false
+    },
+    "platinum_only_mode_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "profile_boost_used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "has_verified_photo_badge": {
+      "type": "boolean",
+      "default": false
+    },
+    "subscription_renewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subscription_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "badges": {
       "type": "array",
       "items": {
         "type": "string"
       }
-    },
-    "invisible_mode": {
-      "type": "boolean",
-      "default": false
     },
     "is_suspended": {
       "type": "boolean",

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin } from "lucide-react";
+import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -13,6 +13,7 @@ import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
+import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -36,10 +37,13 @@ export default function NearbyMap() {
   const [showRadar, setShowRadar] = useState(false);
   const [areaRestricted, setAreaRestricted] = useState(null);
   const [safetyUser, setSafetyUser] = useState(null);
+  const [capabilities, setCapabilities] = useState(null);
+  const [paywallVariant, setPaywallVariant] = useState(null);
 
   useEffect(() => {
     loadUsers();
     checkLocation();
+    loadCapabilities();
   }, []);
 
   // Location refreshes only on app open — no continuous streaming
@@ -61,6 +65,26 @@ export default function NearbyMap() {
     );
   };
 
+  const distanceMiles = (lat1, lon1, lat2, lon2) => {
+    const R = 3958.8;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const loadCapabilities = async () => {
+    try {
+      const res = await base44.functions.invoke("getSubscriptionCapabilities", {});
+      setCapabilities(res.data);
+      if (res.data?.radius_miles != null) {
+        setFilters((prev) => ({ ...prev, distance: res.data.radius_miles }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const loadUsers = async () => {
     try {
       const allUsers = await base44.entities.UserProfile.list("-created_date", 50);
@@ -69,7 +93,7 @@ export default function NearbyMap() {
       const myPlan = myProfiles[0]?.plan || "free";
 
       let realUsers = allUsers.filter(
-        (u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended
+        (u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended && !u.invisible_mode
       );
 
       // Platinum exclusivity: platinum users only see other platinum users
@@ -223,7 +247,16 @@ export default function NearbyMap() {
     iconAnchor: [8, 8],
   });
 
-  const filteredUsers = allProfiles.filter((u) => !filters.onlineOnly || u.is_online);
+  const tierRadius = capabilities?.radius_miles;
+  const filteredUsers = allProfiles.filter((u) => {
+    if (filters.onlineOnly && !u.is_online) return false;
+    if (tierRadius != null) {
+      const [uLat, uLng] = getUserLatLng(u);
+      const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
+      if (dist > tierRadius) return false;
+    }
+    return true;
+  });
 
   if (areaRestricted?.restricted) {
     return (
@@ -317,13 +350,32 @@ export default function NearbyMap() {
               </div>
 
               <div>
-                <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">Distance: {filters.distance} mi</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs text-white/40 uppercase tracking-wider">
+                    Radius: {tierRadius === null ? "Global" : `${tierRadius} mi`}
+                  </label>
+                  {tierRadius !== null && (
+                    <button
+                      onClick={() => setPaywallVariant("radius")}
+                      className="text-[10px] text-blue-400 font-medium flex items-center gap-1"
+                    >
+                      Expand →
+                    </button>
+                  )}
+                </div>
                 <input
                   type="range"
                   min="1"
-                  max="50"
+                  max={tierRadius === null ? 100 : tierRadius}
                   value={filters.distance}
-                  onChange={(e) => setFilters({ ...filters, distance: parseInt(e.target.value) })}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (tierRadius !== null && val > tierRadius) {
+                      setPaywallVariant("radius");
+                      return;
+                    }
+                    setFilters({ ...filters, distance: val });
+                  }}
                   className="w-full accent-blue-500"
                 />
               </div>
@@ -420,14 +472,23 @@ export default function NearbyMap() {
                 >
                   View Profile
                 </button>
-                <WaveButton
-                  targetUser={selectedUser}
-                  compact
-                  onMutualMatch={(convoId) => {
-                    setSelectedUser(null);
-                    navigate(`/chat/${convoId}`);
-                  }}
-                />
+                {capabilities && !capabilities.can_start_chat ? (
+                  <button
+                    onClick={() => setPaywallVariant("chat_limit")}
+                    className="flex-1 py-3 rounded-xl glass flex items-center justify-center gap-1.5 text-white/40 font-medium text-sm"
+                  >
+                    <Lock className="w-4 h-4" /> Chat limit reached
+                  </button>
+                ) : (
+                  <WaveButton
+                    targetUser={selectedUser}
+                    compact
+                    onMutualMatch={(convoId) => {
+                      setSelectedUser(null);
+                      navigate(`/chat/${convoId}`);
+                    }}
+                  />
+                )}
                 <button
                   onClick={() => setSafetyUser(selectedUser)}
                   className="w-12 py-3 rounded-xl glass flex items-center justify-center active:scale-[0.98] transition-transform"
@@ -449,6 +510,13 @@ export default function NearbyMap() {
           setSelectedUser(null);
           loadUsers();
         }}
+      />
+
+      {/* Paywall Prompts */}
+      <PaywallPrompt
+        variant={paywallVariant}
+        open={!!paywallVariant}
+        onClose={() => setPaywallVariant(null)}
       />
     </div>
   );

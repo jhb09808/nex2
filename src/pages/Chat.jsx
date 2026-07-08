@@ -96,7 +96,7 @@ export default function Chat() {
         <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5 text-white/60" />
         </button>
-        <UserAvatar src={otherUser?.profile_photo} size="sm" isOnline={otherUser?.is_online} />
+        <UserAvatar src={otherUser?.profile_photo} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} />
         <div className="flex-1 min-w-0">
           <p className="text-white font-medium text-sm truncate">{otherUser?.username || "User"}</p>
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>

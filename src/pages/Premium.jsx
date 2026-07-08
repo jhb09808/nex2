@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Crown, Award, Zap, X, Diamond, Globe, Trophy } from "lucide-react";
+import { ArrowLeft, Check, Crown, Award, Zap, X, Diamond, Globe, Trophy, EyeOff, BarChart3, Rocket, ShieldCheck, Headphones } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 
 const plans = [
@@ -12,12 +13,12 @@ const plans = [
     icon: Zap,
     color: "text-white/50",
     features: [
-      { label: "5 mile radius", included: true },
-      { label: "Limited daily chats", included: true },
+      { label: "1 mile radius", included: true },
+      { label: "3 chats per day", included: true },
       { label: "Basic filters", included: true },
-      { label: "Unlimited radius", included: false },
       { label: "Invisible mode", included: false },
-      { label: "Profile analytics", included: false },
+      { label: "Analytics dashboard", included: false },
+      { label: "Profile photo", included: false },
     ],
   },
   {
@@ -28,12 +29,12 @@ const plans = [
     color: "text-blue-400",
     popular: true,
     features: [
-      { label: "Unlimited radius", included: true },
+      { label: "10 mile radius", included: true },
       { label: "Unlimited chats", included: true },
       { label: "Advanced filters", included: true },
       { label: "Invisible mode", included: true },
-      { label: "Profile insights", included: true },
       { label: "Priority placement", included: false },
+      { label: "Analytics dashboard", included: false },
     ],
   },
   {
@@ -44,11 +45,11 @@ const plans = [
     color: "text-yellow-400",
     features: [
       { label: "Everything in Plus", included: true },
-      { label: "Priority placement", included: true },
-      { label: "Boost profile", included: true },
-      { label: "Custom themes", included: true },
+      { label: "20 mile radius", included: true },
+      { label: "Priority placement in discovery", included: true },
+      { label: "Daily profile boost", included: true },
       { label: "Analytics dashboard", included: true },
-      { label: "Priority support", included: true },
+      { label: "Verified photo badge", included: false },
     ],
   },
   {
@@ -60,12 +61,11 @@ const plans = [
     exclusive: true,
     features: [
       { label: "Everything in Pro", included: true },
-      { label: "Profile photo (exclusive)", included: true },
-      { label: "See only other Platinum members", included: true },
-      { label: "Global networking unlocked", included: true },
-      { label: "Unlimited worldwide radius", included: true },
+      { label: "Global radius — no limits", included: true },
+      { label: "Verified photo badge", included: true },
+      { label: "Platinum-only visibility mode", included: true },
       { label: "Global leaderboard access", included: true },
-      { label: "Dedicated concierge", included: true },
+      { label: "Dedicated concierge support", included: true },
     ],
   },
 ];
@@ -73,6 +73,16 @@ const plans = [
 export default function Premium() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(1);
+  const [currentTier, setCurrentTier] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await base44.functions.invoke("getSubscriptionCapabilities", {});
+        if (res.data?.tier) setCurrentTier(res.data.tier);
+      } catch {}
+    })();
+  }, []);
 
   return (
     <div className="px-4 pt-4 safe-top pb-8 max-w-lg mx-auto">
@@ -85,7 +95,7 @@ export default function Premium() {
 
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Unlock NEX2</h2>
-        <p className="text-white/40 text-sm">Get more connections, more features, more reach</p>
+        <p className="text-white/40 text-sm">More reach, more features, more connections</p>
       </div>
 
       {selected === 3 && (
@@ -96,7 +106,7 @@ export default function Premium() {
         >
           <Globe className="w-5 h-5 text-cyan-300 flex-shrink-0" />
           <p className="text-cyan-200/80 text-xs leading-relaxed">
-            Platinum unlocks <span className="font-semibold">global networking</span> — connect with anyone, anywhere in the world. No radius limits.
+            Platinum sells <span className="font-semibold">status and exclusivity</span> — global reach, a verified badge, and a network of members who mean business.
           </p>
         </motion.div>
       )}
@@ -105,6 +115,7 @@ export default function Premium() {
         {plans.map((plan, i) => {
           const Icon = plan.icon;
           const isSelected = selected === i;
+          const isCurrent = currentTier === plan.name.toLowerCase();
           return (
             <motion.div key={plan.name} whileTap={{ scale: 0.98 }}>
               <GlassCard
@@ -121,6 +132,11 @@ export default function Premium() {
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1">
                     <Trophy className="w-2.5 h-2.5" />
                     Exclusive
+                  </div>
+                )}
+                {isCurrent && (
+                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-medium text-green-400">
+                    Current
                   </div>
                 )}
 
@@ -161,7 +177,7 @@ export default function Premium() {
         })}
       </div>
 
-      {selected > 0 && (
+      {selected > 0 && currentTier !== plans[selected].name.toLowerCase() && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
           <button
             className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform ${
