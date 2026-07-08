@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Send, Image, Mic, Smile } from "lucide-react";
+import { ArrowLeft, Send, Image, Mic, Smile, Shield } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import ChatWingman from "@/components/nex/ai/ChatWingman";
+import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import moment from "moment";
 
 export default function Chat() {
@@ -17,6 +18,7 @@ export default function Chat() {
   const [me, setMe] = useState(null);
   const [otherUser, setOtherUser] = useState(null);
   const [sending, setSending] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const messagesEnd = useRef(null);
 
   useEffect(() => {
@@ -99,8 +101,15 @@ export default function Chat() {
           <p className="text-white font-medium text-sm truncate">{otherUser?.username || "User"}</p>
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>
         </div>
-        <ChatWingman otherUser={otherUser} recentMessages={messages.map((m) => ({ ...m, sender_id: m.sender_id === me?.id ? "me" : m.sender_id }))} />
+        <button
+          onClick={() => setSafetyOpen(true)}
+          className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0"
+        >
+          <Shield className="w-5 h-5 text-white/40" />
+        </button>
       </div>
+
+      <BlockReportSheet user={otherUser} open={safetyOpen} onClose={() => setSafetyOpen(false)} onBlocked={() => navigate("/messages")} />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

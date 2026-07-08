@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Users, Flag, BarChart3, Shield, Ban, Check, X, Search, Eye } from "lucide-react";
+import { ArrowLeft, Users, Flag, BarChart3, Shield, Ban, Check, X, Search, Eye, MapPin, AlertTriangle, Plus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("users");
+  const [tab, setTab] = useState("reports");
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [newZone, setNewZone] = useState({ name: "", latitude: "", longitude: "", radius_miles: "0.25", restriction_reason: "" });
 
   useEffect(() => {
     loadData();
@@ -20,12 +22,21 @@ export default function AdminPanel() {
 
   const loadData = async () => {
     try {
-      const [u, r] = await Promise.all([
+      const [u, r, z] = await Promise.all([
         base44.entities.UserProfile.list("-created_date", 50),
-        base44.entities.Report.list("-created_date", 30),
+        base44.entities.Report.list("-created_date", 50),
+        base44.entities.GeoZone.list("-created_date", 50),
       ]);
       setUsers(u);
-      setReports(r);
+      // Sort reports: high severity first, then pending, then by date
+      const sorted = [...r].sort((a, b) => {
+        if (a.is_high_severity !== b.is_high_severity) return b.is_high_severity ? 1 : -1;
+        if (a.status === "pending" && b.status !== "pending") return -1;
+        if (b.status === "pending" && a.status !== "pending") return 1;
+        return 0;
+      });
+      setReports(sorted);
+      setZones(z);
     } catch (e) {
       console.error(e);
     } finally {
@@ -53,9 +64,34 @@ export default function AdminPanel() {
     setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status } : r)));
   };
 
+  const handleCreateZone = async () => {
+    if (!newZone.name || !newZone.latitude || !newZone.longitude) return;
+    try {
+      await base44.entities.GeoZone.create({
+        name: newZone.name,
+        latitude: parseFloat(newZone.latitude),
+        longitude: parseFloat(newZone.longitude),
+        radius_miles: parseFloat(newZone.radius_miles) || 0.25,
+        is_restricted: true,
+        restriction_reason: newZone.restriction_reason || "Restricted area",
+        created_by_admin_id: (await base44.auth.me()).id,
+      });
+      setNewZone({ name: "", latitude: "", longitude: "", radius_miles: "0.25", restriction_reason: "" });
+      loadData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleZone = async (zoneId, restricted) => {
+    await base44.entities.GeoZone.update(zoneId, { is_restricted: restricted });
+    setZones((prev) => prev.map((z) => (z.id === zoneId ? { ...z, is_restricted: restricted } : z)));
+  };
+
   const tabs = [
-    { key: "users", label: "Users", icon: Users },
     { key: "reports", label: "Reports", icon: Flag },
+    { key: "users", label: "Users", icon: Users },
+    { key: "zones", label: "Zones", icon: MapPin },
     { key: "analytics", label: "Analytics", icon: BarChart3 },
   ];
 
@@ -153,10 +189,28 @@ export default function AdminPanel() {
       {/* Reports Tab */}
       {tab === "reports" && (
         <div className="space-y-2">
+          {reports.filter((r) => r.is_high_severity).length > 0 && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-2">
+              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 text-xs font-medium">
+                {reports.filter((r) => r.is_high_severity && r.status === "pending").length} high-severity reports require manual review
+              </p>
+            </div>
+          )}
           {reports.length > 0 ? reports.map((report) => (
             <GlassCard key={report.id} className="!p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white/40 text-xs uppercase font-medium">{report.reason}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/40 text-xs uppercase font-medium">{report.reason}</span>
+                  {report.is_high_severity && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-2.5 h-2.5" /> High
+                    </span>
+                  )}
+                  {report.requires_manual_review && report.status === "pending" && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-medium">Manual review</span>
+                  )}
+                </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
                   report.status === "pending" ? "bg-yellow-500/20 text-yellow-400" :
                   report.status === "resolved" ? "bg-green-500/20 text-green-400" : "bg-white/5 text-white/40"
@@ -179,6 +233,69 @@ export default function AdminPanel() {
           )) : (
             <GlassCard className="text-center !py-8">
               <p className="text-white/30 text-sm">No reports</p>
+            </GlassCard>
+          )}
+        </div>
+      )}
+
+      {/* Zones Tab */}
+      {tab === "zones" && (
+        <div className="space-y-3">
+          <GlassCard className="!p-4">
+            <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">Create restricted zone</p>
+            <div className="space-y-2">
+              <input
+                value={newZone.name}
+                onChange={(e) => setNewZone({ ...newZone, name: e.target.value })}
+                placeholder="Zone name (e.g. Near School)"
+                className="w-full px-3 py-2.5 rounded-lg glass text-white text-sm placeholder:text-white/20 focus:outline-none"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={newZone.latitude}
+                  onChange={(e) => setNewZone({ ...newZone, latitude: e.target.value })}
+                  placeholder="Latitude"
+                  type="number"
+                  className="px-3 py-2.5 rounded-lg glass text-white text-sm placeholder:text-white/20 focus:outline-none"
+                />
+                <input
+                  value={newZone.longitude}
+                  onChange={(e) => setNewZone({ ...newZone, longitude: e.target.value })}
+                  placeholder="Longitude"
+                  type="number"
+                  className="px-3 py-2.5 rounded-lg glass text-white text-sm placeholder:text-white/20 focus:outline-none"
+                />
+              </div>
+              <input
+                value={newZone.restriction_reason}
+                onChange={(e) => setNewZone({ ...newZone, restriction_reason: e.target.value })}
+                placeholder="Reason (e.g. School zone safety)"
+                className="w-full px-3 py-2.5 rounded-lg glass text-white text-sm placeholder:text-white/20 focus:outline-none"
+              />
+              <button onClick={handleCreateZone} className="w-full py-2.5 rounded-lg gradient-blue text-white text-sm font-medium flex items-center justify-center gap-1.5">
+                <Plus className="w-4 h-4" /> Add Zone
+              </button>
+            </div>
+          </GlassCard>
+          {zones.length > 0 ? zones.map((zone) => (
+            <GlassCard key={zone.id} className="!p-3 flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${zone.is_restricted ? "bg-red-500/20" : "bg-white/5"}`}>
+                <MapPin className={`w-5 h-5 ${zone.is_restricted ? "text-red-400" : "text-white/40"}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{zone.name}</p>
+                <p className="text-white/30 text-xs">{zone.restriction_reason}</p>
+              </div>
+              <button
+                onClick={() => handleToggleZone(zone.id, !zone.is_restricted)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${zone.is_restricted ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"}`}
+              >
+                {zone.is_restricted ? "Restricted" : "Active"}
+              </button>
+            </GlassCard>
+          )) : (
+            <GlassCard className="text-center !py-8">
+              <p className="text-white/30 text-sm">No zones</p>
             </GlassCard>
           )}
         </div>

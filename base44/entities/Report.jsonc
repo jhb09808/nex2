@@ -12,6 +12,9 @@
       "type": "string",
       "enum": [
         "harassment",
+        "stalking",
+        "underage_suspicion",
+        "threat",
         "spam",
         "inappropriate",
         "fake_profile",
@@ -31,8 +34,22 @@
       ],
       "default": "pending"
     },
+    "is_high_severity": {
+      "type": "boolean",
+      "default": false
+    },
+    "requires_manual_review": {
+      "type": "boolean",
+      "default": false
+    },
     "conversation_id": {
       "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

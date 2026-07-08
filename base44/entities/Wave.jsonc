@@ -1,0 +1,36 @@
+{
+  "name": "Wave",
+  "type": "object",
+  "properties": {
+    "sender_id": {
+      "type": "string"
+    },
+    "receiver_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "message": {
+      "type": "string"
+    },
+    "conversation_id": {
+      "type": "string"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sender_id",
+    "receiver_id"
+  ]
+}

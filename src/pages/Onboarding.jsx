@@ -63,6 +63,8 @@ export default function Onboarding() {
         is_online: true,
         badges: [],
         blocked_users: [],
+        is_adult: false,
+        verification_method: "none",
       });
       navigate("/");
     } catch (err) {

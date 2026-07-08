@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageCircle, Flag, Shield } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import WaveButton from "@/components/nex/safety/WaveButton";
+import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
+import ProximityTier from "@/components/nex/safety/ProximityTier";
 
 export default function UserDetail() {
   const { userId } = useParams();
@@ -12,6 +15,7 @@ export default function UserDetail() {
   const [user, setUser] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [safetyOpen, setSafetyOpen] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -31,17 +35,8 @@ export default function UserDetail() {
     }
   };
 
-  const startConversation = async () => {
-    try {
-      const me = await base44.auth.me();
-      const convo = await base44.entities.Conversation.create({
-        participants: [me.id, user.created_by_id],
-        is_active: true,
-      });
-      navigate(`/chat/${convo.id}`);
-    } catch (err) {
-      console.error(err);
-    }
+  const handleMutualMatch = (convoId) => {
+    navigate(`/chat/${convoId}`);
   };
 
   const mutualInterests = user && myProfile
@@ -76,7 +71,7 @@ export default function UserDetail() {
           <h1 className="text-2xl font-bold text-white">{user.username}</h1>
           {user.is_verified && <Shield className="w-5 h-5 text-blue-400" />}
         </div>
-        <p className="text-white/40 text-sm">{(Math.random() * 5).toFixed(1)} miles away</p>
+        <ProximityTier tier={user.proximity_tier || "nearby"} />
       </div>
 
       {user.bio && (
@@ -109,14 +104,19 @@ export default function UserDetail() {
         </GlassCard>
       )}
 
-      <div className="flex gap-3">
-        <button onClick={startConversation} className="flex-1 py-4 rounded-2xl gradient-blue text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-          <MessageCircle className="w-5 h-5" /> Message
-        </button>
-        <button className="w-14 py-4 rounded-2xl glass flex items-center justify-center active:scale-95 transition-transform">
-          <Flag className="w-5 h-5 text-white/40" />
+      <div className="flex gap-3 items-start">
+        <div className="flex-1">
+          <WaveButton targetUser={user} onMutualMatch={handleMutualMatch} />
+        </div>
+        <button
+          onClick={() => setSafetyOpen(true)}
+          className="w-14 py-4 rounded-2xl glass flex items-center justify-center active:scale-95 transition-transform flex-shrink-0"
+        >
+          <Shield className="w-5 h-5 text-white/40" />
         </button>
       </div>
+
+      <BlockReportSheet user={user} open={safetyOpen} onClose={() => setSafetyOpen(false)} onBlocked={() => navigate(-1)} />
     </div>
   );
 }

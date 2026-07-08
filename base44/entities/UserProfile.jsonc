@@ -45,6 +45,20 @@
     "longitude": {
       "type": "number"
     },
+    "proximity_tier": {
+      "type": "string",
+      "enum": [
+        "same_venue",
+        "same_block",
+        "nearby",
+        "far"
+      ],
+      "default": "nearby"
+    },
+    "location_refreshed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "is_online": {
       "type": "boolean",
       "default": false
@@ -52,6 +66,27 @@
     "last_seen": {
       "type": "string",
       "format": "date-time"
+    },
+    "is_adult": {
+      "type": "boolean",
+      "default": false
+    },
+    "adult_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "none",
+        "self_attested",
+        "id_verified"
+      ],
+      "default": "none"
+    },
+    "requires_reverification": {
+      "type": "boolean",
+      "default": false
     },
     "is_verified": {
       "type": "boolean",

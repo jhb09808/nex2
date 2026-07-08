@@ -4,14 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, MessageCircle, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar } from "lucide-react";
+import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
-import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
+import WaveButton from "@/components/nex/safety/WaveButton";
+import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
+import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
 
@@ -31,19 +33,33 @@ export default function NearbyMap() {
   const [filters, setFilters] = useState({ distance: 5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
-  const [approvalUser, setApprovalUser] = useState(null);
   const [showRadar, setShowRadar] = useState(false);
+  const [areaRestricted, setAreaRestricted] = useState(null);
+  const [safetyUser, setSafetyUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {},
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
+    checkLocation();
   }, []);
+
+  // Location refreshes only on app open — no continuous streaming
+  const checkLocation = async () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(loc);
+        try {
+          const res = await base44.functions.invoke("checkAreaRestriction", loc);
+          setAreaRestricted(res.data);
+        } catch (e) {
+          console.error(e);
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
 
   const loadUsers = async () => {
     try {
@@ -177,6 +193,20 @@ export default function NearbyMap() {
   });
 
   const filteredUsers = allProfiles.filter((u) => !filters.onlineOnly || u.is_online);
+
+  if (areaRestricted?.restricted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-8 text-center">
+        <div>
+          <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+            <MapPin className="w-10 h-10 text-amber-400" />
+          </div>
+          <h1 className="text-xl font-bold text-white mb-2">Area Restricted</h1>
+          <p className="text-white/40 text-sm max-w-xs mx-auto">{areaRestricted.reason}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -328,7 +358,7 @@ export default function NearbyMap() {
                     {selectedUser.is_verified && <BadgeCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />}
                     {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
                   </div>
-                  <p className="text-white/40 text-sm">{(Math.random() * 5).toFixed(1)} miles away</p>
+                  <ProximityTier tier={selectedUser.proximity_tier || calculateProximityTier(Math.random() * 3)} />
                   {selectedUser.visibility === "anonymous" && (
                     <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
                       <Shield className="w-3 h-3" /> Anonymous mode
@@ -352,22 +382,26 @@ export default function NearbyMap() {
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/user/${selectedUser.id}`)}
                   className="flex-1 py-3 rounded-xl glass text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
                 >
                   View Profile
                 </button>
-                <button
-                  onClick={() => {
+                <WaveButton
+                  targetUser={selectedUser}
+                  compact
+                  onMutualMatch={(convoId) => {
                     setSelectedUser(null);
-                    setApprovalUser(selectedUser);
+                    navigate(`/chat/${convoId}`);
                   }}
-                  className="flex-1 py-3 rounded-xl gradient-blue text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                />
+                <button
+                  onClick={() => setSafetyUser(selectedUser)}
+                  className="w-12 py-3 rounded-xl glass flex items-center justify-center active:scale-[0.98] transition-transform"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  Message
+                  <Shield className="w-4 h-4 text-white/40" />
                 </button>
               </div>
             </GlassCard>
@@ -375,39 +409,16 @@ export default function NearbyMap() {
         )}
       </AnimatePresence>
 
-      {/* Chat Approval Modal */}
-      {approvalUser && (
-        <ChatApprovalModal
-          user={approvalUser}
-          onAccept={async () => {
-            const targetUser = approvalUser;
-            setApprovalUser(null);
-            try {
-              const me = await base44.auth.me();
-              const otherId = targetUser.created_by_id || targetUser.id;
-              const existing = await base44.entities.Conversation.filter({ participants: me.id }, "-updated_date", 50);
-              const found = existing.find((c) => c.participants?.includes(otherId));
-              let convoId;
-              if (found) {
-                convoId = found.id;
-              } else {
-                const convo = await base44.entities.Conversation.create({
-                  participants: [me.id, otherId],
-                  last_message: "",
-                  is_active: true,
-                });
-                convoId = convo.id;
-              }
-              navigate(`/chat/${convoId}`, { state: { chatUser: targetUser } });
-            } catch (err) {
-              console.error(err);
-              navigate("/messages");
-            }
-          }}
-          onReject={() => setApprovalUser(null)}
-          onClose={() => setApprovalUser(null)}
-        />
-      )}
+      {/* Block / Report Sheet */}
+      <BlockReportSheet
+        user={safetyUser}
+        open={!!safetyUser}
+        onClose={() => setSafetyUser(null)}
+        onBlocked={() => {
+          setSelectedUser(null);
+          loadUsers();
+        }}
+      />
     </div>
   );
 }
