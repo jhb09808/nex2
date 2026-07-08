@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map, MessageCircle, Bell, User } from "lucide-react";
+import { Radar, Compass, MessageCircle, Bell, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 const tabs = [
-  { path: "/", icon: Home, label: "Home" },
-  { path: "/map", icon: Map, label: "Map" },
+  { path: "/", icon: Radar, label: "Radar" },
+  { path: "/discover", icon: Compass, label: "Discover" },
   { path: "/messages", icon: MessageCircle, label: "Messages" },
   { path: "/notifications", icon: Bell, label: "Alerts" },
   { path: "/profile", icon: User, label: "Profile" },
