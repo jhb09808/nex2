@@ -149,7 +149,7 @@ export default function AdminPanel() {
             {filteredUsers.map((user) => (
               <GlassCard key={user.id} className="!p-3">
                 <div className="flex items-center gap-3 mb-3">
-                  <UserAvatar src={user.profile_photo} size="sm" isOnline={user.is_online} />
+                  <UserAvatar src={user.profile_photo} size="sm" isOnline={user.is_online} plan={user.plan} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="text-white text-sm font-medium truncate">{user.username}</p>

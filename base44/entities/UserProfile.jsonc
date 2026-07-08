@@ -101,7 +101,8 @@
       "enum": [
         "free",
         "plus",
-        "pro"
+        "pro",
+        "platinum"
       ],
       "default": "free"
     },

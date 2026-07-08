@@ -60,11 +60,11 @@ const plans = [
     exclusive: true,
     features: [
       { label: "Everything in Pro", included: true },
+      { label: "Profile photo (exclusive)", included: true },
+      { label: "See only other Platinum members", included: true },
       { label: "Global networking unlocked", included: true },
       { label: "Unlimited worldwide radius", included: true },
       { label: "Global leaderboard access", included: true },
-      { label: "Exclusive top-tier badge", included: true },
-      { label: "Direct intro to top networkers", included: true },
       { label: "Dedicated concierge", included: true },
     ],
   },

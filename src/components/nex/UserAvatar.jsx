@@ -1,6 +1,29 @@
 import React from "react";
 
-export default function UserAvatar({ src, size = "md", isOnline, className = "" }) {
+const TIER_STYLES = {
+  free: {
+    gradient: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+    ring: "rgba(255,255,255,0.2)",
+    glow: "rgba(255,255,255,0.06)",
+  },
+  plus: {
+    gradient: "linear-gradient(135deg, #3B82F6, #60A5FA)",
+    ring: "rgba(96,165,250,0.5)",
+    glow: "rgba(59,130,246,0.15)",
+  },
+  pro: {
+    gradient: "linear-gradient(135deg, #F59E0B, #FBBF24)",
+    ring: "rgba(251,191,36,0.5)",
+    glow: "rgba(245,158,11,0.15)",
+  },
+  platinum: {
+    gradient: "linear-gradient(135deg, #22D3EE, #60A5FA)",
+    ring: "rgba(34,211,238,0.5)",
+    glow: "rgba(34,211,238,0.15)",
+  },
+};
+
+export default function UserAvatar({ src, size = "md", isOnline, plan = "free", className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -17,15 +40,33 @@ export default function UserAvatar({ src, size = "md", isOnline, className = "" 
     xl: "w-5 h-5",
   };
 
+  const textSizes = {
+    xs: "text-[10px]",
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-xl",
+    xl: "text-3xl",
+  };
+
+  const tier = TIER_STYLES[plan] || TIER_STYLES.free;
+  const showPhoto = plan === "platinum" && src;
+
   return (
     <div className={`relative ${className}`}>
-      <div className={`${sizes[size]} rounded-full overflow-hidden bg-white/10 flex-shrink-0`}>
-        {src ? (
+      <div
+        className={`${sizes[size]} rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center`}
+        style={{
+          background: showPhoto ? undefined : tier.gradient,
+          border: `2px solid ${tier.ring}`,
+          boxShadow: `0 0 12px ${tier.glow}`,
+        }}
+      >
+        {showPhoto ? (
           <img src={src} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full gradient-blue opacity-40 flex items-center justify-center">
-            <span className="text-white/60 text-xs font-semibold">?</span>
-          </div>
+          <span className={`${textSizes[size]} font-bold text-white/90`}>
+            {/* Initial displayed for non-platinum tiers */}
+          </span>
         )}
       </div>
       {isOnline !== undefined && (

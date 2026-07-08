@@ -65,9 +65,24 @@ export default function NearbyMap() {
     try {
       const allUsers = await base44.entities.UserProfile.list("-created_date", 50);
       const me = await base44.auth.me();
-      const realUsers = allUsers
-        .filter((u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended)
-        .map((u) => ({ ...u, isMock: false }));
+      const myProfiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+      const myPlan = myProfiles[0]?.plan || "free";
+
+      let realUsers = allUsers.filter(
+        (u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended
+      );
+
+      // Platinum exclusivity: platinum users only see other platinum users
+      if (myPlan === "platinum") {
+        realUsers = realUsers.filter((u) => u.plan === "platinum");
+      }
+
+      // Non-platinum users cannot see platinum users (keeps platinum exclusive)
+      if (myPlan !== "platinum") {
+        realUsers = realUsers.filter((u) => u.plan !== "platinum");
+      }
+
+      realUsers = realUsers.map((u) => ({ ...u, isMock: false }));
       setUsers(realUsers);
     } catch (err) {
       console.error(err);
@@ -105,6 +120,22 @@ export default function NearbyMap() {
     const visibility = user.visibility || "full_profile";
     const isVerified = user.is_verified;
     const isPremium = user.is_premium;
+    const plan = user.plan || "free";
+    const isPlatinum = plan === "platinum";
+
+    // Tier-based gradient colors (non-platinum users get colored icons, no photos)
+    const tierGradients = {
+      free: "linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))",
+      plus: "linear-gradient(135deg,#3B82F6,#60A5FA)",
+      pro: "linear-gradient(135deg,#F59E0B,#FBBF24)",
+      platinum: "linear-gradient(135deg,#22D3EE,#60A5FA)",
+    };
+    const tierBorderColors = {
+      free: "rgba(255,255,255,0.2)",
+      plus: "rgba(96,165,250,0.5)",
+      pro: "rgba(251,191,36,0.5)",
+      platinum: "rgba(34,211,238,0.6)",
+    };
 
     // ---- ANONYMOUS: subtle expanding pulse rings, no solid avatar ----
     if (visibility === "anonymous") {
@@ -126,13 +157,15 @@ export default function NearbyMap() {
     const size = 36;
     let innerHtml;
     if (visibility === "first_name") {
-      // First-name-only: frosted indigo glass with initial
+      // First-name-only: tier-colored glass with initial
       const initial = (user.username || "?").charAt(0).toUpperCase();
-      innerHtml = `<div style="width:100%;height:100%;background:linear-gradient(135deg,rgba(99,102,241,0.35),rgba(139,92,246,0.15));backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.9);">${escapeHtml(initial)}</div>`;
+      innerHtml = `<div style="width:100%;height:100%;background:${tierGradients[plan]};backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.9);">${escapeHtml(initial)}</div>`;
     } else {
-      innerHtml = user.profile_photo
+      // Only platinum users show their profile photo; everyone else gets a tier-colored circle
+      const showPhoto = isPlatinum && user.profile_photo;
+      innerHtml = showPhoto
         ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
-        : `<div style="width:100%;height:100%;background:${isOnline ? "linear-gradient(135deg,#3B82F6,#60A5FA)" : "rgba(255,255,255,0.1)"};"></div>`;
+        : `<div style="width:100%;height:100%;background:${tierGradients[plan]};"></div>`;
     }
 
     // Outer glow layers — stacked for richer effect
@@ -155,11 +188,9 @@ export default function NearbyMap() {
     // Border color by status
     const borderColor = isVerified
       ? "rgba(250,204,21,0.7)"
-      : visibility === "first_name"
-        ? "rgba(139,92,246,0.6)"
-        : isOnline
-          ? "#60A5FA"
-          : "rgba(255,255,255,0.2)";
+      : isPlatinum
+        ? tierBorderColors.platinum
+        : tierBorderColors[plan];
 
     // Badge stack (verified checkmark + premium crown)
     const badges = [];
@@ -350,7 +381,7 @@ export default function NearbyMap() {
                     <span className="text-xl font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
                   </div>
                 ) : (
-                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} />
+                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
