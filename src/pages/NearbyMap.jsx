@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, MessageCircle, Sliders, EyeOff, Shield, Crown, BadgeCheck } from "lucide-react";
+import { X, MessageCircle, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
+import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -31,6 +32,7 @@ export default function NearbyMap() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
   const [approvalUser, setApprovalUser] = useState(null);
+  const [showRadar, setShowRadar] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -189,12 +191,20 @@ export default function NearbyMap() {
       {/* Header */}
       <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between safe-top">
         <h1 className="text-xl font-bold text-white">Nearby</h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center"
-        >
-          <Sliders className="w-5 h-5 text-white/60" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowRadar(!showRadar)}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showRadar ? "gradient-blue" : "glass-strong"}`}
+          >
+            <Radar className="w-5 h-5 text-white/60" />
+          </button>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center"
+          >
+            <Sliders className="w-5 h-5 text-white/60" />
+          </button>
+        </div>
       </div>
 
       {/* Map */}
@@ -267,6 +277,21 @@ export default function NearbyMap() {
                 </button>
               </label>
             </GlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Live Radar Panel */}
+      <AnimatePresence>
+        {showRadar && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="absolute bottom-24 left-0 right-0 z-30 px-4"
+          >
+            <LiveRadar nearbyUsers={allProfiles} />
           </motion.div>
         )}
       </AnimatePresence>

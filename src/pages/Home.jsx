@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Target, Radar, Activity, Briefcase, Users, Radio } from "lucide-react";
+import { Briefcase, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
-import NearbyNudge from "@/components/nex/NearbyNudge";
-import LiveRadar from "@/components/nex/home/LiveRadar";
-import TodayMission from "@/components/nex/home/TodayMission";
-import CityActivity from "@/components/nex/home/CityActivity";
-import TrendingCommunities from "@/components/nex/home/TrendingCommunities";
-import MomentsAround from "@/components/nex/home/MomentsAround";
-import AIBriefing from "@/components/nex/ai/AIBriefing";
-import AIMatchmaker from "@/components/nex/ai/AIMatchmaker";
+import BriefingStrip from "@/components/nex/home/BriefingStrip";
+import TopMatch from "@/components/nex/home/TopMatch";
+import MissionStrip from "@/components/nex/home/MissionStrip";
 import OpportunityFeed from "@/components/nex/ai/OpportunityFeed";
-import NetworkingStreak from "@/components/nex/ai/NetworkingStreak";
-import AIGoals from "@/components/nex/ai/AIGoals";
-import ProfileCard from "@/components/nex/home/ProfileCard";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -61,14 +53,11 @@ export default function Home() {
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
   const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
 
-  const SectionHeader = ({ icon: Icon, children, action }) => (
-    <div className="flex items-center justify-between mb-4 px-1">
-      <h2 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2">
-        <Icon className="w-4 h-4 text-blue-400" />
-        {children}
-      </h2>
-      {action}
-    </div>
+  const SectionHeader = ({ icon: Icon, children }) => (
+    <h2 className="text-sm font-semibold text-white/90 uppercase tracking-wider flex items-center gap-2 mb-4 px-1">
+      <Icon className="w-4 h-4 text-blue-400" />
+      {children}
+    </h2>
   );
 
   return (
@@ -79,7 +68,7 @@ export default function Home() {
       <div className="holo-orb w-56 h-56 bg-cyan-500 bottom-32 left-1/3" style={{ animation: "float-y 7s ease-in-out infinite 2s" }} />
 
       <motion.div
-        className="relative px-4 pt-6 safe-top space-y-8 pb-28"
+        className="relative px-4 pt-6 safe-top space-y-6 pb-28"
         variants={stagger}
         initial="hidden"
         animate="show"
@@ -99,73 +88,26 @@ export default function Home() {
           </button>
         </motion.div>
 
-        {/* AI Daily Briefing — HERO */}
+        {/* Briefing Strip */}
         <motion.div variants={fadeUp}>
-          <AIBriefing profile={profile} nearbyUsers={nearbyUsers} events={events} />
+          <BriefingStrip nearbyUsers={nearbyUsers} events={events} />
         </motion.div>
 
-        {/* Live Radar */}
+        {/* Top Match */}
         <motion.div variants={fadeUp}>
-          <LiveRadar nearbyUsers={nearbyUsers} />
+          <SectionHeader icon={Users}>Who You Should Meet</SectionHeader>
+          <TopMatch nearbyUsers={nearbyUsers} myInterests={profile?.interests} profile={profile} />
         </motion.div>
 
-        {/* Networking Streak + Today's Mission */}
-        <motion.div variants={fadeUp} className="space-y-4">
-          <NetworkingStreak streakMessage="You're on a 5-day streak. Connect with 1 more person today!" />
-          <div>
-            <SectionHeader icon={Target}>Today's Mission</SectionHeader>
-            <TodayMission />
-          </div>
-        </motion.div>
-
-        {/* AI Goals */}
+        {/* Today's Mission — slim strip */}
         <motion.div variants={fadeUp}>
-          <SectionHeader icon={Target}>AI Networking Goals</SectionHeader>
-          <AIGoals />
-        </motion.div>
-
-        {/* People You Should Meet — AI Matchmaker */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Users}>People You Should Meet</SectionHeader>
-          <AIMatchmaker nearbyUsers={nearbyUsers} myInterests={profile?.interests} />
-        </motion.div>
-
-        {/* Discover Nearby — Enhanced Profile Cards */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Radar}>Discover Nearby</SectionHeader>
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {nearbyUsers.length > 0 ? nearbyUsers.slice(0, 8).map((user, i) => (
-              <ProfileCard key={user.id} user={user} myInterests={profile?.interests} index={i} />
-            )) : (
-              <div className="ai-card rounded-[1.75rem] py-10 px-4 text-center w-full">
-                <p className="text-white/30 text-sm">No signals detected nearby yet.</p>
-              </div>
-            )}
-          </div>
+          <MissionStrip />
         </motion.div>
 
         {/* AI Opportunity Feed */}
         <motion.div variants={fadeUp}>
-          <SectionHeader icon={Briefcase}>AI Opportunity Feed</SectionHeader>
+          <SectionHeader icon={Briefcase}>Opportunities</SectionHeader>
           <OpportunityFeed myInterests={profile?.interests} />
-        </motion.div>
-
-        {/* City Activity */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Activity}>City Activity</SectionHeader>
-          <CityActivity />
-        </motion.div>
-
-        {/* Trending Communities */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Users}>Trending Communities</SectionHeader>
-          <TrendingCommunities />
-        </motion.div>
-
-        {/* Moments Around You */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Radio}>Moments Around You</SectionHeader>
-          <MomentsAround events={events} />
         </motion.div>
       </motion.div>
     </div>

@@ -7,6 +7,7 @@ import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
+import NetworkingStreak from "@/components/nex/ai/NetworkingStreak";
 import NetworkRankCard from "@/components/nex/ai/NetworkRankCard";
 
 export default function Profile() {
@@ -110,6 +111,9 @@ export default function Profile() {
           <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
         </GlassCard>
       </div>
+
+      {/* Networking Streak & XP */}
+      <NetworkingStreak streakMessage="Keep your streak alive — connect with 1 more person today!" />
 
       {/* Global Network Rank & Leaderboard */}
       <NetworkRankCard />
