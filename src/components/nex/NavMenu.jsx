@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X } from "lucide-react";
+import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
-const navItems = [
+const baseNavItems = [
   { path: "/", icon: Radar, label: "Radar" },
   { path: "/discover", icon: Compass, label: "Discover" },
   { path: "/messages", icon: MessageCircle, label: "Messages" },
@@ -14,7 +15,32 @@ const navItems = [
 
 export default function NavMenu() {
   const [open, setOpen] = useState(false);
+  const [isPlatinum, setIsPlatinum] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    checkPlan();
+  }, []);
+
+  const checkPlan = async () => {
+    try {
+      const me = await base44.auth.me();
+      const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+      if (profiles.length > 0 && profiles[0].plan === "platinum") {
+        setIsPlatinum(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const navItems = isPlatinum
+    ? [
+        ...baseNavItems.slice(0, 2),
+        { path: "/platinum-lounge", icon: Diamond, label: "Platinum Lounge" },
+        ...baseNavItems.slice(2),
+      ]
+    : baseNavItems;
 
   return (
     <>
@@ -56,6 +82,7 @@ export default function NavMenu() {
               {navItems.map((item, i) => {
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
+                const isPlatinumItem = item.path === "/platinum-lounge";
                 return (
                   <motion.div
                     key={item.path}
@@ -67,7 +94,13 @@ export default function NavMenu() {
                       to={item.path}
                       onClick={() => setOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                        isActive ? "bg-blue-500/10 text-blue-400" : "text-white/70 hover:bg-white/5"
+                        isActive
+                          ? isPlatinumItem
+                            ? "bg-cyan-500/10 text-cyan-300"
+                            : "bg-blue-500/10 text-blue-400"
+                          : isPlatinumItem
+                          ? "text-cyan-300/70 hover:bg-cyan-500/5"
+                          : "text-white/70 hover:bg-white/5"
                       }`}
                     >
                       <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 1.5} />
