@@ -215,6 +215,86 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ===== AI Networking OS Styles ===== */
+
+/* AI gradient card with animated border */
+.ai-card {
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(96, 165, 250, 0.08);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.03), 0 8px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ai-card:hover {
+  border-color: rgba(96, 165, 250, 0.18);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.08), 0 0 40px rgba(59, 130, 246, 0.06), 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* AI glow effect */
+.ai-glow {
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.08);
+}
+
+/* Animated AI gradient border */
+@keyframes ai-border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.ai-border {
+  position: relative;
+}
+.ai-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(34,211,238,0.15), rgba(59,130,246,0.3));
+  background-size: 300% 100%;
+  animation: ai-border-flow 4s ease-in-out infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Shimmer loading */
+@keyframes shimmer-slide {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.5s ease-in-out infinite;
+}
+
+/* AI pulse dot */
+@keyframes ai-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.ai-dot {
+  animation: ai-dot-pulse 2s ease-in-out infinite;
+}
+
+/* Flame flicker */
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); opacity: 1; }
+  50% { transform: scale(1.05) rotate(1deg); opacity: 0.9; }
+}
+.flame-flicker {
+  animation: flame-flicker 2s ease-in-out infinite;
+}
+
+/* Compatibility bar fill */
+@keyframes compat-fill {
+  from { width: 0%; }
+}
+
 /* Leaflet marker animations */
 @keyframes nex-marker-pulse {
   0%, 100% { opacity: 0.5; transform: scale(1); }
