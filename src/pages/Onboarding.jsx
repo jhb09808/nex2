@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Camera, MapPin, User, Eye, EyeOff, Shield } from "lucide-react";
+import { ArrowRight, ArrowLeft, Camera, MapPin, User, Eye, EyeOff, Shield, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import InterestTag from "@/components/nex/InterestTag";
 
@@ -204,13 +204,52 @@ export default function Onboarding() {
         </p>
       </div>
     </motion.div>,
+
+    // Step 4: Launch
+    <motion.div key="launch" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-8 text-center flex flex-col items-center justify-center flex-1">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative"
+      >
+        <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-2xl animate-pulse" />
+        <button
+          onClick={handleComplete}
+          disabled={saving}
+          className="relative w-40 h-40 rounded-full gradient-blue glow-blue flex flex-col items-center justify-center active:scale-95 transition-transform group"
+        >
+          <div className="absolute inset-0 rounded-full border border-white/10 animate-ping" style={{ animationDuration: "3s" }} />
+          {saving ? (
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <Zap className="w-8 h-8 text-white group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+              <span className="text-white font-bold text-2xl mt-1">NEX2</span>
+              <span className="text-white/60 text-[10px] uppercase tracking-widest mt-0.5">Tap to enter</span>
+            </>
+          )}
+        </button>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <h2 className="text-2xl font-bold text-white mb-2">You're all set</h2>
+        <p className="text-white/40 text-sm leading-relaxed max-w-xs">
+          Your radar is live. Tap NEX2 to discover people nearby.
+        </p>
+      </motion.div>
+    </motion.div>,
   ];
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,4%)] px-6 py-8 safe-top safe-bottom max-w-lg mx-auto flex flex-col">
       {/* Progress */}
       <div className="flex gap-2 mb-8">
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2, 3, 4].map((i) => (
           <div key={i} className="flex-1 h-1 rounded-full overflow-hidden bg-white/10">
             <motion.div
               className="h-full gradient-blue"
@@ -234,28 +273,30 @@ export default function Onboarding() {
             <ArrowLeft className="w-5 h-5 text-white/60" />
           </button>
         )}
-        <button
-          onClick={() => {
-            if (step === 3) {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(() => {});
+        {step < 4 && (
+          <button
+            onClick={() => {
+              if (step === 3) {
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(() => {});
+                }
+                setStep(4);
+              } else {
+                setStep(step + 1);
               }
-              handleComplete();
-            } else {
-              setStep(step + 1);
-            }
-          }}
-          disabled={!canProceed() || saving}
-          className="flex-1 py-4 rounded-2xl gradient-blue text-white font-semibold text-base flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-transform"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : step === 3 ? (
-            "Enable & Continue"
-          ) : (
-            <>Continue <ArrowRight className="w-5 h-5" /></>
-          )}
-        </button>
+            }}
+            disabled={!canProceed() || saving}
+            className="flex-1 py-4 rounded-2xl gradient-blue text-white font-semibold text-base flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-transform"
+          >
+            {saving ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : step === 3 ? (
+              <>Enable & Continue <ArrowRight className="w-5 h-5" /></>
+            ) : (
+              <>Continue <ArrowRight className="w-5 h-5" /></>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
