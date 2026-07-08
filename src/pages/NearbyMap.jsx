@@ -189,8 +189,7 @@ export default function NearbyMap() {
   return (
     <div className="relative overflow-hidden" style={{ height: "100vh" }}>
       {/* Header */}
-      <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between safe-top">
-        <h1 className="text-xl font-bold text-white">Nearby</h1>
+      <div className="absolute top-4 left-4 right-16 z-20 flex items-center justify-between safe-top">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowRadar(!showRadar)}
@@ -198,13 +197,14 @@ export default function NearbyMap() {
           >
             <Radar className="w-5 h-5 text-white/60" />
           </button>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center"
-          >
-            <Sliders className="w-5 h-5 text-white/60" />
-          </button>
+          <h1 className="text-xl font-bold text-white">Nearby</h1>
         </div>
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showFilters ? "gradient-blue" : "glass-strong"}`}
+        >
+          <Sliders className="w-5 h-5 text-white/60" />
+        </button>
       </div>
 
       {/* Map */}

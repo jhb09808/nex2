@@ -54,13 +54,8 @@ export default function Profile() {
   return (
     <div className="px-4 pt-6 safe-top space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pr-12">
         <h1 className="text-2xl font-bold text-white">Profile</h1>
-        <div className="flex gap-2">
-          <button onClick={() => navigate("/settings")} className="w-10 h-10 rounded-xl glass flex items-center justify-center">
-            <Settings className="w-5 h-5 text-white/60" />
-          </button>
-        </div>
       </div>
 
       {/* Profile Card */}

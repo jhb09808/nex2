@@ -74,7 +74,7 @@ export default function Home() {
         animate="show"
       >
         {/* Header */}
-        <motion.div variants={fadeUp} className="flex items-center justify-between">
+        <motion.div variants={fadeUp} className="flex items-center justify-between pr-12">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ai-dot" />
@@ -82,10 +82,6 @@ export default function Home() {
             </div>
             <h1 className="text-3xl font-bold holo-text">{profile?.username || "User"}</h1>
           </div>
-          <button onClick={() => navigate("/profile")} className="relative">
-            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-blue-500/20 via-violet-500/20 to-cyan-500/20 blur-md" />
-            <UserAvatar src={profile?.profile_photo} size="md" isOnline={true} className="relative" />
-          </button>
         </motion.div>
 
         {/* Briefing Strip */}

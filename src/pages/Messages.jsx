@@ -57,11 +57,8 @@ export default function Messages() {
   return (
     <div className="px-4 pt-6 safe-top">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 pr-12">
         <h1 className="text-2xl font-bold text-white">Messages</h1>
-        <button className="w-10 h-10 rounded-xl glass flex items-center justify-center">
-          <Edit3 className="w-5 h-5 text-white/60" />
-        </button>
       </div>
 
       {/* Search */}

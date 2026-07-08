@@ -48,7 +48,7 @@ export default function Notifications() {
 
   return (
     <div className="px-4 pt-6 safe-top">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 pr-12">
         <h1 className="text-2xl font-bold text-white">Notifications</h1>
         {notifications.some((n) => !n.is_read) && (
           <button
