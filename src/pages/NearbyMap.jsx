@@ -13,6 +13,7 @@ import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
+import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -38,6 +39,7 @@ export default function NearbyMap() {
   const [safetyUser, setSafetyUser] = useState(null);
   const [capabilities, setCapabilities] = useState(null);
   const [paywallVariant, setPaywallVariant] = useState(null);
+  const [chatApprovalUser, setChatApprovalUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -487,26 +489,7 @@ export default function NearbyMap() {
                           setPaywallVariant("chat_limit");
                           return;
                         }
-                        const existing = await base44.entities.Conversation.filter({});
-                        const convo = existing.find(
-                          (c) =>
-                            c.participants?.includes(selectedUser.created_by_id) ||
-                            c.participants?.includes(selectedUser.id)
-                        );
-                        let conversationId;
-                        if (convo) {
-                          conversationId = convo.id;
-                        } else {
-                          const me = await base44.auth.me();
-                          const newConvo = await base44.entities.Conversation.create({
-                            participants: [me.id, selectedUser.created_by_id || selectedUser.id],
-                            last_message: "",
-                            is_active: true,
-                          });
-                          conversationId = newConvo.id;
-                        }
-                        setSelectedUser(null);
-                        navigate(`/chat/${conversationId}`);
+                        setChatApprovalUser(selectedUser);
                       } catch (err) {
                         console.error(err);
                       }
@@ -544,6 +527,42 @@ export default function NearbyMap() {
         variant={paywallVariant}
         open={!!paywallVariant}
         onClose={() => setPaywallVariant(null)}
+      />
+
+      {/* Chat Approval Modal */}
+      <ChatApprovalModal
+        user={chatApprovalUser}
+        onAccept={async () => {
+          if (!chatApprovalUser) return;
+          try {
+            const existing = await base44.entities.Conversation.filter({});
+            const convo = existing.find(
+              (c) =>
+                c.participants?.includes(chatApprovalUser.created_by_id) ||
+                c.participants?.includes(chatApprovalUser.id)
+            );
+            let conversationId;
+            if (convo) {
+              conversationId = convo.id;
+            } else {
+              const me = await base44.auth.me();
+              const newConvo = await base44.entities.Conversation.create({
+                participants: [me.id, chatApprovalUser.created_by_id || chatApprovalUser.id],
+                last_message: "",
+                is_active: true,
+              });
+              conversationId = newConvo.id;
+            }
+            setChatApprovalUser(null);
+            setSelectedUser(null);
+            navigate(`/chat/${conversationId}`);
+          } catch (err) {
+            console.error(err);
+            setChatApprovalUser(null);
+          }
+        }}
+        onReject={() => setChatApprovalUser(null)}
+        onClose={() => setChatApprovalUser(null)}
       />
     </div>
   );
