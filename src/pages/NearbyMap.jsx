@@ -9,6 +9,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -29,6 +30,7 @@ export default function NearbyMap() {
   const [filters, setFilters] = useState({ distance: 5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
+  const [approvalUser, setApprovalUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -298,7 +300,10 @@ export default function NearbyMap() {
                   View Profile
                 </button>
                 <button
-                  onClick={() => navigate("/messages")}
+                  onClick={() => {
+                    setSelectedUser(null);
+                    setApprovalUser(selectedUser);
+                  }}
                   className="flex-1 py-3 rounded-xl gradient-blue text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -309,6 +314,19 @@ export default function NearbyMap() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Chat Approval Modal */}
+      {approvalUser && (
+        <ChatApprovalModal
+          user={approvalUser}
+          onAccept={() => {
+            setApprovalUser(null);
+            navigate("/messages");
+          }}
+          onReject={() => setApprovalUser(null)}
+          onClose={() => setApprovalUser(null)}
+        />
+      )}
     </div>
   );
 }
