@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Send, Image, Mic, Smile, MoreVertical } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -9,6 +9,8 @@ import moment from "moment";
 export default function Chat() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const chatUser = location.state?.chatUser;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [me, setMe] = useState(null);
@@ -49,6 +51,8 @@ export default function Chat() {
         const profiles = await base44.entities.UserProfile.filter({ created_by_id: otherId });
         if (profiles.length > 0) setOtherUser(profiles[0]);
       }
+      // Fallback to user info passed from the approval flow (e.g. mock profiles)
+      if (!otherUser) setOtherUser(chatUser || null);
     } catch (err) {
       console.error(err);
     }

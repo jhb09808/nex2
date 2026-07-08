@@ -319,9 +319,30 @@ export default function NearbyMap() {
       {approvalUser && (
         <ChatApprovalModal
           user={approvalUser}
-          onAccept={() => {
+          onAccept={async () => {
+            const targetUser = approvalUser;
             setApprovalUser(null);
-            navigate("/messages");
+            try {
+              const me = await base44.auth.me();
+              const otherId = targetUser.created_by_id || targetUser.id;
+              const existing = await base44.entities.Conversation.filter({ participants: me.id }, "-updated_date", 50);
+              const found = existing.find((c) => c.participants?.includes(otherId));
+              let convoId;
+              if (found) {
+                convoId = found.id;
+              } else {
+                const convo = await base44.entities.Conversation.create({
+                  participants: [me.id, otherId],
+                  last_message: "",
+                  is_active: true,
+                });
+                convoId = convo.id;
+              }
+              navigate(`/chat/${convoId}`, { state: { chatUser: targetUser } });
+            } catch (err) {
+              console.error(err);
+              navigate("/messages");
+            }
           }}
           onReject={() => setApprovalUser(null)}
           onClose={() => setApprovalUser(null)}
