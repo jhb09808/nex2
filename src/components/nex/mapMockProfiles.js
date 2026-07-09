@@ -1,59 +1,33 @@
-// Generates diverse mock nearby profiles around a center point.
-// Types: anonymous, first_name, full_profile — plus verified/premium/online variants.
+// Generates diverse mock nearby profiles (bots) around a center point.
+// Positioned within ~0.5mi so they appear on the radar scope by default.
+// Each bot has a primary interest so blips render in distinct colors.
 
 const FIRST_NAMES = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Jamie", "Avery", "Quinn", "Sam", "Drew", "Reese"];
 const ANON_NAMES = ["Ghost", "Shadow", "Wanderer", "Nomad", "Echo", "Drift", "Phantom", "Mystery"];
-const INTERESTS = ["Music", "Technology", "Fitness", "Cooking", "Art", "Travel", "Gaming", "Food", "Photography", "Reading", "Hiking", "Design"];
-const PHOTO_SEEDS = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"];
 
-function pick(arr, seed) {
-  return arr[Math.abs(seed) % arr.length];
-}
+// ~0.007 deg ≈ 0.5mi — keep bots inside default radius
+const R = 0.006;
 
-function pickMany(arr, count, seed) {
-  const result = [];
-  const used = new Set();
-  let s = seed;
-  while (result.length < count && used.size < arr.length) {
-    s = (s * 31 + 7) & 0x7fffffff;
-    const idx = Math.abs(s) % arr.length;
-    if (!used.has(idx)) {
-      used.add(idx);
-      result.push(arr[idx]);
-    }
-  }
-  return result;
+function off(seed) {
+  // deterministic offset in [-R, R]
+  const v = ((Math.abs(seed) * 9301 + 49297) % 233280) / 233280;
+  return (v - 0.5) * 2 * R;
 }
 
 export function generateMockProfiles(center) {
   const { lat, lng } = center;
   return [
-    // Anonymous — online
-    { id: "mock-anon-1", username: "Ghost", visibility: "anonymous", is_online: true, is_verified: false, is_premium: false, interests: [], lat: lat + 0.008, lng: lng - 0.006 },
-    // Anonymous — offline
-    { id: "mock-anon-2", username: "Shadow", visibility: "anonymous", is_online: false, is_verified: false, is_premium: false, interests: [], lat: lat - 0.012, lng: lng + 0.005 },
-    // First name only — verified
-    { id: "mock-fn-1", username: pick(FIRST_NAMES, 11), visibility: "first_name", is_online: true, is_verified: true, is_premium: false, interests: pickMany(INTERESTS, 3, 7), profile_photo: `https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop`, lat: lat + 0.004, lng: lng + 0.011 },
-    // First name only — premium
-    { id: "mock-fn-2", username: pick(FIRST_NAMES, 3), visibility: "first_name", is_online: false, is_verified: false, is_premium: true, interests: pickMany(INTERESTS, 2, 13), profile_photo: `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop`, lat: lat - 0.007, lng: lng - 0.009 },
-    // Full profile — online verified premium
-    { id: "mock-full-1", username: "Maya", bio: "Designer & coffee enthusiast", visibility: "full_profile", is_online: true, is_verified: true, is_premium: true, interests: pickMany(INTERESTS, 4, 19), profile_photo: `https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop`, lat: lat + 0.014, lng: lng + 0.003 },
-    // Full profile — online
-    { id: "mock-full-2", username: "Liam", bio: "Just here to meet people", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 3, 23), profile_photo: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop`, lat: lat - 0.015, lng: lng - 0.014 },
-    // Full profile — offline
-    { id: "mock-full-3", username: "Sofia", bio: "Travel addict 🌍", visibility: "full_profile", is_online: false, is_verified: true, is_premium: false, interests: pickMany(INTERESTS, 2, 29), profile_photo: `https://images.unsplash.com/photo-1534528741775-53994a68a10c?w=100&h=100&fit=crop`, lat: lat + 0.006, lng: lng - 0.018 },
-    // Anonymous — online
-    { id: "mock-anon-3", username: "Echo", visibility: "anonymous", is_online: true, is_verified: false, is_premium: false, interests: [], lat: lat - 0.003, lng: lng + 0.016 },
-    // First name — online
-    { id: "mock-fn-3", username: pick(FIRST_NAMES, 5), visibility: "first_name", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 2, 37), profile_photo: `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop`, lat: lat + 0.018, lng: lng - 0.004 },
-    // Full profile — premium offline
-    { id: "mock-full-4", username: "Noah", bio: "Music producer 🎧", visibility: "full_profile", is_online: false, is_verified: false, is_premium: true, interests: pickMany(INTERESTS, 3, 41), profile_photo: `https://images.unsplash.com/photo-1492562080023-ab3db95b948c?w=100&h=100&fit=crop`, lat: lat + 0.002, lng: lng + 0.021 },
-    // Anonymous — offline
-    { id: "mock-anon-4", username: "Drift", visibility: "anonymous", is_online: false, is_verified: false, is_premium: false, interests: [], lat: lat - 0.020, lng: lng + 0.008 },
-    // Cluster group — 4 profiles very close together
-    { id: "mock-cluster-1", username: "Ethan", bio: "Crypto trader", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 3, 47), profile_photo: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop`, lat: lat + 0.009, lng: lng + 0.009 },
-    { id: "mock-cluster-2", username: "Zoe", bio: "Yoga instructor", visibility: "full_profile", is_online: true, is_verified: true, is_premium: false, interests: pickMany(INTERESTS, 2, 53), profile_photo: `https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop`, lat: lat + 0.00905, lng: lng + 0.00895 },
-    { id: "mock-cluster-3", username: "Mason", visibility: "first_name", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 3, 59), profile_photo: `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop`, lat: lat + 0.00895, lng: lng + 0.00905 },
-    { id: "mock-cluster-4", username: "Aria", bio: "Photographer", visibility: "full_profile", is_online: false, is_verified: false, is_premium: true, interests: pickMany(INTERESTS, 2, 61), profile_photo: `https://images.unsplash.com/photo-1534528741775-53994a68a10c?w=100&h=100&fit=crop`, lat: lat + 0.009, lng: lng + 0.009 },
+    { id: "bot-1", username: "Maya", bio: "Designer & coffee enthusiast", visibility: "full_profile", is_online: true, is_verified: true, is_premium: false, interests: ["Design", "Art"], profile_photo: `https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop`, lat: lat + off(1), lng: lng + off(2) },
+    { id: "bot-2", username: "Liam", bio: "Gym junkie 💪", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: ["Fitness", "Sports"], profile_photo: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop`, lat: lat + off(3), lng: lng + off(4) },
+    { id: "bot-3", username: "Sofia", bio: "Foodie adventures 🍕", visibility: "full_profile", is_online: false, is_verified: true, is_premium: false, interests: ["Food", "Cooking"], profile_photo: `https://images.unsplash.com/photo-1534528741775-53994a68a10c?w=100&h=100&fit=crop`, lat: lat + off(5), lng: lng + off(6) },
+    { id: "bot-4", username: "Noah", bio: "Music producer 🎧", visibility: "full_profile", is_online: true, is_verified: false, is_premium: true, interests: ["Music", "Nightlife"], profile_photo: `https://images.unsplash.com/photo-1492562080023-ab3db95b948c?w=100&h=100&fit=crop`, lat: lat + off(7), lng: lng + off(8) },
+    { id: "bot-5", username: "Aria", bio: "Hiking every weekend ⛰️", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: ["Hiking", "Travel"], profile_photo: `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop`, lat: lat + off(9), lng: lng + off(10) },
+    { id: "bot-6", username: "Ethan", bio: "Crypto trader", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: ["Crypto", "Technology"], profile_photo: `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop`, lat: lat + off(11), lng: lng + off(12) },
+    { id: "bot-7", username: "Zoe", bio: "Yoga instructor 🧘", visibility: "full_profile", is_online: true, is_verified: true, is_premium: false, interests: ["Yoga", "Fitness"], profile_photo: `https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop`, lat: lat + off(13), lng: lng + off(14) },
+    { id: "bot-8", username: "Mason", bio: "Gamer 🎮", visibility: "first_name", is_online: true, is_verified: false, is_premium: false, interests: ["Gaming", "Music"], profile_photo: `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop`, lat: lat + off(15), lng: lng + off(16) },
+    { id: "bot-9", username: "Avery", bio: "Pet lover 🐕", visibility: "full_profile", is_online: false, is_verified: false, is_premium: false, interests: ["Pets", "Reading"], profile_photo: `https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop`, lat: lat + off(17), lng: lng + off(18) },
+    { id: "bot-10", username: "Quinn", bio: "Fashion designer 👗", visibility: "full_profile", is_online: true, is_verified: true, is_premium: true, interests: ["Fashion", "Art"], profile_photo: `https://images.unsplash.com/photo-1534528741775-53994a68a10c?w=100&h=100&fit=crop`, lat: lat + off(19), lng: lng + off(20) },
+    { id: "bot-11", username: "Ghost", visibility: "anonymous", is_online: true, is_verified: false, is_premium: false, interests: [], lat: lat + off(21), lng: lng + off(22) },
+    { id: "bot-12", username: "Echo", visibility: "anonymous", is_online: true, is_verified: false, is_premium: false, interests: [], lat: lat + off(23), lng: lng + off(24) },
   ];
 }
