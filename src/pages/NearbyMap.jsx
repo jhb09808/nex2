@@ -504,7 +504,10 @@ export default function NearbyMap() {
                     {selectedUser.is_verified && <BadgeCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />}
                     {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
                   </div>
-                  <ProximityTier tier={selectedUser.proximity_tier || calculateProximityTier(Math.random() * 3)} />
+                  <ProximityTier tier={selectedUser.proximity_tier || calculateProximityTier(selectedUser._dist ?? Math.random() * 3)} />
+                  {selectedUser._dist != null && (
+                    <p className="text-white/40 text-xs mt-0.5">{selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}</p>
+                  )}
                   {selectedUser.visibility === "anonymous" && (
                     <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
                       <Shield className="w-3 h-3" /> Anonymous mode
