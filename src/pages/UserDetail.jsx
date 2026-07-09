@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -7,11 +7,12 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
-import { getUserDisplayName } from "@/components/nex/userDisplay";
+import { getUserDisplayName, getUserNumber } from "@/components/nex/userDisplay";
 
 export default function UserDetail() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,8 +24,13 @@ export default function UserDetail() {
 
   const loadUser = async () => {
     try {
-      const profile = await base44.entities.UserProfile.get(userId);
-      setUser(profile);
+      const passedUser = location.state?.user;
+      if (passedUser) {
+        setUser(passedUser);
+      } else {
+        const profile = await base44.entities.UserProfile.get(userId);
+        setUser(profile);
+      }
       const me = await base44.auth.me();
       const myP = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (myP.length > 0) setMyProfile(myP[0]);
@@ -71,6 +77,7 @@ export default function UserDetail() {
           <h1 className="text-2xl font-bold text-white">{getUserDisplayName(user)}</h1>
           {user.is_verified && <Shield className="w-5 h-5 text-blue-400" />}
         </div>
+        <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(user)}</p>
       </div>
 
       {user.bio && (

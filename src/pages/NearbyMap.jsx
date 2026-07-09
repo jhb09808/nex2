@@ -532,7 +532,7 @@ export default function NearbyMap() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => navigate(`/user/${selectedUser.id}`)}
+                  onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
                   className="flex-1 py-3 rounded-xl glass text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
                 >
                   View Profile
