@@ -12,6 +12,10 @@
       "type": "string",
       "format": "uri"
     },
+    "show_profile_photo": {
+      "type": "boolean",
+      "default": false
+    },
     "age": {
       "type": "number"
     },

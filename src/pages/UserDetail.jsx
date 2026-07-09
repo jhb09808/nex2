@@ -66,7 +66,7 @@ export default function UserDetail() {
       </button>
 
       <div className="flex flex-col items-center text-center mb-6">
-        <UserAvatar src={user.profile_photo} size="xl" isOnline={user.is_online} plan={user.plan} className="mb-4" />
+        <UserAvatar src={user.profile_photo} size="xl" isOnline={user.is_online} plan={user.plan} showProfilePhoto={user.show_profile_photo} className="mb-4" />
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-2xl font-bold text-white">{user.username}</h1>
           {user.is_verified && <Shield className="w-5 h-5 text-blue-400" />}

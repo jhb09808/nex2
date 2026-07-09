@@ -186,8 +186,8 @@ export default function NearbyMap() {
       const initial = (user.username || "?").charAt(0).toUpperCase();
       innerHtml = `<div style="width:100%;height:100%;background:${tierGradients[plan]};backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.9);">${escapeHtml(initial)}</div>`;
     } else {
-      // Only platinum users show their profile photo; everyone else gets a tier-colored circle
-      const showPhoto = isPlatinum && user.profile_photo;
+      // Only platinum users with show_profile_photo enabled can display a photo
+      const showPhoto = isPlatinum && user.show_profile_photo && user.profile_photo;
       innerHtml = showPhoto
         ? `<img src="${user.profile_photo}" style="width:100%;height:100%;object-fit:cover;" />`
         : `<div style="width:100%;height:100%;background:${tierGradients[plan]};"></div>`;
@@ -434,7 +434,7 @@ export default function NearbyMap() {
                     <span className="text-xl font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
                   </div>
                 ) : (
-                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
+                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} showProfilePhoto={selectedUser.show_profile_photo} />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">

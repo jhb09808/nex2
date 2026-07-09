@@ -62,10 +62,12 @@ export default function Profile() {
       {/* Profile Card */}
       <GlassCard strong className="flex flex-col items-center text-center !pt-8 !pb-6">
         <div className="relative mb-4">
-          <UserAvatar src={profile?.profile_photo} size="xl" isOnline={true} plan={profile?.plan} />
-          <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full gradient-blue flex items-center justify-center">
-            <Camera className="w-4 h-4 text-white" />
-          </button>
+          <UserAvatar src={profile?.profile_photo} size="xl" isOnline={true} plan={profile?.plan} showProfilePhoto={true} />
+          {profile?.plan === "platinum" && (
+            <button onClick={() => navigate("/edit-profile")} className="absolute bottom-0 right-0 w-8 h-8 rounded-full gradient-blue flex items-center justify-center">
+              <Camera className="w-4 h-4 text-white" />
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-xl font-bold text-white">{profile?.username}</h2>

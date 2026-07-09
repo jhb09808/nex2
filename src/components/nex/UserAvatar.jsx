@@ -23,7 +23,7 @@ const TIER_STYLES = {
   },
 };
 
-export default function UserAvatar({ src, size = "md", isOnline, plan = "free", className = "" }) {
+export default function UserAvatar({ src, size = "md", isOnline, plan = "free", showProfilePhoto = false, className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -49,7 +49,7 @@ export default function UserAvatar({ src, size = "md", isOnline, plan = "free", 
   };
 
   const tier = TIER_STYLES[plan] || TIER_STYLES.free;
-  const showPhoto = plan === "platinum" && src;
+  const showPhoto = plan === "platinum" && showProfilePhoto && src;
 
   return (
     <div className={`relative ${className}`}>

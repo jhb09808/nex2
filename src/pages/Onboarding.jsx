@@ -89,20 +89,11 @@ export default function Onboarding() {
       </div>
 
       <div className="flex justify-center">
-        <label className="relative cursor-pointer">
-          <div className="w-28 h-28 rounded-full glass-strong flex items-center justify-center overflow-hidden">
-            {photoPreview ? (
-              <img src={photoPreview} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <Camera className="w-8 h-8 text-white/30" />
-            )}
-          </div>
-          <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full gradient-blue flex items-center justify-center">
-            <Camera className="w-4 h-4 text-white" />
-          </div>
-          <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-        </label>
+        <div className="w-28 h-28 rounded-full glass-strong flex items-center justify-center">
+          <Camera className="w-8 h-8 text-white/20" />
+        </div>
       </div>
+      <p className="text-white/30 text-xs text-center -mt-2">Profile photos are available with Platinum</p>
 
       <div className="space-y-4">
         <div>
