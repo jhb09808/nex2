@@ -44,11 +44,12 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      const existing = await base44.asServiceRole.entities.Waitlist.filter({ email: email.trim().toLowerCase() });
-      if (existing.length === 0) {
-        await base44.asServiceRole.entities.Waitlist.create({ email: email.trim().toLowerCase() });
+      const res = await base44.functions.invoke("joinWaitlist", { email: email.trim() });
+      if (res.data?.success) {
+        setWaitlistDone(true);
+      } else {
+        setError(res.data?.error || "Something went wrong. Try again.");
       }
-      setWaitlistDone(true);
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
