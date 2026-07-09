@@ -31,8 +31,8 @@ export default function PasswordGate() {
       } else {
         setError("Incorrect password. Try again.");
       }
-    } catch {
-      setError("Something went wrong. Try again.");
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
@@ -50,8 +50,8 @@ export default function PasswordGate() {
       } else {
         setError(res.data?.error || "Something went wrong. Try again.");
       }
-    } catch {
-      setError("Something went wrong. Try again.");
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
