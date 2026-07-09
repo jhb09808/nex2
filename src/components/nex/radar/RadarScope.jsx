@@ -57,38 +57,68 @@ export default function RadarScope({
   onUserClick,
   onClusterClick,
   blurred = false,
+  zoom = 1,
 }) {
-  const radius = effectiveRadius || 1;
+  const baseRadius = effectiveRadius || 1;
+  // Zoom shrinks the visible radius — blips spread out, distant ones leave the scope
+  const visibleRadius = baseRadius / zoom;
 
   const blips = useMemo(() => {
-    return markers.map((m) => {
+    // Compute raw polar positions, filtering out blips beyond the zoomed-in radius
+    const raw = [];
+    for (const m of markers) {
       if (m.type === "cluster") {
         const dist = distanceMiles(center.lat, center.lng, m.lat, m.lng);
+        if (dist > visibleRadius) continue;
         const angle = Math.atan2(m.lng - center.lng, m.lat - center.lat);
-        const fraction = Math.min(dist / radius, 0.92);
+        const fraction = Math.min(dist / visibleRadius, 0.92);
         const r = fraction * 44;
-        return { ...m, x: 50 + Math.sin(angle) * r, y: 50 - Math.cos(angle) * r };
+        raw.push({ ...m, x: 50 + Math.sin(angle) * r, y: 50 - Math.cos(angle) * r });
+      } else {
+        const [uLat, uLng] = getUserLatLng(m.user);
+        const dist = distanceMiles(center.lat, center.lng, uLat, uLng);
+        if (dist > visibleRadius) continue;
+        const angle = Math.atan2(uLng - center.lng, uLat - center.lat);
+        const fraction = Math.min(dist / visibleRadius, 0.92);
+        const r = fraction * 44;
+        // Privacy: deterministic jitter so exact position is obscured
+        const hash = hashStr(m.user.id || "x");
+        const jx = ((hash % 100) / 100 - 0.5) * 4;
+        const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
+        const color = getBlipColor(m.user);
+        const pulseDelay = (hash % 40) / 10;
+        raw.push({
+          ...m,
+          color,
+          pulseDelay,
+          x: Math.max(8, Math.min(92, 50 + Math.sin(angle) * r + jx)),
+          y: Math.max(8, Math.min(92, 50 - Math.cos(angle) * r + jy)),
+        });
       }
-      const [uLat, uLng] = getUserLatLng(m.user);
-      const dist = distanceMiles(center.lat, center.lng, uLat, uLng);
-      const angle = Math.atan2(uLng - center.lng, uLat - center.lat);
-      const fraction = Math.min(dist / radius, 0.92);
-      const r = fraction * 44;
-      // Privacy: deterministic jitter so exact position is obscured
-      const hash = hashStr(m.user.id || "x");
-      const jx = ((hash % 100) / 100 - 0.5) * 4;
-      const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
-      const color = getBlipColor(m.user);
-      const pulseDelay = (hash % 40) / 10; // 0–4s staggered pulse
-      return {
-        ...m,
-        color,
-        pulseDelay,
-        x: Math.max(8, Math.min(92, 50 + Math.sin(angle) * r + jx)),
-        y: Math.max(8, Math.min(92, 50 - Math.cos(angle) * r + jy)),
-      };
-    });
-  }, [markers, center, radius, getUserLatLng, distanceMiles]);
+    }
+
+    // Collision avoidance — nudge overlapping blips apart so they're tappable
+    const MIN_DIST = 5; // min % distance between blip centers
+    for (let iter = 0; iter < 4; iter++) {
+      for (let i = 0; i < raw.length; i++) {
+        for (let j = i + 1; j < raw.length; j++) {
+          const dx = raw[j].x - raw[i].x;
+          const dy = raw[j].y - raw[i].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < MIN_DIST && d > 0.01) {
+            const push = (MIN_DIST - d) / 2;
+            const ux = dx / d;
+            const uy = dy / d;
+            raw[i].x = Math.max(6, Math.min(94, raw[i].x - ux * push));
+            raw[i].y = Math.max(6, Math.min(94, raw[i].y - uy * push));
+            raw[j].x = Math.max(6, Math.min(94, raw[j].x + ux * push));
+            raw[j].y = Math.max(6, Math.min(94, raw[j].y + uy * push));
+          }
+        }
+      }
+    }
+    return raw;
+  }, [markers, center, visibleRadius, getUserLatLng, distanceMiles]);
 
   const rings = [0.25, 0.5, 0.75, 1];
   const spokes = Array.from({ length: 8 }, (_, i) => i * 45);

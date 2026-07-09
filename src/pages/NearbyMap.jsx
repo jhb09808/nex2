@@ -37,6 +37,7 @@ export default function NearbyMap() {
   const [viewMode, setViewMode] = useState("best");
   const [activeFilters, setActiveFilters] = useState([]);
   const [expandedClusters, setExpandedClusters] = useState({});
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     loadUsers();
@@ -340,7 +341,27 @@ export default function NearbyMap() {
         onUserClick={(user) => setSelectedUser(user)}
         onClusterClick={(key) => handleExpandCluster(key)}
         blurred={showRadarOnboarding}
+        zoom={zoom}
       />
+
+      {/* Zoom controls */}
+      {!showRadarOnboarding && (
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
+          <button
+            onClick={() => setZoom((z) => Math.min(5, z + 1))}
+            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
+          >
+            +
+          </button>
+          <span className="text-center text-[10px] font-mono text-white/30">{zoom}x</span>
+          <button
+            onClick={() => setZoom((z) => Math.max(1, z - 1))}
+            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
+          >
+            −
+          </button>
+        </div>
+      )}
 
       {/* Filters Panel */}
       <AnimatePresence>
