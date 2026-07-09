@@ -221,7 +221,7 @@ export default function NearbyMap() {
     })
     .sort((a, b) => b._score - a._score);
 
-  const displayUsers = viewMode === "best" ? ranked.slice(0, 18) : ranked;
+  const displayUsers = viewMode === "best" ? ranked.slice(0, 15) : ranked;
 
   // Clustering: collapse 4+ users within a small area into a single marker
   const CLUSTER_THRESHOLD = 0.02;
