@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Users, Flag, BarChart3, Shield, Ban, Check, X, Search, Eye, MapPin, AlertTriangle, Plus } from "lucide-react";
+import { ArrowLeft, Users, Flag, BarChart3, Shield, Ban, Check, X, Search, Eye, MapPin, AlertTriangle, Plus, Mail, Copy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -12,6 +12,7 @@ export default function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [zones, setZones] = useState([]);
+  const [waitlist, setWaitlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [newZone, setNewZone] = useState({ name: "", latitude: "", longitude: "", radius_miles: "0.25", restriction_reason: "" });
@@ -22,10 +23,11 @@ export default function AdminPanel() {
 
   const loadData = async () => {
     try {
-      const [u, r, z] = await Promise.all([
+      const [u, r, z, w] = await Promise.all([
         base44.entities.UserProfile.list("-created_date", 50),
         base44.entities.Report.list("-created_date", 50),
         base44.entities.GeoZone.list("-created_date", 50),
+        base44.entities.Waitlist.list("-created_date", 200),
       ]);
       setUsers(u);
       // Sort reports: high severity first, then pending, then by date
@@ -37,6 +39,7 @@ export default function AdminPanel() {
       });
       setReports(sorted);
       setZones(z);
+      setWaitlist(w);
     } catch (e) {
       console.error(e);
     } finally {
@@ -88,9 +91,19 @@ export default function AdminPanel() {
     setZones((prev) => prev.map((z) => (z.id === zoneId ? { ...z, is_restricted: restricted } : z)));
   };
 
+  const handleWaitlistStatus = async (entryId, status) => {
+    await base44.entities.Waitlist.update(entryId, { status });
+    setWaitlist((prev) => prev.map((w) => (w.id === entryId ? { ...w, status } : w)));
+  };
+
+  const copyEmail = (email) => {
+    navigator.clipboard?.writeText(email);
+  };
+
   const tabs = [
     { key: "reports", label: "Reports", icon: Flag },
     { key: "users", label: "Users", icon: Users },
+    { key: "waitlist", label: "Waitlist", icon: Mail },
     { key: "zones", label: "Zones", icon: MapPin },
     { key: "analytics", label: "Analytics", icon: BarChart3 },
   ];
@@ -233,6 +246,59 @@ export default function AdminPanel() {
           )) : (
             <GlassCard className="text-center !py-8">
               <p className="text-white/30 text-sm">No reports</p>
+            </GlassCard>
+          )}
+        </div>
+      )}
+
+      {/* Waitlist Tab */}
+      {tab === "waitlist" && (
+        <div className="space-y-2">
+          {waitlist.length > 0 ? waitlist.map((entry) => (
+            <GlassCard key={entry.id} className="!p-3">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">{entry.email}</p>
+                  <p className="text-white/30 text-xs">{new Date(entry.created_date).toLocaleDateString()}</p>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                  entry.status === "approved" ? "bg-green-500/20 text-green-400" :
+                  entry.status === "rejected" ? "bg-red-500/20 text-red-400" : "bg-yellow-500/20 text-yellow-400"
+                }`}>
+                  {entry.status}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {entry.status !== "approved" && (
+                  <button
+                    onClick={() => handleWaitlistStatus(entry.id, "approved")}
+                    className="flex-1 py-2 rounded-lg bg-green-500/20 text-green-400 text-xs font-medium flex items-center justify-center gap-1"
+                  >
+                    <Check className="w-3.5 h-3.5" /> Approve
+                  </button>
+                )}
+                {entry.status !== "rejected" && (
+                  <button
+                    onClick={() => handleWaitlistStatus(entry.id, "rejected")}
+                    className="flex-1 py-2 rounded-lg glass text-red-400 text-xs font-medium flex items-center justify-center gap-1"
+                  >
+                    <X className="w-3.5 h-3.5" /> Reject
+                  </button>
+                )}
+                <button
+                  onClick={() => copyEmail(entry.email)}
+                  className="px-3 py-2 rounded-lg glass text-white/40 text-xs font-medium flex items-center justify-center"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </GlassCard>
+          )) : (
+            <GlassCard className="text-center !py-8">
+              <p className="text-white/30 text-sm">No waitlist entries yet</p>
             </GlassCard>
           )}
         </div>

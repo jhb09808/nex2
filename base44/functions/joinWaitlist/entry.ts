@@ -17,6 +17,19 @@ Deno.serve(async (req) => {
     }
 
     await base44.asServiceRole.entities.Waitlist.create({ email });
+
+    // Send email notification to the admin
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: "whosnex2me@gmail.com",
+        subject: "New Waitlist Signup",
+        body: `A new user joined the NEX2 waitlist!\n\nEmail: ${email}\n\nManage your waitlist from the Admin Panel.`,
+      });
+    } catch (emailErr) {
+      // Don't fail the whole request if email fails
+      console.error("Failed to send waitlist notification email:", emailErr);
+    }
+
     return Response.json({ success: true });
   } catch (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 });
