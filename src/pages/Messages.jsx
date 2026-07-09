@@ -89,7 +89,7 @@ export default function Messages() {
                   className="flex items-center gap-3 !p-3"
                   onClick={() => navigate(`/chat/${convo.id}`)}
                 >
-                  <UserAvatar src={other?.profile_photo} size="md" isOnline={other?.is_online} plan={other?.plan} showProfilePhoto={other?.show_profile_photo} />
+                  <UserAvatar name={getUserDisplayName(other)} size="md" isOnline={other?.is_online} plan={other?.plan} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
                       <p className="text-white font-medium text-sm truncate">{getUserDisplayName(other)}</p>

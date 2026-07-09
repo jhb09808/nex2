@@ -23,7 +23,7 @@ const TIER_STYLES = {
   },
 };
 
-export default function UserAvatar({ src, size = "md", isOnline, plan = "free", showProfilePhoto = false, blurLevel = 0, className = "" }) {
+export default function UserAvatar({ name, size = "md", isOnline, plan = "free", className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -49,32 +49,21 @@ export default function UserAvatar({ src, size = "md", isOnline, plan = "free", 
   };
 
   const tier = TIER_STYLES[plan] || TIER_STYLES.free;
-  const showPhoto = showProfilePhoto && src;
+  const initial = name ? name.charAt(0).toUpperCase() : "";
 
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`${sizes[size]} rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center`}
+        className={`${sizes[size]} rounded-full flex-shrink-0 flex items-center justify-center`}
         style={{
-          background: showPhoto ? undefined : tier.gradient,
+          background: tier.gradient,
           border: `2px solid ${tier.ring}`,
           boxShadow: `0 0 12px ${tier.glow}`,
         }}
       >
-        {showPhoto ? (
-          <img
-            src={src}
-            alt=""
-            className="w-full h-full object-cover"
-            style={{
-              filter: blurLevel > 0 ? `blur(${blurLevel}px)` : "none",
-              transition: "filter 600ms ease-in-out, transform 600ms ease-in-out",
-              transform: blurLevel > 0 ? "scale(1.15)" : "scale(1)",
-            }}
-          />
-        ) : (
+        {initial && (
           <span className={`${textSizes[size]} font-bold text-white/90`}>
-            {/* Initial displayed for non-platinum tiers */}
+            {initial}
           </span>
         )}
       </div>

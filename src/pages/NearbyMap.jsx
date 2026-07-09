@@ -12,7 +12,6 @@ import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
-import { getBlurForConversation } from "@/components/nex/photoBlur";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
@@ -39,37 +38,12 @@ export default function NearbyMap() {
   const [activeFilters, setActiveFilters] = useState([]);
   const [expandedClusters, setExpandedClusters] = useState({});
   const [zoom, setZoom] = useState(1);
-  const [selectedUserBlur, setSelectedUserBlur] = useState(20);
 
   useEffect(() => {
     loadUsers();
     checkLocation();
     loadCapabilities();
   }, []);
-
-  // Compute photo blur for the selected user based on existing conversation state
-  useEffect(() => {
-    if (!selectedUser) {
-      setSelectedUserBlur(20);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const me = await base44.auth.me();
-        const convos = await base44.entities.Conversation.filter({});
-        const convo = convos.find(
-          (c) =>
-            c.participants?.includes(me.id) &&
-            c.participants?.includes(selectedUser.created_by_id || selectedUser.id)
-        );
-        if (!cancelled) setSelectedUserBlur(getBlurForConversation(convo));
-      } catch (e) {
-        if (!cancelled) setSelectedUserBlur(20);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [selectedUser]);
 
   // Location refreshes only on app open — no continuous streaming
   const checkLocation = async () => {
@@ -519,7 +493,7 @@ export default function NearbyMap() {
                     <span className="text-xl font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
                   </div>
                 ) : (
-                  <UserAvatar src={selectedUser.profile_photo} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} showProfilePhoto={selectedUser.show_profile_photo} blurLevel={selectedUserBlur} />
+                  <UserAvatar name={getDisplayName(selectedUser)} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">

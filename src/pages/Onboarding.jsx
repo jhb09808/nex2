@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Camera, MapPin, User, Eye, EyeOff, Shield, Zap } from "lucide-react";
+import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import InterestTag from "@/components/nex/InterestTag";
 
@@ -24,8 +24,6 @@ export default function Onboarding() {
   const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [bio, setBio] = useState("");
-  const [photo, setPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
   const [interests, setInterests] = useState([]);
   const [visibility, setVisibility] = useState("full_profile");
   const [saving, setSaving] = useState(false);
@@ -36,27 +34,13 @@ export default function Onboarding() {
     );
   };
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhoto(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleComplete = async () => {
     setSaving(true);
     try {
-      let photoUrl = "";
-      if (photo) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: photo });
-        photoUrl = file_url;
-      }
       await base44.entities.UserProfile.create({
         username,
         age: parseInt(age),
         bio,
-        profile_photo: photoUrl,
         interests,
         visibility,
         onboarding_complete: true,
@@ -89,13 +73,6 @@ export default function Onboarding() {
         <h2 className="text-2xl font-bold text-white mb-1">Create your profile</h2>
         <p className="text-white/40 text-sm">Tell us about yourself</p>
       </div>
-
-      <div className="flex justify-center">
-        <div className="w-28 h-28 rounded-full glass-strong flex items-center justify-center">
-          <Camera className="w-8 h-8 text-white/20" />
-        </div>
-      </div>
-      <p className="text-white/30 text-xs text-center -mt-2">Profile photos are available with Platinum</p>
 
       <div className="space-y-4">
         <div>

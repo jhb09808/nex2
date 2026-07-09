@@ -8,7 +8,6 @@ import ChatWingman from "@/components/nex/ai/ChatWingman";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
-import { computeBlurLevel } from "@/components/nex/photoBlur";
 
 export default function Chat() {
   const { conversationId } = useParams();
@@ -21,9 +20,6 @@ export default function Chat() {
   const [otherUser, setOtherUser] = useState(null);
   const [sending, setSending] = useState(false);
   const [safetyOpen, setSafetyOpen] = useState(false);
-  const [photoBlur, setPhotoBlur] = useState(20);
-  const [otherParticipantId, setOtherParticipantId] = useState(null);
-  const [conversation, setConversation] = useState(null);
   const messagesEnd = useRef(null);
 
   useEffect(() => {
@@ -52,28 +48,12 @@ export default function Chat() {
     return unsub;
   }, [conversationId]);
 
-  // Recompute photo blur whenever messages change
-  useEffect(() => {
-    if (!me || !otherParticipantId) return;
-    if (conversation && !conversation.is_active) {
-      setPhotoBlur(20);
-      return;
-    }
-    const blur = computeBlurLevel(messages, me.id, otherParticipantId);
-    setPhotoBlur(blur);
-    if (blur === 0 && conversation && !conversation.photo_unlocked) {
-      base44.entities.Conversation.update(conversationId, { photo_unlocked: true }).catch(() => {});
-    }
-  }, [messages, me, otherParticipantId, conversation, conversationId]);
-
   const loadChat = async () => {
     try {
       const user = await base44.auth.me();
       setMe(user);
       const convo = await base44.entities.Conversation.get(conversationId);
-      setConversation(convo);
       const otherId = convo.participants?.find((id) => id !== user.id);
-      setOtherParticipantId(otherId);
       const msgs = await base44.entities.Message.filter({ conversation_id: conversationId }, "created_date", 100);
       setMessages(msgs);
 
@@ -117,7 +97,7 @@ export default function Chat() {
         <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5 text-white/60" />
         </button>
-        <UserAvatar src={otherUser?.profile_photo} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} showProfilePhoto={otherUser?.show_profile_photo} blurLevel={photoBlur} />
+        <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} />
         <div className="flex-1 min-w-0">
           <p className="text-white font-medium text-sm truncate">{getUserDisplayName(otherUser)}</p>
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>
@@ -144,7 +124,7 @@ export default function Chat() {
               className={`flex items-end gap-1.5 ${isMe ? "justify-end" : "justify-start"}`}
             >
               {!isMe && otherUser && (
-                <UserAvatar src={otherUser.profile_photo} size="xs" plan={otherUser.plan} showProfilePhoto={otherUser.show_profile_photo} blurLevel={photoBlur} className="flex-shrink-0" />
+                <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} className="flex-shrink-0" />
               )}
               <div
                 className={`max-w-[65%] px-4 py-2.5 rounded-2xl ${
