@@ -61,6 +61,8 @@ export function generateMockProfiles(center) {
       is_verified: i % 7 === 0,
       is_premium: i % 9 === 0,
       interests,
+      plan: i % 15 === 0 ? "platinum" : i % 5 === 0 ? "pro" : "free",
+      show_profile_photo: i % 15 === 0,
       profile_photo: isAnon ? undefined : PHOTOS[i % PHOTOS.length],
       lat: lat + off(i * 3 + 1),
       lng: lng + off(i * 3 + 2),

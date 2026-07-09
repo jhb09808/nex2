@@ -7,7 +7,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
-import ProximityTier from "@/components/nex/safety/ProximityTier";
+import { getUserDisplayName } from "@/components/nex/userDisplay";
 
 export default function UserDetail() {
   const { userId } = useParams();
@@ -68,10 +68,9 @@ export default function UserDetail() {
       <div className="flex flex-col items-center text-center mb-6">
         <UserAvatar src={user.profile_photo} size="xl" isOnline={user.is_online} plan={user.plan} showProfilePhoto={user.show_profile_photo} className="mb-4" />
         <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-2xl font-bold text-white">{user.username}</h1>
+          <h1 className="text-2xl font-bold text-white">{getUserDisplayName(user)}</h1>
           {user.is_verified && <Shield className="w-5 h-5 text-blue-400" />}
         </div>
-        <ProximityTier tier={user.proximity_tier || "nearby"} />
       </div>
 
       {user.bio && (

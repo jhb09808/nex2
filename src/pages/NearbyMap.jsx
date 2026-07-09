@@ -11,7 +11,7 @@ import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
-import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
+import { getUserDisplayName } from "@/components/nex/userDisplay";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
@@ -176,11 +176,7 @@ export default function NearbyMap() {
   // Combine real users with mock profiles centered on user's location
   const allProfiles = [...users, ...generateMockProfiles(userLocation).map((u) => ({ ...u, isMock: true }))];
 
-  const getDisplayName = (user) => {
-    if (user.visibility === "anonymous") return "Anonymous";
-    if (user.visibility === "first_name") return user.username;
-    return user.username;
-  };
+  const getDisplayName = (user) => getUserDisplayName(user);
 
   // Use explicit lat/lng for mock profiles, deterministic offset for real users
   const getUserLatLng = (user) => {

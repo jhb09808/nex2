@@ -7,6 +7,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import ChatWingman from "@/components/nex/ai/ChatWingman";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import moment from "moment";
+import { getUserDisplayName } from "@/components/nex/userDisplay";
 
 export default function Chat() {
   const { conversationId } = useParams();
@@ -98,7 +99,7 @@ export default function Chat() {
         </button>
         <UserAvatar src={otherUser?.profile_photo} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} showProfilePhoto={otherUser?.show_profile_photo} />
         <div className="flex-1 min-w-0">
-          <p className="text-white font-medium text-sm truncate">{otherUser?.username || "User"}</p>
+          <p className="text-white font-medium text-sm truncate">{getUserDisplayName(otherUser)}</p>
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>
         </div>
         <button

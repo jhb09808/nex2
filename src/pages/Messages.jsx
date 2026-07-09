@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import moment from "moment";
+import { getUserDisplayName } from "@/components/nex/userDisplay";
 
 export default function Messages() {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ export default function Messages() {
                   <UserAvatar src={other?.profile_photo} size="md" isOnline={other?.is_online} plan={other?.plan} showProfilePhoto={other?.show_profile_photo} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
-                      <p className="text-white font-medium text-sm truncate">{other?.username || "User"}</p>
+                      <p className="text-white font-medium text-sm truncate">{getUserDisplayName(other)}</p>
                       <span className="text-white/30 text-[10px]">
                         {convo.last_message_at ? moment(convo.last_message_at).fromNow() : ""}
                       </span>
