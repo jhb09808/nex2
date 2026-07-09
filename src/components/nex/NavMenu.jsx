@@ -44,11 +44,11 @@ export default function NavMenu() {
     : baseNavItems;
 
   return (
-    <>
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-[60] pointer-events-none">
       {/* Floating menu button */}
       <button
         onClick={() => setOpen(!open)}
-        className="absolute top-4 right-4 z-[60] w-10 h-10 rounded-xl glass-strong flex items-center justify-center active:scale-95 transition-transform safe-top"
+        className="absolute top-4 right-4 pointer-events-auto w-10 h-10 rounded-xl glass-strong flex items-center justify-center active:scale-95 transition-transform safe-top"
       >
         <AnimatePresence mode="wait">
           {open ? (
@@ -71,14 +71,14 @@ export default function NavMenu() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="absolute inset-0 z-[55] bg-black/40 backdrop-blur-sm"
+              className="absolute inset-0 h-screen pointer-events-auto bg-black/40 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -8 }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute top-16 right-4 z-[60] w-56 ai-card rounded-2xl p-2 overflow-hidden"
+              className="absolute top-16 right-4 pointer-events-auto w-56 ai-card rounded-2xl p-2 overflow-hidden"
             >
               {isMapRoute && (
                 <>
@@ -129,6 +129,6 @@ export default function NavMenu() {
           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

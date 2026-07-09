@@ -183,16 +183,6 @@ export default function RadarScope({
         touchAction: "none",
       }}
     >
-      {/* Top descriptive text */}
-      <div className="absolute top-20 left-0 right-0 z-20 text-center pointer-events-none px-6">
-        <p className="text-[11px] font-medium tracking-[0.2em] uppercase" style={{ color: "#7f8c8d" }}>
-          Signal Scope · No Map, No Streets
-        </p>
-        <p className="text-[10px] mt-1" style={{ color: "#5d6d7e" }}>
-          Range shown is approximate, not exact
-        </p>
-      </div>
-
       {/* Radar scope circle */}
       <div className="relative w-full h-full max-w-[560px] max-h-[560px] aspect-square">
         {/* Scope background */}
@@ -274,12 +264,6 @@ export default function RadarScope({
         ))}
       </div>
 
-      {/* Bottom descriptive text */}
-      <div className="absolute bottom-20 left-0 right-0 z-20 text-center pointer-events-none px-8">
-        <p className="text-[10px] leading-relaxed" style={{ color: "#7f8c8d" }}>
-          No streets, no landmarks, no precise position — just relative range on a closed scope.
-        </p>
-      </div>
     </div>
   );
 }
