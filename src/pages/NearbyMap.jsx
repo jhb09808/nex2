@@ -16,7 +16,7 @@ import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
-import RadarFilterChips from "@/components/nex/radar/RadarFilterChips";
+import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
 
@@ -459,15 +459,6 @@ export default function NearbyMap() {
               </button>
             </div>
           </div>
-
-          {/* Filter Chips Dock */}
-          <div className="absolute top-[92px] left-0 right-0 z-20 px-4">
-            <RadarFilterChips
-              activeFilters={activeFilters}
-              onToggle={toggleFilter}
-              onClear={clearFilters}
-            />
-          </div>
         </>
       )}
 
@@ -575,6 +566,36 @@ export default function NearbyMap() {
                   <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${filters.onlineOnly ? "left-[22px]" : "left-0.5"}`} />
                 </button>
               </label>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs text-white/40 uppercase tracking-wider">Interests</label>
+                  {activeFilters.length > 0 && (
+                    <button onClick={clearFilters} className="text-[10px] text-blue-400 font-medium">
+                      Clear all
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto scrollbar-hide">
+                  {RADAR_INTERESTS.map((interest) => {
+                    const isActive = activeFilters.includes(interest);
+                    return (
+                      <button
+                        key={interest}
+                        onClick={() => toggleFilter(interest)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 ${
+                          isActive ? "gradient-blue text-white glow-blue-sm" : "glass text-white/40"
+                        }`}
+                      >
+                        {interest}
+                      </button>
+                    );
+                  })}
+                </div>
+                {activeFilters.length === 0 && (
+                  <p className="text-white/30 text-[11px] mt-2">Showing all interests. Tap to filter.</p>
+                )}
+              </div>
             </GlassCard>
           </motion.div>
         )}
