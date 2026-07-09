@@ -25,15 +25,20 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      const res = await base44.functions.invoke("checkAccessPassword", { password });
-      if (res.data?.valid) {
+      const response = await fetch(`/api/apps/${appParams.appId}/functions/checkAccessPassword`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (data.valid) {
         sessionStorage.setItem(SESSION_KEY, "true");
         window.location.reload();
       } else {
         setError("Incorrect password. Try again.");
       }
     } catch (err) {
-      setError(err?.response?.data?.error || err?.message || "Something went wrong. Try again.");
+      setError(err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
