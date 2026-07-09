@@ -34,6 +34,16 @@
         "type": "string"
       }
     },
+    "radar_filter_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "radar_onboarding_complete": {
+      "type": "boolean",
+      "default": false
+    },
     "visibility": {
       "type": "string",
       "enum": [
@@ -112,7 +122,7 @@
     },
     "radius_miles": {
       "type": "number",
-      "default": 1
+      "default": 0.5
     },
     "daily_chat_count": {
       "type": "number",

@@ -103,10 +103,12 @@ Deno.serve(async (req) => {
       staleUpdates.has_verified_photo_badge = false;
     }
 
-    // Always sync radius_miles to match tier
-    const expectedRadius = TIER_CONFIG[tier]?.radius_miles;
-    if (expectedRadius !== undefined && profile.radius_miles !== expectedRadius) {
-      staleUpdates.radius_miles = expectedRadius;
+    // Initialize default radius (0.5 mi) for new accounts; cap at tier ceiling
+    const tierMax = TIER_CONFIG[tier]?.radius_miles;
+    if (profile.radius_miles == null) {
+      staleUpdates.radius_miles = 0.5;
+    } else if (tierMax != null && profile.radius_miles > tierMax) {
+      staleUpdates.radius_miles = tierMax;
     }
 
     if (Object.keys(staleUpdates).length > 0) {
@@ -125,10 +127,12 @@ Deno.serve(async (req) => {
 
     const config = TIER_CONFIG[tier] || TIER_CONFIG.free;
     const canStartChat = config.daily_chat_limit === null || dailyChatCount < config.daily_chat_limit;
+    const finalRadius = staleUpdates.radius_miles !== undefined ? staleUpdates.radius_miles : (profile.radius_miles ?? 0.5);
 
     return Response.json({
       tier,
-      radius_miles: config.radius_miles,
+      radius_miles: finalRadius,
+      radius_miles_max: config.radius_miles,
       daily_chat_limit: config.daily_chat_limit,
       daily_chat_count: dailyChatCount,
       can_start_chat: canStartChat,

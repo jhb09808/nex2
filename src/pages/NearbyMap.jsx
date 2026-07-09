@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock, MessageCircle } from "lucide-react";
+import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock, MessageCircle, Sparkles, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -15,6 +15,8 @@ import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
 import ProximityTier, { calculateProximityTier } from "@/components/nex/safety/ProximityTier";
+import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
+import RadarFilterChips from "@/components/nex/radar/RadarFilterChips";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
 
@@ -31,7 +33,7 @@ export default function NearbyMap() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ distance: 5, onlineOnly: false });
+  const [filters, setFilters] = useState({ distance: 0.5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
   const [showRadar, setShowRadar] = useState(false);
@@ -40,6 +42,11 @@ export default function NearbyMap() {
   const [capabilities, setCapabilities] = useState(null);
   const [paywallVariant, setPaywallVariant] = useState(null);
   const [chatApprovalUser, setChatApprovalUser] = useState(null);
+  const [myProfile, setMyProfile] = useState(null);
+  const [showRadarOnboarding, setShowRadarOnboarding] = useState(false);
+  const [viewMode, setViewMode] = useState("best");
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [expandedClusters, setExpandedClusters] = useState({});
 
   useEffect(() => {
     loadUsers();
@@ -78,9 +85,8 @@ export default function NearbyMap() {
     try {
       const res = await base44.functions.invoke("getSubscriptionCapabilities", {});
       setCapabilities(res.data);
-      if (res.data?.radius_miles != null) {
-        setFilters((prev) => ({ ...prev, distance: res.data.radius_miles }));
-      }
+      const userRadius = res.data?.radius_miles ?? 0.5;
+      setFilters((prev) => ({ ...prev, distance: userRadius }));
     } catch (err) {
       console.error(err);
     }
@@ -91,7 +97,18 @@ export default function NearbyMap() {
       const allUsers = await base44.entities.UserProfile.list("-created_date", 50);
       const me = await base44.auth.me();
       const myProfiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
-      const myPlan = myProfiles[0]?.plan || "free";
+      const myP = myProfiles[0];
+      setMyProfile(myP);
+      const myPlan = myP?.plan || "free";
+
+      if (!myP?.radar_onboarding_complete) {
+        setShowRadarOnboarding(true);
+      }
+
+      const defaultFilters = myP?.radar_filter_interests?.length > 0
+        ? myP.radar_filter_interests
+        : myP?.interests || [];
+      setActiveFilters(defaultFilters);
 
       let realUsers = allUsers.filter(
         (u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended && !u.invisible_mode
@@ -114,6 +131,55 @@ export default function NearbyMap() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRadarOnboardingComplete = async (selectedInterests) => {
+    setShowRadarOnboarding(false);
+    setActiveFilters(selectedInterests);
+    setExpandedClusters({});
+    if (myProfile) {
+      try {
+        await base44.entities.UserProfile.update(myProfile.id, {
+          radar_onboarding_complete: true,
+          radar_filter_interests: selectedInterests,
+        });
+        setMyProfile({ ...myProfile, radar_onboarding_complete: true, radar_filter_interests: selectedInterests });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const toggleFilter = (interest) => {
+    setActiveFilters((prev) =>
+      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
+    );
+    setExpandedClusters({});
+  };
+
+  const clearFilters = () => {
+    setActiveFilters([]);
+    setExpandedClusters({});
+  };
+
+  const handleExpandCluster = (key) => {
+    setExpandedClusters((prev) => ({ ...prev, [key]: true }));
+  };
+
+  const saveRadius = async () => {
+    if (myProfile && filters.distance !== (myProfile.radius_miles ?? 0.5)) {
+      try {
+        await base44.entities.UserProfile.update(myProfile.id, { radius_miles: filters.distance });
+        setMyProfile({ ...myProfile, radius_miles: filters.distance });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleCloseFilters = () => {
+    setShowFilters(false);
+    saveRadius();
   };
 
   // Combine real users with mock profiles centered on user's location
@@ -248,16 +314,84 @@ export default function NearbyMap() {
     iconAnchor: [8, 8],
   });
 
-  const tierRadius = capabilities?.radius_miles;
-  const filteredUsers = allProfiles.filter((u) => {
+  const createClusterIcon = (count) => {
+    return L.divIcon({
+      className: "",
+      html: `<div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;inset:-4px;border-radius:9999px;background:radial-gradient(circle,rgba(59,130,246,0.2) 30%,transparent 70%);animation:nex-marker-pulse 2s ease-in-out infinite;"></div>
+        <div style="position:relative;width:40px;height:40px;border-radius:9999px;background:linear-gradient(135deg,#3B82F6,#60A5FA);border:2px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-weight:700;font-size:14px;color:white;box-shadow:0 0 16px rgba(59,130,246,0.35);">${count}</div>
+      </div>`,
+      iconSize: [48, 48],
+      iconAnchor: [24, 24],
+    });
+  };
+
+  const tierCeiling = capabilities?.radius_miles_max;
+  const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 0.5;
+
+  // Filter by interest chips
+  const interestFiltered = activeFilters.length > 0
+    ? allProfiles.filter((u) => (u.interests || []).some((i) => activeFilters.includes(i)))
+    : allProfiles;
+
+  // Filter by radius and online status
+  const radiusFiltered = interestFiltered.filter((u) => {
     if (filters.onlineOnly && !u.is_online) return false;
-    if (tierRadius != null) {
-      const [uLat, uLng] = getUserLatLng(u);
-      const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
-      if (dist > tierRadius) return false;
-    }
+    const [uLat, uLng] = getUserLatLng(u);
+    const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
+    if (effectiveRadius != null && dist > effectiveRadius) return false;
     return true;
   });
+
+  // Rank by shared interests + proximity (Best Matches)
+  const ranked = radiusFiltered
+    .map((u) => {
+      const shared = (u.interests || []).filter((i) => activeFilters.includes(i)).length;
+      const [uLat, uLng] = getUserLatLng(u);
+      const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
+      return { ...u, _shared: shared, _dist: dist, _score: shared * 10 - dist };
+    })
+    .sort((a, b) => b._score - a._score);
+
+  const displayUsers = viewMode === "best" ? ranked.slice(0, 18) : ranked;
+
+  // Clustering: collapse 4+ users within a small area into a single marker
+  const CLUSTER_THRESHOLD = 0.02;
+  const CLUSTER_MIN = 4;
+
+  const computeClusters = (userList) => {
+    const result = [];
+    const assigned = new Set();
+    userList.forEach((user, i) => {
+      if (assigned.has(i)) return;
+      const [uLat, uLng] = getUserLatLng(user);
+      const group = [{ user, i }];
+      assigned.add(i);
+      userList.forEach((other, j) => {
+        if (assigned.has(j)) return;
+        const [oLat, oLng] = getUserLatLng(other);
+        if (distanceMiles(uLat, uLng, oLat, oLng) < CLUSTER_THRESHOLD) {
+          group.push({ user: other, j });
+          assigned.add(j);
+        }
+      });
+      if (group.length >= CLUSTER_MIN) {
+        const avgLat = group.reduce((s, g) => s + getUserLatLng(g.user)[0], 0) / group.length;
+        const avgLng = group.reduce((s, g) => s + getUserLatLng(g.user)[1], 0) / group.length;
+        const key = `${avgLat.toFixed(4)},${avgLng.toFixed(4)}`;
+        if (expandedClusters[key]) {
+          group.forEach((g) => result.push({ type: "single", user: g.user }));
+        } else {
+          result.push({ type: "cluster", count: group.length, lat: avgLat, lng: avgLng, key, users: group.map((g) => g.user) });
+        }
+      } else {
+        group.forEach((g) => result.push({ type: "single", user: g.user }));
+      }
+    });
+    return result;
+  };
+
+  const markers = computeClusters(displayUsers);
 
   if (areaRestricted?.restricted) {
     return (
@@ -283,27 +417,68 @@ export default function NearbyMap() {
 
   return (
     <div className="relative overflow-hidden" style={{ height: "100vh" }}>
-      {/* Header */}
-      <div className="absolute top-4 left-4 right-16 z-20 flex items-center justify-between safe-top">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowRadar(!showRadar)}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showRadar ? "gradient-blue" : "glass-strong"}`}
-          >
-            <Radar className="w-5 h-5 text-white/60" />
-          </button>
-          <h1 className="text-xl font-bold text-white">Nearby</h1>
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showFilters ? "gradient-blue" : "glass-strong"}`}
-        >
-          <Sliders className="w-5 h-5 text-white/60" />
-        </button>
-      </div>
+      {/* Header + controls — hidden during radar onboarding */}
+      {!showRadarOnboarding && (
+        <>
+          <div className="absolute top-4 left-4 right-16 z-20 flex items-center justify-between safe-top">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowRadar(!showRadar)}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showRadar ? "gradient-blue" : "glass-strong"}`}
+              >
+                <Radar className="w-5 h-5 text-white/60" />
+              </button>
+              <h1 className="text-xl font-bold text-white">Nearby</h1>
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showFilters ? "gradient-blue" : "glass-strong"}`}
+            >
+              <Sliders className="w-5 h-5 text-white/60" />
+            </button>
+          </div>
 
-      {/* Map */}
-      <div className="absolute inset-0 z-0">
+          {/* View Toggle */}
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20">
+            <div className="glass-strong rounded-full p-1 flex gap-1">
+              <button
+                onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "best" ? "gradient-blue text-white" : "text-white/40"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Best Matches
+              </button>
+              <button
+                onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "all" ? "gradient-blue text-white" : "text-white/40"
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" /> All Nearby
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Chips Dock */}
+          <div className="absolute top-[92px] left-0 right-0 z-20 px-4">
+            <RadarFilterChips
+              activeFilters={activeFilters}
+              onToggle={toggleFilter}
+              onClear={clearFilters}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Map — blurred and dimmed behind the onboarding overlay */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          filter: showRadarOnboarding ? "blur(16px) brightness(0.35)" : "none",
+          transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
         <MapContainer
           center={[userLocation.lat, userLocation.lng]}
           zoom={14}
@@ -320,15 +495,24 @@ export default function NearbyMap() {
           {/* Your location */}
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon} />
 
-          {/* User markers */}
-          {filteredUsers.map((user) => (
-            <Marker
-              key={user.id}
-              position={getUserLatLng(user)}
-              icon={createUserIcon(user)}
-              eventHandlers={{ click: () => setSelectedUser(user) }}
-            />
-          ))}
+          {/* Cluster + user markers */}
+          {markers.map((m, idx) =>
+            m.type === "cluster" ? (
+              <Marker
+                key={`cluster-${m.key}-${idx}`}
+                position={[m.lat, m.lng]}
+                icon={createClusterIcon(m.count)}
+                eventHandlers={{ click: () => handleExpandCluster(m.key) }}
+              />
+            ) : (
+              <Marker
+                key={m.user.id}
+                position={getUserLatLng(m.user)}
+                icon={createUserIcon(m.user)}
+                eventHandlers={{ click: () => setSelectedUser(m.user) }}
+              />
+            )
+          )}
         </MapContainer>
       </div>
 
@@ -345,7 +529,7 @@ export default function NearbyMap() {
             <GlassCard strong className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-white font-semibold">Filters</h3>
-                <button onClick={() => setShowFilters(false)}>
+                <button onClick={handleCloseFilters}>
                   <X className="w-5 h-5 text-white/40" />
                 </button>
               </div>
@@ -353,9 +537,9 @@ export default function NearbyMap() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs text-white/40 uppercase tracking-wider">
-                    Radius: {tierRadius === null ? "Global" : `${tierRadius} mi`}
+                    Radius: {tierCeiling == null ? "Global" : `${filters.distance} mi`}
                   </label>
-                  {tierRadius !== null && (
+                  {tierCeiling != null && (
                     <button
                       onClick={() => setPaywallVariant("radius")}
                       className="text-[10px] text-blue-400 font-medium flex items-center gap-1"
@@ -366,12 +550,13 @@ export default function NearbyMap() {
                 </div>
                 <input
                   type="range"
-                  min="1"
-                  max={tierRadius === null ? 100 : tierRadius}
+                  min="0.5"
+                  step="0.5"
+                  max={tierCeiling == null ? 100 : tierCeiling}
                   value={filters.distance}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    if (tierRadius !== null && val > tierRadius) {
+                    const val = parseFloat(e.target.value);
+                    if (tierCeiling != null && val > tierCeiling) {
                       setPaywallVariant("radius");
                       return;
                     }
@@ -564,6 +749,13 @@ export default function NearbyMap() {
         onReject={() => setChatApprovalUser(null)}
         onClose={() => setChatApprovalUser(null)}
       />
+
+      {/* Radar Onboarding Overlay */}
+      <AnimatePresence>
+        {showRadarOnboarding && (
+          <RadarOnboardingOverlay key="radar-onboarding" onComplete={handleRadarOnboardingComplete} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

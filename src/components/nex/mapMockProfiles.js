@@ -3,7 +3,7 @@
 
 const FIRST_NAMES = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Jamie", "Avery", "Quinn", "Sam", "Drew", "Reese"];
 const ANON_NAMES = ["Ghost", "Shadow", "Wanderer", "Nomad", "Echo", "Drift", "Phantom", "Mystery"];
-const INTERESTS = ["Music", "Tech", "Fitness", "Coffee", "Art", "Travel", "Gaming", "Food", "Photography", "Reading", "Hiking", "Design"];
+const INTERESTS = ["Music", "Technology", "Fitness", "Cooking", "Art", "Travel", "Gaming", "Food", "Photography", "Reading", "Hiking", "Design"];
 const PHOTO_SEEDS = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"];
 
 function pick(arr, seed) {
@@ -50,5 +50,10 @@ export function generateMockProfiles(center) {
     { id: "mock-full-4", username: "Noah", bio: "Music producer 🎧", visibility: "full_profile", is_online: false, is_verified: false, is_premium: true, interests: pickMany(INTERESTS, 3, 41), profile_photo: `https://images.unsplash.com/photo-1492562080023-ab3db95b948c?w=100&h=100&fit=crop`, lat: lat + 0.002, lng: lng + 0.021 },
     // Anonymous — offline
     { id: "mock-anon-4", username: "Drift", visibility: "anonymous", is_online: false, is_verified: false, is_premium: false, interests: [], lat: lat - 0.020, lng: lng + 0.008 },
+    // Cluster group — 4 profiles very close together
+    { id: "mock-cluster-1", username: "Ethan", bio: "Crypto trader", visibility: "full_profile", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 3, 47), profile_photo: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop`, lat: lat + 0.009, lng: lng + 0.009 },
+    { id: "mock-cluster-2", username: "Zoe", bio: "Yoga instructor", visibility: "full_profile", is_online: true, is_verified: true, is_premium: false, interests: pickMany(INTERESTS, 2, 53), profile_photo: `https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop`, lat: lat + 0.00905, lng: lng + 0.00895 },
+    { id: "mock-cluster-3", username: "Mason", visibility: "first_name", is_online: true, is_verified: false, is_premium: false, interests: pickMany(INTERESTS, 3, 59), profile_photo: `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop`, lat: lat + 0.00895, lng: lng + 0.00905 },
+    { id: "mock-cluster-4", username: "Aria", bio: "Photographer", visibility: "full_profile", is_online: false, is_verified: false, is_premium: true, interests: pickMany(INTERESTS, 2, 61), profile_photo: `https://images.unsplash.com/photo-1534528741775-53994a68a10c?w=100&h=100&fit=crop`, lat: lat + 0.009, lng: lng + 0.009 },
   ];
 }
