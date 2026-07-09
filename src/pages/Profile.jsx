@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
+import { getUserNumber } from "@/components/nex/userDisplay";
 import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
 import NetworkingStreak from "@/components/nex/ai/NetworkingStreak";
 import NetworkRankCard from "@/components/nex/ai/NetworkRankCard";
@@ -68,6 +69,7 @@ export default function Profile() {
           <h2 className="text-xl font-bold text-white">{profile?.username}</h2>
           {profile?.is_verified && <Shield className="w-4 h-4 text-blue-400" />}
         </div>
+        <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(profile)}</p>
         {badge && (
           <div className="flex items-center gap-1 mb-2">
             <badge.icon className={`w-3.5 h-3.5 ${badge.color}`} />
