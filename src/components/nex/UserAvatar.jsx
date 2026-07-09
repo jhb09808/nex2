@@ -49,7 +49,7 @@ export default function UserAvatar({ src, size = "md", isOnline, plan = "free", 
   };
 
   const tier = TIER_STYLES[plan] || TIER_STYLES.free;
-  const showPhoto = plan === "platinum" && showProfilePhoto && src;
+  const showPhoto = (plan === "platinum" || plan === "pro") && showProfilePhoto && src;
 
   return (
     <div className={`relative ${className}`}>
