@@ -1,11 +1,43 @@
 import React, { useMemo } from "react";
 
-const TIER_COLORS = {
-  free: { bg: "rgba(255,255,255,0.15)", ring: "rgba(255,255,255,0.25)", glow: "rgba(255,255,255,0.08)" },
-  plus: { bg: "#3B82F6", ring: "rgba(96,165,250,0.5)", glow: "rgba(59,130,246,0.2)" },
-  pro: { bg: "#F59E0B", ring: "rgba(251,191,36,0.5)", glow: "rgba(245,158,11,0.2)" },
-  platinum: { bg: "#22D3EE", ring: "rgba(34,211,238,0.5)", glow: "rgba(34,211,238,0.2)" },
+// Interest → blip color mapping (reused from profile card coding)
+// green, orange, amber, purple, blue palette
+const INTEREST_COLORS = {
+  Technology: "#38bdf8",
+  Fitness: "#f97316",
+  Business: "#38bdf8",
+  Cars: "#f97316",
+  Nightlife: "#a855f7",
+  Photography: "#a855f7",
+  Travel: "#38bdf8",
+  Food: "#fbbf24",
+  Creators: "#a855f7",
+  Startups: "#38bdf8",
+  Sports: "#4ade80",
+  Music: "#a855f7",
+  Art: "#a855f7",
+  Gaming: "#4ade80",
+  Fashion: "#fbbf24",
+  Movies: "#a855f7",
+  Reading: "#4ade80",
+  Hiking: "#38bdf8",
+  Yoga: "#4ade80",
+  Cooking: "#fbbf24",
+  Design: "#a855f7",
+  Crypto: "#38bdf8",
+  Science: "#38bdf8",
+  Pets: "#4ade80",
 };
+
+const DEFAULT_BLIP_COLOR = "#38bdf8";
+
+function getBlipColor(user) {
+  const interests = user.interests || [];
+  for (const interest of interests) {
+    if (INTEREST_COLORS[interest]) return INTEREST_COLORS[interest];
+  }
+  return DEFAULT_BLIP_COLOR;
+}
 
 function hashStr(s) {
   let h = 0;
@@ -33,107 +65,113 @@ export default function RadarScope({
       if (m.type === "cluster") {
         const dist = distanceMiles(center.lat, center.lng, m.lat, m.lng);
         const angle = Math.atan2(m.lng - center.lng, m.lat - center.lat);
-        const fraction = Math.min(dist / radius, 0.95);
+        const fraction = Math.min(dist / radius, 0.92);
         const r = fraction * 44;
         return { ...m, x: 50 + Math.sin(angle) * r, y: 50 - Math.cos(angle) * r };
       }
       const [uLat, uLng] = getUserLatLng(m.user);
       const dist = distanceMiles(center.lat, center.lng, uLat, uLng);
       const angle = Math.atan2(uLng - center.lng, uLat - center.lat);
-      const fraction = Math.min(dist / radius, 0.95);
+      const fraction = Math.min(dist / radius, 0.92);
       const r = fraction * 44;
       // Privacy: deterministic jitter so exact position is obscured
       const hash = hashStr(m.user.id || "x");
-      const jx = ((hash % 100) / 100 - 0.5) * 5;
-      const jy = (((hash * 31) % 100) / 100 - 0.5) * 5;
+      const jx = ((hash % 100) / 100 - 0.5) * 4;
+      const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
+      const color = getBlipColor(m.user);
+      const pulseDelay = (hash % 40) / 10; // 0–4s staggered pulse
       return {
         ...m,
-        x: Math.max(6, Math.min(94, 50 + Math.sin(angle) * r + jx)),
-        y: Math.max(6, Math.min(94, 50 - Math.cos(angle) * r + jy)),
+        color,
+        pulseDelay,
+        x: Math.max(8, Math.min(92, 50 + Math.sin(angle) * r + jx)),
+        y: Math.max(8, Math.min(92, 50 - Math.cos(angle) * r + jy)),
       };
     });
   }, [markers, center, radius, getUserLatLng, distanceMiles]);
 
   const rings = [0.25, 0.5, 0.75, 1];
+  const spokes = Array.from({ length: 8 }, (_, i) => i * 45);
 
   return (
     <div
       className="absolute inset-0 z-0 flex items-center justify-center"
       style={{
-        background: "radial-gradient(circle at center, hsl(220,30%,6%) 0%, hsl(0,0%,2%) 80%)",
+        background: "radial-gradient(circle at center, hsl(210,20%,5%) 0%, hsl(0,0%,2%) 75%)",
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
       }}
     >
       <div className="relative w-full h-full max-w-[560px] max-h-[560px] aspect-square">
-        {/* Faint grid */}
+        {/* Scope circle background */}
         <div
-          className="absolute inset-0 rounded-full opacity-[0.04]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(59,130,246,1) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,1) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
+          className="absolute inset-0 rounded-full"
+          style={{ background: "radial-gradient(circle at center, hsl(200,30%,3%) 0%, hsl(0,0%,0%) 100%)" }}
         />
 
-        {/* Range rings */}
+        {/* Concentric range rings — perfect circles, evenly spaced, teal */}
         {rings.map((s, i) => (
-          <div key={i} className="absolute rounded-full border border-blue-500/[0.06]" style={{ inset: `${(1 - s) * 50}%` }} />
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{ inset: `${(1 - s) * 50}%`, border: "1px solid hsl(187, 39%, 27%)" }}
+          />
         ))}
 
-        {/* Crosshair lines */}
-        <div className="absolute top-1/2 left-0 right-0 h-px bg-blue-500/[0.05]" />
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-blue-500/[0.05]" />
-
-        {/* Diagonal crosshairs */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <line x1="0" y1="0" x2="100" y2="100" stroke="rgb(59,130,246)" strokeWidth="0.2" />
-          <line x1="100" y1="0" x2="0" y2="100" stroke="rgb(59,130,246)" strokeWidth="0.2" />
+        {/* Radial spokes — 8 lines from center, faint teal */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {spokes.map((deg, i) => {
+            const rad = (deg * Math.PI) / 180;
+            const x2 = 50 + Math.sin(rad) * 50;
+            const y2 = 50 - Math.cos(rad) * 50;
+            return (
+              <line
+                key={i}
+                x1="50"
+                y1="50"
+                x2={x2}
+                y2={y2}
+                stroke="hsl(187, 39%, 27%)"
+                strokeWidth="0.15"
+                opacity="0.7"
+              />
+            );
+          })}
         </svg>
 
-        {/* Rotating sweep */}
+        {/* Rotating sweep with fading afterglow trail */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: "conic-gradient(from 0deg, transparent 0deg, rgba(59,130,246,0.06) 30deg, rgba(59,130,246,0.12) 55deg, transparent 90deg)",
-            animation: "radar-sweep 4s linear infinite",
+            background:
+              "conic-gradient(from 0deg, transparent 0deg, hsla(187, 60%, 45%, 0.02) 280deg, hsla(187, 60%, 45%, 0.06) 320deg, hsla(187, 70%, 55%, 0.14) 350deg, hsla(187, 80%, 60%, 0.22) 360deg, transparent 360deg)",
+            animation: "radar-sweep 4.5s linear infinite",
+            maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
+            WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
           }}
         />
 
-        {/* Cardinal markers */}
-        {["N", "E", "S", "W"].map((dir, i) => {
-          const angle = i * 90;
-          const rad = (angle * Math.PI) / 180;
-          const x = 50 + Math.sin(rad) * 48;
-          const y = 50 - Math.cos(rad) * 48;
-          return (
-            <span key={dir} className="absolute text-[9px] font-mono text-blue-500/25 font-bold" style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}>
-              {dir}
-            </span>
-          );
-        })}
+        {/* Bright leading edge of sweep */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: "conic-gradient(from 0deg, transparent 358deg, hsla(187, 90%, 65%, 0.35) 360deg, transparent 360deg)",
+            animation: "radar-sweep 4.5s linear infinite",
+            maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
+            WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
+          }}
+        />
 
-        {/* Range labels */}
-        {rings.map((s, i) => {
-          if (i === 0) return null;
-          const inset = (1 - s) * 50;
-          const dist = (radius * s).toFixed(radius < 1 ? 2 : 1);
-          return (
-            <span key={i} className="absolute left-1/2 -translate-x-1/2 text-[8px] font-mono text-blue-500/20" style={{ top: `${inset}%`, marginTop: "-5px" }}>
-              {dist}mi
-            </span>
-          );
-        })}
-
-        {/* Center (you) */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <div className="relative">
-            <div className="absolute inset-[-12px] rounded-full bg-blue-500/10 animate-ping" style={{ animationDuration: "3s" }} />
-            <div className="absolute inset-[-6px] rounded-full bg-blue-500/20" />
-            <div className="relative w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-blue-600" style={{ boxShadow: "0 0 16px rgba(59,130,246,0.7)" }} />
+        {/* Center user marker — fixed dot with thin ring */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute w-5 h-5 rounded-full border border-white/30" />
+            <div className="absolute w-5 h-5 rounded-full bg-white/5 animate-ping" style={{ animationDuration: "3s" }} />
+            <div className="relative w-2 h-2 rounded-full bg-white" style={{ boxShadow: "0 0 10px rgba(255,255,255,0.8)" }} />
           </div>
         </div>
 
-        {/* Blips */}
+        {/* Contact blips — glowing, colored by interest, staggered pulse */}
         {blips.map((blip, idx) => (
           <div
             key={blip.type === "cluster" ? `cluster-${blip.key}-${idx}` : blip.user.id}
@@ -162,45 +200,41 @@ export default function RadarScope({
 function Blip({ blip, onUserClick }) {
   const user = blip.user;
   const isAnonymous = user.visibility === "anonymous";
-  const plan = user.plan || "free";
-  const tier = TIER_COLORS[plan] || TIER_COLORS.free;
-  const isOnline = user.is_online;
-  const isVerified = user.is_verified;
-  const isPlatinum = plan === "platinum";
-  const showPhoto = isPlatinum && user.show_profile_photo && user.profile_photo;
-  const initial = (user.username || "?").charAt(0).toUpperCase();
+  const color = blip.color || DEFAULT_BLIP_COLOR;
+
+  if (isAnonymous) {
+    return (
+      <button onClick={() => onUserClick(user)} className="active:scale-90 transition-transform">
+        <div className="relative w-3 h-3 flex items-center justify-center">
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{ background: color, opacity: 0.2, animation: `ai-dot-pulse 2.5s ease-in-out ${blip.pulseDelay}s infinite` }}
+          />
+          <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+        </div>
+      </button>
+    );
+  }
 
   return (
     <button onClick={() => onUserClick(user)} className="active:scale-90 transition-transform">
-      {isAnonymous ? (
-        <div className="relative w-7 h-7 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full border border-blue-400/30 animate-ping" style={{ animationDuration: "3s" }} />
-          <div className="absolute inset-1.5 rounded-full border border-blue-400/20" />
-          <div className="relative w-1.5 h-1.5 rounded-full bg-blue-400/50" />
-        </div>
-      ) : (
-        <div className="relative">
-          {isVerified && <div className="absolute inset-[-4px] rounded-full bg-amber-400/20 blur-md" />}
-          {isOnline && !isVerified && <div className="absolute inset-[-4px] rounded-full bg-blue-500/15 blur-md animate-pulse" />}
-          <div
-            className="relative w-7 h-7 rounded-full flex items-center justify-center overflow-hidden border-2"
-            style={{
-              borderColor: isVerified ? "rgba(250,204,21,0.6)" : tier.ring,
-              background: showPhoto ? undefined : tier.bg,
-              boxShadow: `0 0 8px ${tier.glow}`,
-            }}
-          >
-            {showPhoto ? (
-              <img src={user.profile_photo} alt="" className="w-full h-full object-cover" />
-            ) : user.visibility === "first_name" ? (
-              <span className="text-[11px] font-bold text-white/90">{initial}</span>
-            ) : null}
-          </div>
-          {user.is_premium && (
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 border border-black/80" />
-          )}
-        </div>
-      )}
+      <div className="relative w-3 h-3 flex items-center justify-center">
+        {/* Pulsing glow halo */}
+        <div
+          className="absolute inset-[-3px] rounded-full"
+          style={{ background: color, opacity: 0.15, filter: "blur(4px)", animation: `ai-dot-pulse 2.8s ease-in-out ${blip.pulseDelay}s infinite` }}
+        />
+        {/* Inner glow */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{ background: color, opacity: 0.3, filter: "blur(2px)" }}
+        />
+        {/* Core dot */}
+        <div
+          className="relative w-2 h-2 rounded-full"
+          style={{ background: color, boxShadow: `0 0 8px ${color}, 0 0 4px ${color}` }}
+        />
+      </div>
     </button>
   );
 }
