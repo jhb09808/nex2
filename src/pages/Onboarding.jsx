@@ -60,6 +60,8 @@ export default function Onboarding() {
         interests,
         visibility,
         onboarding_complete: true,
+        radar_onboarding_complete: true,
+        radar_filter_interests: interests,
         is_online: true,
         badges: [],
         blocked_users: [],
