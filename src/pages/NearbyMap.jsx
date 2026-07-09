@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sliders, EyeOff, Shield, Crown, BadgeCheck, Radar, MapPin, Lock, MessageCircle, Sparkles, Users } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
-import LiveRadar from "@/components/nex/home/LiveRadar";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
@@ -26,7 +25,6 @@ export default function NearbyMap() {
   const [filters, setFilters] = useState({ distance: 0.5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
-  const [showRadar, setShowRadar] = useState(false);
   const [areaRestricted, setAreaRestricted] = useState(null);
   const [safetyUser, setSafetyUser] = useState(null);
   const [capabilities, setCapabilities] = useState(null);
@@ -43,6 +41,12 @@ export default function NearbyMap() {
     loadUsers();
     checkLocation();
     loadCapabilities();
+  }, []);
+
+  useEffect(() => {
+    const openFilters = () => setShowFilters(true);
+    window.addEventListener("nex-open-filters", openFilters);
+    return () => window.removeEventListener("nex-open-filters", openFilters);
   }, []);
 
   // Location refreshes only on app open — no continuous streaming
@@ -285,22 +289,8 @@ export default function NearbyMap() {
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
-          <div className="absolute top-4 left-4 right-16 z-20 flex items-center justify-between safe-top">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowRadar(!showRadar)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showRadar ? "gradient-blue" : "glass-strong"}`}
-              >
-                <Radar className="w-5 h-5 text-white/60" />
-              </button>
-              <h1 className="text-xl font-bold text-white">Nearby</h1>
-            </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${showFilters ? "gradient-blue" : "glass-strong"}`}
-            >
-              <Sliders className="w-5 h-5 text-white/60" />
-            </button>
+          <div className="absolute top-4 left-4 right-16 z-20 flex items-center safe-top">
+            <h1 className="text-xl font-bold text-white">Nearby</h1>
           </div>
 
           {/* View Toggle */}
@@ -450,21 +440,6 @@ export default function NearbyMap() {
                 )}
               </div>
             </GlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Live Radar Panel */}
-      <AnimatePresence>
-        {showRadar && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute bottom-24 left-0 right-0 z-30 px-4"
-          >
-            <LiveRadar nearbyUsers={allProfiles} />
           </motion.div>
         )}
       </AnimatePresence>

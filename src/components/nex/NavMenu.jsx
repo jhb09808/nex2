@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond } from "lucide-react";
+import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, Sliders } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const baseNavItems = [
@@ -34,6 +34,7 @@ export default function NavMenu() {
     }
   };
 
+  const isMapRoute = location.pathname === "/" || location.pathname === "/map";
   const navItems = isPlatinum
     ? [
         ...baseNavItems.slice(0, 2),
@@ -79,6 +80,21 @@ export default function NavMenu() {
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="absolute top-16 right-4 z-[60] w-56 ai-card rounded-2xl p-2 overflow-hidden"
             >
+              {isMapRoute && (
+                <>
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("nex-open-filters"));
+                      setOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/70 hover:bg-white/5 w-full transition-colors"
+                  >
+                    <Sliders className="w-4 h-4" strokeWidth={1.5} />
+                    <span className="text-sm font-medium">Filters</span>
+                  </button>
+                  <div className="h-px bg-white/5 my-1" />
+                </>
+              )}
               {navItems.map((item, i) => {
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
