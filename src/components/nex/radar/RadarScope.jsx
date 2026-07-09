@@ -1,35 +1,44 @@
 import React, { useMemo, useRef, useEffect } from "react";
 
-// Interest → blip color mapping (reused from profile card coding)
-// green, orange, amber, purple, blue palette
-const INTEREST_COLORS = {
-  Technology: "#38bdf8",
-  Fitness: "#f97316",
-  Business: "#38bdf8",
-  Cars: "#f97316",
-  Nightlife: "#a855f7",
-  Photography: "#a855f7",
-  Travel: "#38bdf8",
-  Food: "#fbbf24",
-  Creators: "#a855f7",
-  Startups: "#38bdf8",
-  Sports: "#4ade80",
-  Music: "#a855f7",
-  Art: "#a855f7",
-  Gaming: "#4ade80",
-  Fashion: "#fbbf24",
-  Movies: "#a855f7",
-  Reading: "#4ade80",
-  Hiking: "#38bdf8",
-  Yoga: "#4ade80",
-  Cooking: "#fbbf24",
-  Design: "#a855f7",
-  Crypto: "#38bdf8",
-  Science: "#38bdf8",
-  Pets: "#4ade80",
+// Exact palette from the design spec
+const PALETTE = {
+  bg: "#05080a",
+  grid: "#0b2024",
+  green: "#2ecc71",
+  blue: "#3498db",
+  orange: "#e67e22",
+  purple: "#9b59b6",
+  white: "#ffffff",
 };
 
-const DEFAULT_BLIP_COLOR = "#38bdf8";
+const INTEREST_COLORS = {
+  Technology: PALETTE.blue,
+  Fitness: PALETTE.orange,
+  Business: PALETTE.blue,
+  Cars: PALETTE.orange,
+  Nightlife: PALETTE.purple,
+  Photography: PALETTE.purple,
+  Travel: PALETTE.blue,
+  Food: PALETTE.orange,
+  Creators: PALETTE.purple,
+  Startups: PALETTE.blue,
+  Sports: PALETTE.green,
+  Music: PALETTE.purple,
+  Art: PALETTE.purple,
+  Gaming: PALETTE.green,
+  Fashion: PALETTE.orange,
+  Movies: PALETTE.purple,
+  Reading: PALETTE.green,
+  Hiking: PALETTE.green,
+  Yoga: PALETTE.green,
+  Cooking: PALETTE.orange,
+  Design: PALETTE.purple,
+  Crypto: PALETTE.blue,
+  Science: PALETTE.blue,
+  Pets: PALETTE.green,
+};
+
+const DEFAULT_BLIP_COLOR = PALETTE.blue;
 
 function getBlipColor(user) {
   const interests = user.interests || [];
@@ -61,11 +70,9 @@ export default function RadarScope({
   onZoomChange,
 }) {
   const baseRadius = effectiveRadius || 1;
-  // Zoom shrinks the visible radius — blips spread out, distant ones leave the scope
   const visibleRadius = baseRadius / zoom;
 
   const blips = useMemo(() => {
-    // Compute raw polar positions, filtering out blips beyond the zoomed-in radius
     const raw = [];
     for (const m of markers) {
       if (m.type === "cluster") {
@@ -82,7 +89,6 @@ export default function RadarScope({
         const angle = Math.atan2(uLng - center.lng, uLat - center.lat);
         const fraction = Math.min(dist / visibleRadius, 0.92);
         const r = fraction * 44;
-        // Privacy: deterministic jitter so exact position is obscured
         const hash = hashStr(m.user.id || "x");
         const jx = ((hash % 100) / 100 - 0.5) * 4;
         const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
@@ -98,8 +104,7 @@ export default function RadarScope({
       }
     }
 
-    // Collision avoidance — nudge overlapping blips apart so they're tappable
-    const MIN_DIST = 5; // min % distance between blip centers
+    const MIN_DIST = 5;
     for (let iter = 0; iter < 4; iter++) {
       for (let i = 0; i < raw.length; i++) {
         for (let j = i + 1; j < raw.length; j++) {
@@ -124,7 +129,6 @@ export default function RadarScope({
   const rings = [0.25, 0.5, 0.75, 1];
   const spokes = Array.from({ length: 8 }, (_, i) => i * 45);
 
-  // Pinch-to-zoom gesture handling
   const scopeRef = useRef(null);
   const pinchRef = useRef(null);
 
@@ -158,7 +162,6 @@ export default function RadarScope({
     onZoomChange((z) => Math.max(1, Math.min(5, Math.round((z + delta) * 10) / 10)));
   };
 
-  // Attach non-passive touchmove so preventDefault works
   useEffect(() => {
     const el = scopeRef.current;
     if (!el) return;
@@ -174,29 +177,40 @@ export default function RadarScope({
       onWheel={onWheel}
       className="absolute inset-0 z-0 flex items-center justify-center"
       style={{
-        background: "radial-gradient(circle at center, hsl(210,20%,5%) 0%, hsl(0,0%,2%) 75%)",
+        background: `radial-gradient(circle at center, ${PALETTE.bg} 0%, #020405 75%)`,
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
         touchAction: "none",
       }}
     >
+      {/* Top descriptive text */}
+      <div className="absolute top-20 left-0 right-0 z-20 text-center pointer-events-none px-6">
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase" style={{ color: "#7f8c8d" }}>
+          Signal Scope · No Map, No Streets
+        </p>
+        <p className="text-[10px] mt-1" style={{ color: "#5d6d7e" }}>
+          Range shown is approximate, not exact
+        </p>
+      </div>
+
+      {/* Radar scope circle */}
       <div className="relative w-full h-full max-w-[560px] max-h-[560px] aspect-square">
-        {/* Scope circle background */}
+        {/* Scope background */}
         <div
           className="absolute inset-0 rounded-full"
-          style={{ background: "radial-gradient(circle at center, hsl(200,30%,3%) 0%, hsl(0,0%,0%) 100%)" }}
+          style={{ background: `radial-gradient(circle at center, #060a0c 0%, #020405 100%)` }}
         />
 
-        {/* Concentric range rings — perfect circles, evenly spaced, teal */}
+        {/* Concentric range rings */}
         {rings.map((s, i) => (
           <div
             key={i}
             className="absolute rounded-full"
-            style={{ inset: `${(1 - s) * 50}%`, border: "1px solid hsl(187, 39%, 27%)" }}
+            style={{ inset: `${(1 - s) * 50}%`, border: `1px solid ${PALETTE.grid}` }}
           />
         ))}
 
-        {/* Radial spokes — 8 lines from center, faint teal */}
+        {/* Radial spokes */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           {spokes.map((deg, i) => {
             const rad = (deg * Math.PI) / 180;
@@ -209,47 +223,35 @@ export default function RadarScope({
                 y1="50"
                 x2={x2}
                 y2={y2}
-                stroke="hsl(187, 39%, 27%)"
+                stroke={PALETTE.grid}
                 strokeWidth="0.15"
-                opacity="0.7"
+                opacity="0.8"
               />
             );
           })}
         </svg>
 
-        {/* Rotating sweep with fading afterglow trail */}
+        {/* Sweep wedge — dark teal semi-transparent */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background:
-              "conic-gradient(from 0deg, transparent 0deg, hsla(187, 60%, 45%, 0.02) 280deg, hsla(187, 60%, 45%, 0.06) 320deg, hsla(187, 70%, 55%, 0.14) 350deg, hsla(187, 80%, 60%, 0.22) 360deg, transparent 360deg)",
-            animation: "radar-sweep 4.5s linear infinite",
+            background: `conic-gradient(from 0deg, transparent 0deg, ${PALETTE.grid}00 270deg, ${PALETTE.grid}33 340deg, ${PALETTE.grid}66 358deg, ${PALETTE.grid}99 360deg, transparent 360deg)`,
+            animation: "radar-sweep 5s linear infinite",
             maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
             WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
           }}
         />
 
-        {/* Bright leading edge of sweep */}
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: "conic-gradient(from 0deg, transparent 358deg, hsla(187, 90%, 65%, 0.35) 360deg, transparent 360deg)",
-            animation: "radar-sweep 4.5s linear infinite",
-            maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
-            WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
-          }}
-        />
-
-        {/* Center user marker — fixed dot with thin ring */}
+        {/* Center marker — white dot */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="relative flex items-center justify-center">
-            <div className="absolute w-5 h-5 rounded-full border border-white/30" />
-            <div className="absolute w-5 h-5 rounded-full bg-white/5 animate-ping" style={{ animationDuration: "3s" }} />
-            <div className="relative w-2 h-2 rounded-full bg-white" style={{ boxShadow: "0 0 10px rgba(255,255,255,0.8)" }} />
+            <div className="absolute w-4 h-4 rounded-full border border-white/20" />
+            <div className="absolute w-4 h-4 rounded-full bg-white/5 animate-ping" style={{ animationDuration: "3s" }} />
+            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.white, boxShadow: `0 0 8px ${PALETTE.white}` }} />
           </div>
         </div>
 
-        {/* Contact blips — glowing, colored by interest, staggered pulse */}
+        {/* Blips */}
         {blips.map((blip, idx) => (
           <div
             key={blip.type === "cluster" ? `cluster-${blip.key}-${idx}` : blip.user.id}
@@ -258,9 +260,9 @@ export default function RadarScope({
           >
             {blip.type === "cluster" ? (
               <button onClick={() => onClusterClick(blip.key)} className="active:scale-90 transition-transform">
-                <div className="relative w-9 h-9 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-blue-500/15 animate-pulse" />
-                  <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border border-white/20 flex items-center justify-center text-white text-xs font-bold" style={{ boxShadow: "0 0 10px rgba(59,130,246,0.4)" }}>
+                <div className="relative w-8 h-8 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: PALETTE.blue, opacity: 0.12 }} />
+                  <div className="relative w-6 h-6 rounded-full border border-white/15 flex items-center justify-center text-white text-[10px] font-bold" style={{ background: `${PALETTE.blue}33`, boxShadow: `0 0 8px ${PALETTE.blue}66` }}>
                     {blip.count}
                   </div>
                 </div>
@@ -271,6 +273,13 @@ export default function RadarScope({
           </div>
         ))}
       </div>
+
+      {/* Bottom descriptive text */}
+      <div className="absolute bottom-20 left-0 right-0 z-20 text-center pointer-events-none px-8">
+        <p className="text-[10px] leading-relaxed" style={{ color: "#7f8c8d" }}>
+          No streets, no landmarks, no precise position — just relative range on a closed scope.
+        </p>
+      </div>
     </div>
   );
 }
@@ -280,37 +289,18 @@ function Blip({ blip, onUserClick }) {
   const isAnonymous = user.visibility === "anonymous";
   const color = blip.color || DEFAULT_BLIP_COLOR;
 
-  if (isAnonymous) {
-    return (
-      <button onClick={() => onUserClick(user)} className="active:scale-90 transition-transform">
-        <div className="relative w-3 h-3 flex items-center justify-center">
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{ background: color, opacity: 0.2, animation: `ai-dot-pulse 2.5s ease-in-out ${blip.pulseDelay}s infinite` }}
-          />
-          <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
-        </div>
-      </button>
-    );
-  }
-
   return (
     <button onClick={() => onUserClick(user)} className="active:scale-90 transition-transform">
-      <div className="relative w-3 h-3 flex items-center justify-center">
-        {/* Pulsing glow halo */}
+      <div className="relative w-2.5 h-2.5 flex items-center justify-center">
+        {/* Glow halo */}
         <div
-          className="absolute inset-[-3px] rounded-full"
-          style={{ background: color, opacity: 0.15, filter: "blur(4px)", animation: `ai-dot-pulse 2.8s ease-in-out ${blip.pulseDelay}s infinite` }}
-        />
-        {/* Inner glow */}
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{ background: color, opacity: 0.3, filter: "blur(2px)" }}
+          className="absolute inset-[-2px] rounded-full"
+          style={{ background: color, opacity: 0.15, filter: "blur(3px)", animation: `ai-dot-pulse 2.8s ease-in-out ${blip.pulseDelay}s infinite` }}
         />
         {/* Core dot */}
         <div
-          className="relative w-2 h-2 rounded-full"
-          style={{ background: color, boxShadow: `0 0 8px ${color}, 0 0 4px ${color}` }}
+          className="relative w-1.5 h-1.5 rounded-full"
+          style={{ background: color, boxShadow: `0 0 6px ${color}, 0 0 3px ${color}` }}
         />
       </div>
     </button>
