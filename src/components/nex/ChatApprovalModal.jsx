@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Clock, Loader2 } from "lucide-react";
+import { X, Check, Clock } from "lucide-react";
 import UserAvatar from "@/components/nex/UserAvatar";
-import { EyeOff, BadgeCheck, Crown, Shield } from "lucide-react";
+import { EyeOff, BadgeCheck, Crown } from "lucide-react";
 
 const COUNTDOWN_SECONDS = 10;
 
 export default function ChatApprovalModal({ user, onAccept, onReject, onClose }) {
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
   const [status, setStatus] = useState("waiting"); // waiting | accepted | rejected | timeout
+  const statusRef = useRef("waiting");
   const timersRef = useRef([]);
 
   const getDisplayName = (u) => {
@@ -17,56 +18,63 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
     return u.username;
   };
 
-  useEffect(() => {
-    // Simulate the other person responding at a random time between 3-9 seconds
-    const responseDelay = (Math.random() * 6 + 3) * 1000;
-    const willAccept = Math.random() > 0.3; // 70% accept rate
+  const updateStatus = (newStatus) => {
+    statusRef.current = newStatus;
+    setStatus(newStatus);
+  };
 
-    const responseTimer = setTimeout(() => {
-      setStatus(willAccept ? "accepted" : "rejected");
-      clearTimers();
-      if (willAccept) {
-        const navTimer = setTimeout(() => onAccept(), 1200);
-        timersRef.current.push(navTimer);
-      } else {
-        const closeTimer = setTimeout(() => onReject(), 1500);
-        timersRef.current.push(closeTimer);
-      }
-    }, responseDelay);
-    timersRef.current.push(responseTimer);
-
-    // Countdown ticker
-    const tickTimer = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(tickTimer);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    timersRef.current.push(tickTimer);
-
-    // Timeout — no response in 10s
-    const timeoutTimer = setTimeout(() => {
-      if (status === "waiting") {
-        setStatus("timeout");
-        const closeT = setTimeout(() => onReject(), 2000);
-        timersRef.current.push(closeT);
-      }
-    }, COUNTDOWN_SECONDS * 1000);
-    timersRef.current.push(timeoutTimer);
-
-    return clearTimers;
-  }, []);
-
-  const clearTimers = () => {
+  const clearAllTimers = () => {
     timersRef.current.forEach((t) => {
       clearTimeout(t);
       clearInterval(t);
     });
     timersRef.current = [];
   };
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Determine the outcome: 55% accept, 30% reject, 15% timeout (no response)
+    const roll = Math.random();
+    let outcome;
+    if (roll < 0.55) outcome = "accepted";
+    else if (roll < 0.85) outcome = "rejected";
+    else outcome = "timeout";
+
+    // Simulated response delay — between 4-9 seconds (always within the 10s window)
+    const responseDelay = outcome === "timeout"
+      ? COUNTDOWN_SECONDS * 1000
+      : (Math.random() * 5 + 4) * 1000;
+
+    // Countdown ticker — runs every second
+    const tickTimer = setInterval(() => {
+      setSecondsLeft((s) => Math.max(0, s - 1));
+    }, 1000);
+    timersRef.current.push(tickTimer);
+
+    // Response / timeout timer
+    const responseTimer = setTimeout(() => {
+      if (statusRef.current !== "waiting") return;
+      clearAllTimers();
+
+      if (outcome === "accepted") {
+        updateStatus("accepted");
+        const navTimer = setTimeout(() => onAccept(), 1300);
+        timersRef.current.push(navTimer);
+      } else if (outcome === "rejected") {
+        updateStatus("rejected");
+        const closeTimer = setTimeout(() => onReject(), 1800);
+        timersRef.current.push(closeTimer);
+      } else {
+        updateStatus("timeout");
+        const closeTimer = setTimeout(() => onReject(), 2200);
+        timersRef.current.push(closeTimer);
+      }
+    }, responseDelay);
+    timersRef.current.push(responseTimer);
+
+    return clearAllTimers;
+  }, [user]);
 
   const progress = ((COUNTDOWN_SECONDS - secondsLeft) / COUNTDOWN_SECONDS) * 100;
 
@@ -86,7 +94,15 @@ export default function ChatApprovalModal({ user, onAccept, onReject, onClose })
         </div>
       );
     }
-    return <UserAvatar src={user.profile_photo} size="lg" isOnline={user.is_online} />;
+    return (
+      <UserAvatar
+        src={user.profile_photo}
+        size="lg"
+        isOnline={user.is_online}
+        plan={user.plan}
+        showProfilePhoto={user.show_profile_photo}
+      />
+    );
   };
 
   if (!user) return null;
