@@ -224,9 +224,9 @@ export default function NearbyMap() {
 
   const displayUsers = viewMode === "best" ? ranked.slice(0, 15) : ranked;
 
-  // Clustering: collapse 4+ users within a small area into a single marker
-  const CLUSTER_THRESHOLD = 0.02;
-  const CLUSTER_MIN = 4;
+  // Smart clustering: threshold shrinks with zoom so blips spread out when zoomed in
+  const CLUSTER_THRESHOLD = 0.02 / zoom;
+  const CLUSTER_MIN = 3;
 
   const computeClusters = (userList) => {
     const result = [];
@@ -342,6 +342,7 @@ export default function NearbyMap() {
         onClusterClick={(key) => handleExpandCluster(key)}
         blurred={showRadarOnboarding}
         zoom={zoom}
+        onZoomChange={setZoom}
       />
 
       {/* Zoom controls */}
@@ -353,7 +354,7 @@ export default function NearbyMap() {
           >
             +
           </button>
-          <span className="text-center text-[10px] font-mono text-white/30">{zoom}x</span>
+          <span className="text-center text-[10px] font-mono text-white/30">{zoom < 1 ? "1x" : `${zoom.toFixed(1)}x`}</span>
           <button
             onClick={() => setZoom((z) => Math.max(1, z - 1))}
             className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"

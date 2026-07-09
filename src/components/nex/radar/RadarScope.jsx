@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 
 // Interest → blip color mapping (reused from profile card coding)
 // green, orange, amber, purple, blue palette
@@ -58,6 +58,7 @@ export default function RadarScope({
   onClusterClick,
   blurred = false,
   zoom = 1,
+  onZoomChange,
 }) {
   const baseRadius = effectiveRadius || 1;
   // Zoom shrinks the visible radius — blips spread out, distant ones leave the scope
@@ -123,13 +124,60 @@ export default function RadarScope({
   const rings = [0.25, 0.5, 0.75, 1];
   const spokes = Array.from({ length: 8 }, (_, i) => i * 45);
 
+  // Pinch-to-zoom gesture handling
+  const scopeRef = useRef(null);
+  const pinchRef = useRef(null);
+
+  const onScopeTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = { startDist: Math.hypot(dx, dy), startZoom: zoom };
+    }
+  };
+
+  const onScopeTouchMove = (e) => {
+    if (e.touches.length === 2 && pinchRef.current && onZoomChange) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / pinchRef.current.startDist;
+      const newZoom = Math.max(1, Math.min(5, pinchRef.current.startZoom * ratio));
+      onZoomChange(Math.round(newZoom * 10) / 10);
+    }
+  };
+
+  const onScopeTouchEnd = (e) => {
+    if (e.touches.length < 2) pinchRef.current = null;
+  };
+
+  const onWheel = (e) => {
+    if (!onZoomChange) return;
+    const delta = e.deltaY > 0 ? -0.5 : 0.5;
+    onZoomChange((z) => Math.max(1, Math.min(5, Math.round((z + delta) * 10) / 10)));
+  };
+
+  // Attach non-passive touchmove so preventDefault works
+  useEffect(() => {
+    const el = scopeRef.current;
+    if (!el) return;
+    el.addEventListener("touchmove", onScopeTouchMove, { passive: false });
+    return () => el.removeEventListener("touchmove", onScopeTouchMove);
+  });
+
   return (
     <div
+      ref={scopeRef}
+      onTouchStart={onScopeTouchStart}
+      onTouchEnd={onScopeTouchEnd}
+      onWheel={onWheel}
       className="absolute inset-0 z-0 flex items-center justify-center"
       style={{
         background: "radial-gradient(circle at center, hsl(210,20%,5%) 0%, hsl(0,0%,2%) 75%)",
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
+        touchAction: "none",
       }}
     >
       <div className="relative w-full h-full max-w-[560px] max-h-[560px] aspect-square">
