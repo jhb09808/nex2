@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Lock, Loader2, ArrowRight, Mail, CheckCircle2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { appParams } from "@/lib/app-params";
 
 const SESSION_KEY = "nex_access_granted";
 
@@ -44,14 +45,20 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      const res = await base44.functions.invoke("joinWaitlist", { email: email.trim() });
-      if (res.data?.success) {
+      const response = await fetch(`/api/apps/${appParams.appId}/functions/joinWaitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await response.json();
+      if (data.success) {
         setWaitlistDone(true);
       } else {
-        setError(res.data?.error || "Something went wrong. Try again.");
+        setError(data.error || data.detail || "Something went wrong. Try again.");
       }
     } catch (err) {
-      setError(err?.response?.data?.error || err?.message || "Something went wrong. Try again.");
+      console.error("Waitlist error:", err);
+      setError(err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
