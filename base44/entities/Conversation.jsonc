@@ -18,6 +18,10 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "photo_unlocked": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

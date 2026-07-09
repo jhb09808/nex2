@@ -23,7 +23,7 @@ const TIER_STYLES = {
   },
 };
 
-export default function UserAvatar({ src, size = "md", isOnline, plan = "free", showProfilePhoto = false, className = "" }) {
+export default function UserAvatar({ src, size = "md", isOnline, plan = "free", showProfilePhoto = false, blurLevel = 0, className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -62,7 +62,16 @@ export default function UserAvatar({ src, size = "md", isOnline, plan = "free", 
         }}
       >
         {showPhoto ? (
-          <img src={src} alt="" className="w-full h-full object-cover" />
+          <img
+            src={src}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{
+              filter: blurLevel > 0 ? `blur(${blurLevel}px)` : "none",
+              transition: "filter 600ms ease-in-out, transform 600ms ease-in-out",
+              transform: blurLevel > 0 ? "scale(1.15)" : "scale(1)",
+            }}
+          />
         ) : (
           <span className={`${textSizes[size]} font-bold text-white/90`}>
             {/* Initial displayed for non-platinum tiers */}
