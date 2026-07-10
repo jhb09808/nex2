@@ -50,21 +50,25 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      const response = await fetch("/functions/joinWaitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      await base44.entities.Waitlist.create({ email: email.trim() });
+      // Best-effort admin notification (don't block success if email fails)
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: "whosnex2me@gmail.com",
+          subject: "New Waitlist Signup",
+          body: `A new user joined the NEX2 waitlist!\n\nEmail: ${email.trim()}\n\nManage your waitlist from the Admin Panel.`,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send waitlist notification email:", emailErr);
+      }
+      setWaitlistDone(true);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err?.message || "";
+      if (msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already")) {
         setWaitlistDone(true);
       } else {
-        console.error("Waitlist error:", response.status, data);
-        setError(data.error || "Something went wrong. Try again.");
+        setError(msg || "Something went wrong. Try again.");
       }
-    } catch (err) {
-      console.error("Waitlist error:", err);
-      setError(err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
