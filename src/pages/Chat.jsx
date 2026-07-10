@@ -68,21 +68,58 @@ export default function Chat() {
     }
   };
 
+  const isBotChat = () => {
+    const botId = otherUser?.id || chatUser?.id;
+    return botId && String(botId).startsWith("bot-");
+  };
+
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return;
     setSending(true);
+    const msgText = newMessage.trim();
     try {
       await base44.entities.Message.create({
         conversation_id: conversationId,
         sender_id: me.id,
-        content: newMessage.trim(),
+        content: msgText,
         type: "text",
       });
       await base44.entities.Conversation.update(conversationId, {
-        last_message: newMessage.trim(),
+        last_message: msgText,
         last_message_at: new Date().toISOString(),
       });
       setNewMessage("");
+
+      // If chatting with a bot, generate an AI reply
+      if (isBotChat()) {
+        const botId = otherUser?.id || chatUser?.id;
+        const botProfile = otherUser || chatUser;
+        try {
+          const res = await base44.functions.invoke("generateBotReply", {
+            conversation_id: conversationId,
+            bot_user_id: botId,
+            bot_profile: botProfile,
+            recent_messages: [...messages, { sender_id: me.id, content: msgText }],
+          });
+          // Real-time subscription will pick up the new message, but add as fallback
+          if (res.data?.reply && !res.data?.reply?.error) {
+            setMessages((prev) => {
+              const exists = prev.some((m) => m.content === res.data.reply && m.sender_id === botId);
+              if (exists) return prev;
+              return [...prev, {
+                id: `bot-reply-${Date.now()}`,
+                conversation_id: conversationId,
+                sender_id: botId,
+                content: res.data.reply,
+                type: "text",
+                created_date: new Date().toISOString(),
+              }];
+            });
+          }
+        } catch (botErr) {
+          console.error("Bot reply failed:", botErr);
+        }
+      }
     } catch (err) {
       console.error(err);
     } finally {
