@@ -7,10 +7,8 @@
 export function getUserNumber(user) {
   if (!user?.id) return "00000";
   const id = String(user.id);
-  if (id.startsWith("bot-")) {
-    const n = parseInt(id.replace("bot-", ""), 10);
-    return String(n).padStart(5, "0");
-  }
+  if (id.startsWith("bot-")) return "Bot";
+  if (user.user_number != null) return String(user.user_number).padStart(5, "0");
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = ((hash << 5) - hash) + id.charCodeAt(i);
