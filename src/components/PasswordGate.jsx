@@ -50,16 +50,11 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      const response = await fetch(`/api/apps/${appParams.appId}/functions/joinWaitlist`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await response.json();
-      if (data.success) {
+      const res = await base44.functions.invoke("joinWaitlist", { email: email.trim() });
+      if (res.data?.success) {
         setWaitlistDone(true);
       } else {
-        setError(data.error || data.detail || "Something went wrong. Try again.");
+        setError(res.data?.error || "Something went wrong. Try again.");
       }
     } catch (err) {
       console.error("Waitlist error:", err);
