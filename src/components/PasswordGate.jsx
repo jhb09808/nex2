@@ -54,11 +54,13 @@ export default function PasswordGate() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
-      const data = await response.json();
-      if (data.success) {
+      const text = await response.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = null; }
+      if (response.ok && data?.success) {
         setWaitlistDone(true);
       } else {
-        setError(data.error || "Something went wrong. Try again.");
+        setError(data?.error || `Error ${response.status}: ${text.slice(0, 120)}`);
       }
     } catch (err) {
       setError(err?.message || "Something went wrong. Try again.");
