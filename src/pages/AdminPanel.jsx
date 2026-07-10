@@ -100,11 +100,7 @@ export default function AdminPanel() {
     if (status === "approved") {
       const res = await base44.functions.invoke("approveWaitlist", { entryId: entry.id });
       if (!res.data?.success) throw new Error(res.data?.error || "Approval failed");
-      const emailSent = res.data?.email_sent;
       setWaitlist((prev) => prev.map((w) => (w.id === entry.id ? { ...w, status } : w)));
-      if (emailSent) {
-        // Could add a toast here
-      }
     } else {
       await base44.entities.Waitlist.update(entry.id, { status });
       setWaitlist((prev) => prev.map((w) => (w.id === entry.id ? { ...w, status } : w)));

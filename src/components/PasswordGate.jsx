@@ -9,7 +9,7 @@ export function hasAccess() {
 }
 
 export default function PasswordGate() {
-  const [mode, setMode] = useState("password"); // "password" | "waitlist"
+  const [mode, setMode] = useState("password"); // "password" | "waitlist" | "check"
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,6 +71,33 @@ export default function PasswordGate() {
     }
   };
 
+  const handleCheckApproval = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setError("");
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/apps/${appParams.appId}/functions/checkWaitlistApproval`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await response.json();
+      if (data.approved) {
+        sessionStorage.setItem(SESSION_KEY, "true");
+        window.location.reload();
+      } else if (data.status === "pending") {
+        setError("You're on the list, but not approved yet. Check back soon!");
+      } else {
+        setError("We couldn't find that email. Make sure it matches what you signed up with.");
+      }
+    } catch (err) {
+      setError(`[FETCH ERROR] ${err?.message || "unknown"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center px-6 bg-[hsl(0,0%,4%)]">
       <div className="w-full max-w-sm">
@@ -89,6 +116,11 @@ export default function PasswordGate() {
             <>
               <h1 className="text-2xl font-bold text-white mb-2">Enter to continue</h1>
               <p className="text-white/40 text-sm">This site is invite-only. Enter the access code to explore.</p>
+            </>
+          ) : mode === "check" ? (
+            <>
+              <h1 className="text-2xl font-bold text-white mb-2">Check your status</h1>
+              <p className="text-white/40 text-sm">Enter the email you used to join the waitlist to see if you've been approved.</p>
             </>
           ) : (
             <>
@@ -132,19 +164,69 @@ export default function PasswordGate() {
             >
               Don't have a code? <span className="text-blue-400 font-medium">Join the waitlist</span>
             </button>
+            <button
+              type="button"
+              onClick={() => { setMode("check"); setError(""); setEmail(""); }}
+              className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors"
+            >
+              Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
+            </button>
+          </form>
+        ) : mode === "check" ? (
+          <form onSubmit={handleCheckApproval} className="space-y-3">
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                autoFocus
+                className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+            </div>
+
+            {error && <p className="text-amber-400 text-sm text-center">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loading || !email.trim()}
+              className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>Check status <ArrowRight className="w-4 h-4" /></>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setMode("password"); setError(""); setEmail(""); }}
+              className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors pt-1"
+            >
+              Have a code? <span className="text-blue-400 font-medium">Enter access code</span>
+            </button>
           </form>
         ) : waitlistDone ? (
           <div className="text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8 text-blue-400" />
             </div>
-            <p className="text-white text-sm">You're on the list! We'll reach out soon.</p>
+            <p className="text-white text-sm">You're on the list! When you're approved, come back here to check your status.</p>
+            <button
+              type="button"
+              onClick={() => { setMode("check"); setWaitlistDone(false); setEmail(""); }}
+              className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            >
+              Check your status
+            </button>
             <button
               type="button"
               onClick={() => { setMode("password"); setWaitlistDone(false); setEmail(""); setZipCode(""); }}
-              className="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors"
+              className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors"
             >
-              Back to access code
+              Have a code? <span className="text-blue-400 font-medium">Enter access code</span>
             </button>
           </div>
         ) : (
@@ -194,6 +276,13 @@ export default function PasswordGate() {
               className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors pt-1"
             >
               Have a code? <span className="text-blue-400 font-medium">Enter access code</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode("check"); setError(""); setEmail(""); }}
+              className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors"
+            >
+              Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
             </button>
           </form>
         )}
