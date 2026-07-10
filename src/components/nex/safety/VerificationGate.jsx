@@ -1,43 +1,58 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, ShieldCheck, Lock, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldCheck, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function VerificationGate({ onComplete }) {
-  const navigate = useNavigate();
-  const [stage, setStage] = useState("intro"); // intro | verifying | done
+  const [stage, setStage] = useState("loading"); // loading | intro | verifying | done
   const [error, setError] = useState("");
   const [profile, setProfile] = useState(null);
 
-  const startVerification = async () => {
-    setStage("verifying");
-    setError("");
+  useEffect(() => {
+    checkProfile();
+  }, []);
+
+  const checkProfile = async () => {
     try {
       const me = await base44.auth.me();
       const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (profiles.length === 0) {
-        navigate("/onboarding", { replace: true });
+        window.location.href = "/onboarding";
         return;
       }
-      const p = profiles[0];
-      setProfile(p);
+      setProfile(profiles[0]);
+      setStage("intro");
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+      setStage("intro");
+    }
+  };
 
-      // Self-attested age confirmation (upgradeable to Persona/Veriff when API key is set)
-      await base44.entities.UserProfile.update(p.id, {
+  const startVerification = async () => {
+    if (!profile) return;
+    setStage("verifying");
+    setError("");
+    try {
+      await base44.entities.UserProfile.update(profile.id, {
         is_adult: true,
         adult_verified_at: new Date().toISOString(),
         verification_method: "self_attested",
         requires_reverification: false,
       });
-
-      // Brief artificial delay for trust UX
       setTimeout(() => setStage("done"), 1500);
     } catch (err) {
       setError(err.message || "Verification failed.");
       setStage("intro");
     }
   };
+
+  if (stage === "loading") {
+    return (
+      <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center px-6 safe-top safe-bottom">
