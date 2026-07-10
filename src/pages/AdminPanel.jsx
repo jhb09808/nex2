@@ -91,9 +91,19 @@ export default function AdminPanel() {
     setZones((prev) => prev.map((z) => (z.id === zoneId ? { ...z, is_restricted: restricted } : z)));
   };
 
-  const handleWaitlistStatus = async (entryId, status) => {
-    await base44.entities.Waitlist.update(entryId, { status });
-    setWaitlist((prev) => prev.map((w) => (w.id === entryId ? { ...w, status } : w)));
+  const handleWaitlistStatus = async (entry, status) => {
+    if (status === "approved") {
+      const res = await base44.functions.invoke("approveWaitlist", { entryId: entry.id });
+      if (!res.data?.success) throw new Error(res.data?.error || "Approval failed");
+      const emailSent = res.data?.email_sent;
+      setWaitlist((prev) => prev.map((w) => (w.id === entry.id ? { ...w, status } : w)));
+      if (emailSent) {
+        // Could add a toast here
+      }
+    } else {
+      await base44.entities.Waitlist.update(entry.id, { status });
+      setWaitlist((prev) => prev.map((w) => (w.id === entry.id ? { ...w, status } : w)));
+    }
   };
 
   const copyEmail = (email) => {
@@ -274,7 +284,7 @@ export default function AdminPanel() {
               <div className="flex gap-2">
                 {entry.status !== "approved" && (
                   <button
-                    onClick={() => handleWaitlistStatus(entry.id, "approved")}
+                    onClick={() => handleWaitlistStatus(entry, "approved")}
                     className="flex-1 py-2 rounded-lg bg-green-500/20 text-green-400 text-xs font-medium flex items-center justify-center gap-1"
                   >
                     <Check className="w-3.5 h-3.5" /> Approve
@@ -282,7 +292,7 @@ export default function AdminPanel() {
                 )}
                 {entry.status !== "rejected" && (
                   <button
-                    onClick={() => handleWaitlistStatus(entry.id, "rejected")}
+                    onClick={() => handleWaitlistStatus(entry, "rejected")}
                     className="flex-1 py-2 rounded-lg glass text-red-400 text-xs font-medium flex items-center justify-center gap-1"
                   >
                     <X className="w-3.5 h-3.5" /> Reject
