@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Lock, Loader2, ArrowRight, Mail, CheckCircle2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { appParams } from "@/lib/app-params";
 
 const SESSION_KEY = "nex_access_granted";
@@ -50,25 +49,19 @@ export default function PasswordGate() {
     setError("");
     setLoading(true);
     try {
-      await base44.entities.Waitlist.create({ email: email.trim() });
-      // Best-effort admin notification (don't block success if email fails)
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: "whosnex2me@gmail.com",
-          subject: "New Waitlist Signup",
-          body: `A new user joined the NEX2 waitlist!\n\nEmail: ${email.trim()}\n\nManage your waitlist from the Admin Panel.`,
-        });
-      } catch (emailErr) {
-        console.error("Failed to send waitlist notification email:", emailErr);
-      }
-      setWaitlistDone(true);
-    } catch (err) {
-      const msg = err?.response?.data?.detail || err?.message || "";
-      if (msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already")) {
+      const response = await fetch(`/api/apps/${appParams.appId}/functions/joinWaitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await response.json();
+      if (data.success) {
         setWaitlistDone(true);
       } else {
-        setError(msg || "Something went wrong. Try again.");
+        setError(data.error || "Something went wrong. Try again.");
       }
+    } catch (err) {
+      setError(err?.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
