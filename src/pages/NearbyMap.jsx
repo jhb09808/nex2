@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users } from "lucide-react";
+import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -473,7 +474,7 @@ export default function NearbyMap() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="text-white font-semibold text-lg truncate">{getDisplayName(selectedUser)}</p>
-                    {selectedUser.is_verified && <BadgeCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+                    <VerifiedBadges isVerified={selectedUser.is_verified} isOg={selectedUser.is_og} size="md" />
                     {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
                   </div>
                   {selectedUser._dist != null && (

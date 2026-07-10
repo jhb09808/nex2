@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Users, Flag, BarChart3, Shield, Ban, Check, X, Search, Eye, MapPin, AlertTriangle, Plus, Mail, Copy } from "lucide-react";
+import { ArrowLeft, Users, Flag, BarChart3, Shield, BadgeCheck, Star, Ban, Check, X, Search, Eye, MapPin, AlertTriangle, Plus, Mail, Copy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -60,6 +60,11 @@ export default function AdminPanel() {
   const handleVerify = async (userId, verified) => {
     await base44.entities.UserProfile.update(userId, { is_verified: verified });
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_verified: verified } : u)));
+  };
+
+  const handleToggleOg = async (userId, og) => {
+    await base44.entities.UserProfile.update(userId, { is_og: og });
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_og: og } : u)));
   };
 
   const handleReportStatus = async (reportId, status) => {
@@ -176,7 +181,8 @@ export default function AdminPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="text-white text-sm font-medium truncate">{user.username}</p>
-                      {user.is_verified && <Shield className="w-3.5 h-3.5 text-blue-400" />}
+                      {user.is_verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />}
+                      {user.is_og && <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />}
                     </div>
                     <p className="text-white/30 text-xs">
                       {user.plan || "free"} · {user.is_banned ? "Banned" : user.is_suspended ? "Suspended" : "Active"}
@@ -189,6 +195,13 @@ export default function AdminPanel() {
                     className={`flex-1 py-2 rounded-lg text-xs font-medium ${user.is_verified ? "gradient-blue text-white" : "glass text-white/40"}`}
                   >
                     {user.is_verified ? "Verified" : "Verify"}
+                  </button>
+                  <button
+                    onClick={() => handleToggleOg(user.id, !user.is_og)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 ${user.is_og ? "bg-amber-500/20 text-amber-400" : "glass text-white/40"}`}
+                  >
+                    <Star className="w-3 h-3" />
+                    {user.is_og ? "OG" : "Make OG"}
                   </button>
                   <button
                     onClick={() => handleSuspend(user.id, !user.is_suspended)}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut } from "lucide-react";
+import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -67,7 +68,7 @@ export default function Profile() {
         </div>
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-xl font-bold text-white">{profile?.username}</h2>
-          {profile?.is_verified && <Shield className="w-4 h-4 text-blue-400" />}
+          <VerifiedBadges isVerified={profile?.is_verified} isOg={profile?.is_og} size="md" />
         </div>
         <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(profile)}</p>
         {badge && (

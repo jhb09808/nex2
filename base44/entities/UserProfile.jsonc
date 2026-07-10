@@ -106,6 +106,10 @@
       "type": "boolean",
       "default": false
     },
+    "is_og": {
+      "type": "boolean",
+      "default": false
+    },
     "is_premium": {
       "type": "boolean",
       "default": false
@@ -200,5 +204,33 @@
   },
   "required": [
     "username"
-  ]
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
+import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -75,7 +76,7 @@ export default function UserDetail() {
         <UserAvatar name={getUserDisplayName(user)} size="xl" isOnline={user.is_online} plan={user.plan} className="mb-4" />
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-2xl font-bold text-white">{getUserDisplayName(user)}</h1>
-          {user.is_verified && <Shield className="w-5 h-5 text-blue-400" />}
+          <VerifiedBadges isVerified={user.is_verified} isOg={user.is_og} size="lg" />
         </div>
         <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(user)}</p>
       </div>
