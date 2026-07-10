@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, ShieldCheck, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function VerificationGate({ onComplete }) {
+  const navigate = useNavigate();
   const [stage, setStage] = useState("intro"); // intro | verifying | done
   const [error, setError] = useState("");
   const [profile, setProfile] = useState(null);
@@ -15,8 +17,7 @@ export default function VerificationGate({ onComplete }) {
       const me = await base44.auth.me();
       const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (profiles.length === 0) {
-        setError("Please complete onboarding first.");
-        setStage("intro");
+        navigate("/onboarding", { replace: true });
         return;
       }
       const p = profiles[0];
