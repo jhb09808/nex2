@@ -508,7 +508,7 @@ export default function NearbyMap() {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
-                  className="flex-1 py-3 rounded-xl glass text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
+                  className="flex-1 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
                 >
                   View Profile
                 </button>
@@ -540,7 +540,7 @@ export default function NearbyMap() {
                 )}
                 <button
                   onClick={() => setSafetyUser(selectedUser)}
-                  className="w-12 py-3 rounded-xl glass flex items-center justify-center active:scale-[0.98] transition-transform"
+                  className="w-12 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:scale-[0.98] transition-transform"
                 >
                   <Shield className="w-4 h-4 text-white/40" />
                 </button>
