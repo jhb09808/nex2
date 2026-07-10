@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       });
     } catch (emailErr) {
       // Don't fail the whole request if email fails
-      console.error("Failed to send waitlist notification email:", emailErr);
+      console.error("Failed to send waitlist notification email:", emailErr?.message || JSON.stringify(emailErr));
     }
 
     return Response.json({ success: true });
