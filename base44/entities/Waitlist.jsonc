@@ -6,6 +6,9 @@
       "type": "string",
       "format": "email"
     },
+    "zip_code": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -17,7 +20,8 @@
     }
   },
   "required": [
-    "email"
+    "email",
+    "zip_code"
   ],
   "rls": {
     "create": true,

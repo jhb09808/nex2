@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock, Loader2, ArrowRight, Mail, CheckCircle2 } from "lucide-react";
+import { Lock, Loader2, ArrowRight, Mail, CheckCircle2, MapPin } from "lucide-react";
 import { appParams } from "@/lib/app-params";
 
 const SESSION_KEY = "nex_access_granted";
@@ -16,6 +16,7 @@ export default function PasswordGate() {
 
   // Waitlist state
   const [email, setEmail] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [waitlistDone, setWaitlistDone] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -46,13 +47,14 @@ export default function PasswordGate() {
   const handleWaitlist = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    if (!zipCode.trim()) return;
     setError("");
     setLoading(true);
     try {
       const response = await fetch(`/api/apps/${appParams.appId}/functions/joinWaitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), zip_code: zipCode.trim() }),
       });
       const text = await response.text();
       let data;
@@ -91,7 +93,7 @@ export default function PasswordGate() {
           ) : (
             <>
               <h1 className="text-2xl font-bold text-white mb-2">Join the waitlist</h1>
-              <p className="text-white/40 text-sm">Don't have a code? Enter your email and we'll let you in soon.</p>
+              <p className="text-white/40 text-sm">We're launching neighborhood by neighborhood. Enter your email and ZIP code so we can notify you when NEX2 goes live in your area.</p>
             </>
           )}
         </div>
@@ -139,7 +141,7 @@ export default function PasswordGate() {
             <p className="text-white text-sm">You're on the list! We'll reach out soon.</p>
             <button
               type="button"
-              onClick={() => { setMode("password"); setWaitlistDone(false); setEmail(""); }}
+              onClick={() => { setMode("password"); setWaitlistDone(false); setEmail(""); setZipCode(""); }}
               className="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors"
             >
               Back to access code
@@ -159,11 +161,24 @@ export default function PasswordGate() {
               />
             </div>
 
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="ZIP code"
+                inputMode="numeric"
+                maxLength={5}
+                className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+            </div>
+
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
             <button
               type="submit"
-              disabled={loading || !email.trim()}
+              disabled={loading || !email.trim() || !zipCode.trim()}
               className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
               {loading ? (
