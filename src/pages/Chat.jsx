@@ -8,6 +8,7 @@ import ChatWingman from "@/components/nex/ai/ChatWingman";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
+import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 export default function Chat() {
   const { conversationId } = useParams();
@@ -62,7 +63,16 @@ export default function Chat() {
         if (profiles.length > 0) setOtherUser(profiles[0]);
       }
       // Fallback to user info passed from the approval flow (e.g. mock profiles)
-      if (!otherUser) setOtherUser(chatUser || null);
+      if (!otherUser) {
+        if (chatUser) {
+          setOtherUser(chatUser);
+        } else if (otherId && String(otherId).startsWith("bot-")) {
+          // Reconstruct bot profile from mock profiles generator
+          const mockBots = generateMockProfiles({ lat: 0, lng: 0 });
+          const bot = mockBots.find((b) => b.id === otherId);
+          if (bot) setOtherUser(bot);
+        }
+      }
     } catch (err) {
       console.error(err);
     }

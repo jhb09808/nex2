@@ -41,17 +41,22 @@ Respond naturally as ${botName} would — casual, friendly, brief (1-2 sentences
     const reply = typeof llmRes === 'string' ? llmRes.trim() : (llmRes?.response || llmRes?.text || JSON.stringify(llmRes)).trim();
 
     // Create the bot's reply message
-    const msg = await base44.asServiceRole.entities.Message.create({
+    await base44.asServiceRole.entities.Message.create({
       conversation_id,
       sender_id: bot_user_id,
       content: reply,
       type: 'text',
     });
 
-    await base44.asServiceRole.entities.Conversation.update(conversation_id, {
-      last_message: reply,
-      last_message_at: new Date().toISOString(),
-    });
+    // Update conversation metadata (non-fatal if this fails)
+    try {
+      await base44.asServiceRole.entities.Conversation.update(conversation_id, {
+        last_message: reply,
+        last_message_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      // Message is already created; real-time subscription will deliver it
+    }
 
     return Response.json({ success: true, reply });
   } catch (error) {

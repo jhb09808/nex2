@@ -594,7 +594,7 @@ export default function NearbyMap() {
             }
             setChatApprovalUser(null);
             setSelectedUser(null);
-            navigate(`/chat/${conversationId}`);
+            navigate(`/chat/${conversationId}`, { state: { chatUser: chatApprovalUser } });
           } catch (err) {
             console.error(err);
             setChatApprovalUser(null);
