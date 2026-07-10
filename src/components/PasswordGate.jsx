@@ -34,10 +34,10 @@ export default function PasswordGate() {
         sessionStorage.setItem(SESSION_KEY, "true");
         window.location.reload();
       } else {
-        setError("Incorrect password. Try again.");
+        setError(data.error ? `[${response.status}] ${data.error}` : "Incorrect password. Try again.");
       }
     } catch (err) {
-      setError(err?.message || "Something went wrong. Try again.");
+      setError(`[FETCH ERROR] ${err?.message || "unknown"}`);
     } finally {
       setLoading(false);
     }

@@ -10,7 +10,10 @@ Deno.serve(async (req) => {
     }
 
     const accessPassword = Deno.env.get("ACCESS_PASSWORD");
-    const valid = accessPassword && password.trim() === accessPassword.trim();
+    if (!accessPassword) {
+      return Response.json({ valid: false, error: "ACCESS_PASSWORD env var is not set" });
+    }
+    const valid = password.trim() === accessPassword.trim();
 
     return Response.json({ valid });
   } catch (error) {
