@@ -62,7 +62,7 @@ export default function PasswordGate() {
       if (response.ok && data?.success) {
         setWaitlistDone(true);
       } else {
-        setError(`[DEBUG] ${response.status}: ${text.slice(0, 150)}`);
+        setError(data?.error || "Something went wrong. Please try again.");
       }
     } catch (err) {
       setError(`[FETCH ERROR] ${err?.message || "unknown"}`);
