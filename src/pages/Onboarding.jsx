@@ -37,8 +37,11 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setSaving(true);
     try {
+      const allUsers = await base44.entities.UserProfile.list("created_date", 500);
+      const nextNumber = allUsers.length + 1;
       await base44.entities.UserProfile.create({
         username,
+        user_number: nextNumber,
         age: parseInt(age),
         bio,
         interests,
