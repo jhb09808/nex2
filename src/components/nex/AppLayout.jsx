@@ -9,6 +9,7 @@ export default function AppLayout() {
   const [verified, setVerified] = useState(false);
   const [checking, setChecking] = useState(true);
   const [hasProfile, setHasProfile] = useState(true);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     checkVerification();
@@ -20,8 +21,11 @@ export default function AppLayout() {
       const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (profiles.length === 0) {
         setHasProfile(false);
-      } else if (profiles[0].is_adult && !profiles[0].requires_reverification) {
-        setVerified(true);
+      } else {
+        setProfile(profiles[0]);
+        if (profiles[0].is_adult && !profiles[0].requires_reverification) {
+          setVerified(true);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -45,7 +49,7 @@ export default function AppLayout() {
   if (!verified) {
     return (
       <div className="max-w-lg mx-auto">
-        <VerificationGate onComplete={() => window.location.reload()} />
+        <VerificationGate profile={profile} onComplete={() => window.location.reload()} />
       </div>
     );
   }

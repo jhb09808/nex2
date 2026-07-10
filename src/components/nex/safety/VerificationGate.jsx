@@ -1,32 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-export default function VerificationGate({ onComplete }) {
-  const [stage, setStage] = useState("loading"); // loading | intro | verifying | done
+export default function VerificationGate({ profile, onComplete }) {
+  const [stage, setStage] = useState("intro");
   const [error, setError] = useState("");
-  const [profile, setProfile] = useState(null);
-
-  useEffect(() => {
-    checkProfile();
-  }, []);
-
-  const checkProfile = async () => {
-    try {
-      const me = await base44.auth.me();
-      const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
-      if (profiles.length === 0) {
-        window.location.href = "/onboarding";
-        return;
-      }
-      setProfile(profiles[0]);
-      setStage("intro");
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-      setStage("intro");
-    }
-  };
 
   const startVerification = async () => {
     if (!profile) return;
@@ -45,14 +24,6 @@ export default function VerificationGate({ onComplete }) {
       setStage("intro");
     }
   };
-
-  if (stage === "loading") {
-    return (
-      <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center px-6 safe-top safe-bottom">
