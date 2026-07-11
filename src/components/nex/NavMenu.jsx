@@ -16,10 +16,14 @@ const baseNavItems = [
 export default function NavMenu() {
   const [open, setOpen] = useState(false);
   const [isPlatinum, setIsPlatinum] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
 
   useEffect(() => {
     checkPlan();
+    const handleCount = (e) => setUnreadCount(e.detail || 0);
+    window.addEventListener("nex-unread-count", handleCount);
+    return () => window.removeEventListener("nex-unread-count", handleCount);
   }, []);
 
   const checkPlan = async () => {
@@ -119,7 +123,14 @@ export default function NavMenu() {
                           : "text-white/70 hover:bg-white/5"
                       }`}
                     >
-                      <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 1.5} />
+                      <div className="relative">
+                        <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 1.5} />
+                        {item.path === "/notifications" && unreadCount > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full gradient-blue text-white text-[9px] font-bold flex items-center justify-center">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-sm font-medium">{item.label}</span>
                     </Link>
                   </motion.div>

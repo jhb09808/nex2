@@ -3,6 +3,7 @@ import { Outlet, Navigate } from "react-router-dom";
 import NavMenu from "@/components/nex/NavMenu";
 import ProximityMatchNudge from "@/components/nex/ProximityMatchNudge";
 import VerificationGate from "@/components/nex/safety/VerificationGate";
+import NotificationListener from "@/components/nex/NotificationListener";
 import { base44 } from "@/api/base44Client";
 
 export default function AppLayout() {
@@ -56,6 +57,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,4%)] max-w-lg mx-auto relative overflow-hidden">
+      <NotificationListener />
       <ProximityMatchNudge />
       <Outlet />
       <NavMenu />

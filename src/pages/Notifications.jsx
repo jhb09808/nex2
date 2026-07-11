@@ -36,6 +36,7 @@ export default function Notifications() {
   const markAsRead = async (id) => {
     await base44.entities.Notification.update(id, { is_read: true });
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    window.dispatchEvent(new CustomEvent("nex-notifications-read"));
   };
 
   if (loading) {
