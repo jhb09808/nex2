@@ -7,7 +7,6 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
-import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
@@ -50,7 +49,7 @@ export default function NearbyMap() {
     return () => window.removeEventListener("nex-open-filters", openFilters);
   }, []);
 
-  // Location refreshes only on app open — no continuous streaming
+  // Save real GPS to profile on app open so nearby users can see each other
   const checkLocation = async () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -58,6 +57,17 @@ export default function NearbyMap() {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         try {
+          const me = await base44.auth.me();
+          const myProfiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+          if (myProfiles[0]) {
+            await base44.entities.UserProfile.update(myProfiles[0].id, {
+              latitude: loc.lat,
+              longitude: loc.lng,
+              is_online: true,
+              last_seen: new Date().toISOString(),
+              location_refreshed_at: new Date().toISOString(),
+            });
+          }
           const res = await base44.functions.invoke("checkAreaRestriction", loc);
           setAreaRestricted(res.data);
         } catch (e) {
@@ -65,7 +75,7 @@ export default function NearbyMap() {
         }
       },
       () => {},
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
   };
 
@@ -178,22 +188,16 @@ export default function NearbyMap() {
     saveRadius();
   };
 
-  // Combine real users with mock profiles centered on user's location
-  const allProfiles = [...users, ...generateMockProfiles(userLocation).map((u) => ({ ...u, isMock: true }))];
+  const allProfiles = users;
 
   const getDisplayName = (user) => getUserDisplayName(user);
 
-  // Use explicit lat/lng for mock profiles, deterministic offset for real users
+  // Use stored latitude/longitude from the user's profile (saved when they open the app)
   const getUserLatLng = (user) => {
-    if (user.lat != null && user.lng != null) return [user.lat, user.lng];
-    let hash = 0;
-    for (let i = 0; i < user.id.length; i++) {
-      hash = ((hash << 5) - hash) + user.id.charCodeAt(i);
-      hash = hash & hash;
+    if (user.latitude != null && user.longitude != null) {
+      return [user.latitude, user.longitude];
     }
-    const latOffset = (Math.abs(hash % 1000) / 1000 - 0.5) * 0.04;
-    const lngOffset = (Math.abs((hash * 31) % 1000) / 1000 - 0.5) * 0.04;
-    return [userLocation.lat + latOffset, userLocation.lng + lngOffset];
+    return null;
   };
 
   const tierCeiling = capabilities?.radius_miles_max;
@@ -204,11 +208,12 @@ export default function NearbyMap() {
     ? allProfiles.filter((u) => (u.interests || []).some((i) => activeFilters.includes(i)))
     : allProfiles;
 
-  // Filter by radius and online status
+  // Filter by radius and online status (skip users without stored coordinates)
   const radiusFiltered = interestFiltered.filter((u) => {
     if (filters.onlineOnly && !u.is_online) return false;
-    const [uLat, uLng] = getUserLatLng(u);
-    const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
+    const coords = getUserLatLng(u);
+    if (!coords) return false;
+    const dist = distanceMiles(userLocation.lat, userLocation.lng, coords[0], coords[1]);
     if (effectiveRadius != null && dist > effectiveRadius) return false;
     return true;
   });
@@ -217,8 +222,8 @@ export default function NearbyMap() {
   const ranked = radiusFiltered
     .map((u) => {
       const shared = (u.interests || []).filter((i) => activeFilters.includes(i)).length;
-      const [uLat, uLng] = getUserLatLng(u);
-      const dist = distanceMiles(userLocation.lat, userLocation.lng, uLat, uLng);
+      const coords = getUserLatLng(u);
+      const dist = coords ? distanceMiles(userLocation.lat, userLocation.lng, coords[0], coords[1]) : Infinity;
       return { ...u, _shared: shared, _dist: dist, _score: shared * 10 - dist };
     })
     .sort((a, b) => b._score - a._score);
