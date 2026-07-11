@@ -86,8 +86,10 @@ export default function PasswordGate() {
       if (data.approved) {
         sessionStorage.setItem(SESSION_KEY, "true");
         window.location.reload();
-      } else if (data.status === "pending") {
+      } else if (data.status === "waitlisted" || data.status === "pending") {
         setError("You're on the list, but not approved yet. Check back soon!");
+      } else if (data.status === "rejected") {
+        setError("Your waitlist entry was not approved. Contact support if you think this is an error.");
       } else {
         setError("We couldn't find that email. Make sure it matches what you signed up with.");
       }
