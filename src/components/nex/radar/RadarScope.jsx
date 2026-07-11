@@ -221,11 +221,11 @@ export default function RadarScope({
           })}
         </svg>
 
-        {/* Sweep wedge — dark teal semi-transparent */}
+        {/* Sweep wedge — bright glowing green */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, ${PALETTE.grid}00 270deg, ${PALETTE.grid}33 340deg, ${PALETTE.grid}66 358deg, ${PALETTE.grid}99 360deg, transparent 360deg)`,
+            background: `conic-gradient(from 0deg, transparent 0deg, ${PALETTE.green}00 270deg, ${PALETTE.green}0D 310deg, ${PALETTE.green}33 340deg, ${PALETTE.green}66 356deg, ${PALETTE.green}FF 360deg, transparent 360deg)`,
             animation: "radar-sweep 5s linear infinite",
             maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
             WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
