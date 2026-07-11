@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Eye, Bell, Ban, CreditCard, ChevronRight } from "lucide-react";
+import { ArrowLeft, MapPin, Eye, Bell, Ban, CreditCard, ChevronRight, Radar } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
+import { useRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function SettingsPage() {
     const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
     if (profiles.length > 0) setProfile(profiles[0]);
   };
+
+  const { color: radarColor, changeColor } = useRadarSweepColor();
 
   const toggleSetting = async (key, value) => {
     setSaving(true);
@@ -83,6 +86,29 @@ export default function SettingsPage() {
               <Toggle value={true} onToggle={() => {}} />
             </GlassCard>
           </div>
+        </div>
+
+        {/* Radar */}
+        <div>
+          <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 px-1">Radar</p>
+          <GlassCard className="!p-3.5">
+            <div className="flex items-center gap-3 mb-4">
+              <Radar className="w-5 h-5 text-white/40" />
+              <span className="text-white/70 text-sm">Sweep Color</span>
+              <div className="ml-auto w-4 h-4 rounded-full" style={{ background: radarColor, boxShadow: `0 0 8px ${radarColor}88` }} />
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              {RADAR_SWEEP_COLORS.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => changeColor(c.value)}
+                  title={c.label}
+                  className={`w-9 h-9 rounded-full transition-all active:scale-90 ${radarColor === c.value ? "ring-2 ring-white/60 ring-offset-2 ring-offset-[hsl(0,0%,8%)]" : "ring-1 ring-white/10"}`}
+                  style={{ background: c.value, boxShadow: radarColor === c.value ? `0 0 12px ${c.value}88` : "none" }}
+                />
+              ))}
+            </div>
+          </GlassCard>
         </div>
 
         {/* Account */}

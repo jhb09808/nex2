@@ -1,4 +1,5 @@
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
+import { getRadarSweepColor } from "@/hooks/useRadarSweepColor";
 
 // Exact palette from the design spec
 const PALETTE = {
@@ -71,6 +72,13 @@ export default function RadarScope({
 }) {
   const baseRadius = effectiveRadius || 1;
   const visibleRadius = baseRadius / zoom;
+  const [sweepColor, setSweepColor] = useState(getRadarSweepColor);
+
+  useEffect(() => {
+    const handler = (e) => setSweepColor(e.detail || getRadarSweepColor());
+    window.addEventListener("nex-radar-color-change", handler);
+    return () => window.removeEventListener("nex-radar-color-change", handler);
+  }, []);
 
   const blips = useMemo(() => {
     const raw = [];
@@ -221,11 +229,11 @@ export default function RadarScope({
           })}
         </svg>
 
-        {/* Sweep wedge — bright glowing green */}
+        {/* Sweep wedge — user-selected glowing color */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, ${PALETTE.green}00 270deg, ${PALETTE.green}0D 310deg, ${PALETTE.green}33 340deg, ${PALETTE.green}66 356deg, ${PALETTE.green}FF 360deg, transparent 360deg)`,
+            background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 270deg, ${sweepColor}0D 310deg, ${sweepColor}33 340deg, ${sweepColor}66 356deg, ${sweepColor}FF 360deg, transparent 360deg)`,
             animation: "radar-sweep 5s linear infinite",
             maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
             WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
