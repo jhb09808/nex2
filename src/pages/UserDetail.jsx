@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, Shield, Users } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -18,6 +18,7 @@ export default function UserDetail() {
   const [myProfile, setMyProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [safetyOpen, setSafetyOpen] = useState(false);
+  const [connectionCount, setConnectionCount] = useState(null);
 
   useEffect(() => {
     loadUser();
@@ -26,15 +27,25 @@ export default function UserDetail() {
   const loadUser = async () => {
     try {
       const passedUser = location.state?.user;
+      let targetUser;
       if (passedUser) {
+        targetUser = passedUser;
         setUser(passedUser);
       } else {
-        const profile = await base44.entities.UserProfile.get(userId);
-        setUser(profile);
+        targetUser = await base44.entities.UserProfile.get(userId);
+        setUser(targetUser);
       }
       const me = await base44.auth.me();
       const myP = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (myP.length > 0) setMyProfile(myP[0]);
+
+      const targetId = targetUser.created_by_id || targetUser.id;
+      const sent = await base44.entities.Wave.filter({ sender_id: targetId, status: "accepted" });
+      const received = await base44.entities.Wave.filter({ receiver_id: targetId, status: "accepted" });
+      const connections = new Set();
+      sent.forEach((w) => connections.add(w.receiver_id));
+      received.forEach((w) => connections.add(w.sender_id));
+      setConnectionCount(connections.size);
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,7 +89,13 @@ export default function UserDetail() {
           <h1 className="text-2xl font-bold text-white">{getUserDisplayName(user)}</h1>
           <VerifiedBadges isVerified={user.is_verified} isOg={user.is_og} size="lg" />
         </div>
-        <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(user)}</p>
+        <p className="text-white/30 text-xs font-mono mb-2">#{getUserNumber(user)}</p>
+        {connectionCount != null && (
+          <div className="flex items-center gap-1.5 text-white/40 text-sm mb-1">
+            <Users className="w-4 h-4" />
+            <span>{connectionCount} {connectionCount === 1 ? "connection" : "connections"}</span>
+          </div>
+        )}
       </div>
 
       {user.bio && (
@@ -94,7 +111,7 @@ export default function UserDetail() {
           </p>
           <div className="flex flex-wrap gap-2">
             {mutualInterests.map((i) => (
-              <InterestTag key={i} label={i} selected size="sm" />
+              <InterestTag key={i} label={i} selected size="sm" iconOnly />
             ))}
           </div>
         </GlassCard>
@@ -105,7 +122,7 @@ export default function UserDetail() {
           <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">All Interests</p>
           <div className="flex flex-wrap gap-2">
             {user.interests.map((i) => (
-              <InterestTag key={i} label={i} size="sm" selected={mutualInterests.includes(i)} />
+              <InterestTag key={i} label={i} size="sm" iconOnly selected={mutualInterests.includes(i)} />
             ))}
           </div>
         </GlassCard>

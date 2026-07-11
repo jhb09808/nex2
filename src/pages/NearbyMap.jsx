@@ -51,6 +51,29 @@ export default function NearbyMap() {
     return () => window.removeEventListener("nex-open-filters", openFilters);
   }, []);
 
+  const [connectionCount, setConnectionCount] = useState(null);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setConnectionCount(null);
+      return;
+    }
+    const targetId = selectedUser.created_by_id || selectedUser.id;
+    (async () => {
+      try {
+        const sent = await base44.entities.Wave.filter({ sender_id: targetId, status: "accepted" });
+        const received = await base44.entities.Wave.filter({ receiver_id: targetId, status: "accepted" });
+        const connections = new Set();
+        sent.forEach((w) => connections.add(w.receiver_id));
+        received.forEach((w) => connections.add(w.sender_id));
+        setConnectionCount(connections.size);
+      } catch (e) {
+        console.error(e);
+        setConnectionCount(null);
+      }
+    })();
+  }, [selectedUser]);
+
   // Save real GPS to profile on app open so nearby users can see each other
   const checkLocation = async () => {
     if (!navigator.geolocation) return;
@@ -299,20 +322,24 @@ export default function NearbyMap() {
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
-          <div className="absolute top-4 left-4 right-16 z-20 flex items-center gap-3 safe-top">
+          <div className="absolute top-4 left-4 z-20 safe-top">
             <h1 className="text-xl font-bold text-white">Nearby</h1>
+          </div>
+
+          {/* Sonar / List toggle */}
+          <div className="absolute top-16 right-4 z-20">
             <div className="glass-strong rounded-full p-0.5 flex gap-0.5">
               <button
                 onClick={() => setLayoutMode("sonar")}
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "gradient-blue text-white" : "text-white/40"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "gradient-blue text-white" : "text-white/40"}`}
               >
-                <Radar className="w-3.5 h-3.5" />
+                <Radar className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setLayoutMode("list")}
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "gradient-blue text-white" : "text-white/40"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "gradient-blue text-white" : "text-white/40"}`}
               >
-                <List className="w-3.5 h-3.5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -505,12 +532,20 @@ export default function NearbyMap() {
                   {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
                 </div>
                 <p className="text-white/30 text-[11px] font-mono mt-0.5">{getUserNumberLabel(selectedUser)}</p>
-                {selectedUser._dist != null && (
-                  <p className="text-white/40 text-xs mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
-                  </p>
-                )}
+                <div className="flex items-center gap-3 mt-0.5">
+                  {selectedUser._dist != null && (
+                    <span className="text-white/40 text-xs flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
+                    </span>
+                  )}
+                  {connectionCount != null && (
+                    <span className="text-white/40 text-xs flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {connectionCount} {connectionCount === 1 ? "connection" : "connections"}
+                    </span>
+                  )}
+                </div>
                   {selectedUser.visibility === "anonymous" && (
                     <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
                       <Shield className="w-3 h-3" /> Anonymous mode
@@ -528,8 +563,8 @@ export default function NearbyMap() {
 
               {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  {selectedUser.interests.slice(0, 5).map((interest) => (
-                    <InterestTag key={interest} label={interest} size="sm" />
+                  {selectedUser.interests.slice(0, 8).map((interest) => (
+                    <InterestTag key={interest} label={interest} size="sm" iconOnly />
                   ))}
                 </div>
               )}
