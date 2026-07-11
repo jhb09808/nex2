@@ -38,7 +38,8 @@ export default function Onboarding() {
     setSaving(true);
     try {
       const allUsers = await base44.entities.UserProfile.list("created_date", 500);
-      const nextNumber = allUsers.length + 1;
+      const realUserCount = allUsers.filter(u => !String(u.created_by_id).startsWith("service_")).length;
+      const nextNumber = realUserCount + 1;
       await base44.entities.UserProfile.create({
         username,
         user_number: nextNumber,

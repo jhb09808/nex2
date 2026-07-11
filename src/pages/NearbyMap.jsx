@@ -10,7 +10,7 @@ import InterestTag from "@/components/nex/InterestTag";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 
-import { getUserDisplayName } from "@/components/nex/userDisplay";
+import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
