@@ -117,7 +117,9 @@ export default function NearbyMap() {
       setActiveFilters(defaultFilters);
 
       let realUsers = allUsers.filter(
-        (u) => u.created_by_id !== me.id && !u.is_banned && !u.is_suspended && !u.invisible_mode
+        (u) => u.created_by_id !== me.id &&
+          !u.is_banned && !u.is_suspended && !u.invisible_mode &&
+          !String(u.created_by_id).startsWith("service_")
       );
 
       // Platinum exclusivity: platinum users only see other platinum users
@@ -477,17 +479,18 @@ export default function NearbyMap() {
                   <UserAvatar name={getDisplayName(selectedUser)} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-white font-semibold text-lg truncate">{getDisplayName(selectedUser)}</p>
-                    <VerifiedBadges isVerified={selectedUser.is_verified} isOg={selectedUser.is_og} size="md" />
-                    {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
-                  </div>
-                  {selectedUser._dist != null && (
-                    <p className="text-white/40 text-xs mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
-                    </p>
-                  )}
+                <div className="flex items-center gap-1.5">
+                  <p className="text-white font-semibold text-lg truncate">{getDisplayName(selectedUser)}</p>
+                  <VerifiedBadges isVerified={selectedUser.is_verified} isOg={selectedUser.is_og} size="md" />
+                  {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
+                </div>
+                <p className="text-white/30 text-[11px] font-mono mt-0.5">{getUserNumberLabel(selectedUser)}</p>
+                {selectedUser._dist != null && (
+                  <p className="text-white/40 text-xs mt-0.5 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
+                  </p>
+                )}
                   {selectedUser.visibility === "anonymous" && (
                     <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
                       <Shield className="w-3 h-3" /> Anonymous mode
