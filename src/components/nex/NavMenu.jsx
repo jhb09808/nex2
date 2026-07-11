@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, Sliders } from "lucide-react";
+import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, Sliders, Trophy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const baseNavItems = [
@@ -10,6 +10,7 @@ const baseNavItems = [
   { path: "/messages", icon: MessageCircle, label: "Messages" },
   { path: "/notifications", icon: Bell, label: "Alerts" },
   { path: "/profile", icon: User, label: "Profile" },
+  { path: "/leaderboard", icon: Trophy, label: "Leaderboard" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 

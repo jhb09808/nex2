@@ -6,41 +6,33 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Service-role: see all users' networking memories
-    const memories = await base44.asServiceRole.entities.NetworkingMemory.list('-created_date', 500);
     const profiles = await base44.asServiceRole.entities.UserProfile.list('-created_date', 500);
 
-    const profileMap = {};
-    profiles.forEach((p) => {
-      if (p.created_by_id) profileMap[p.created_by_id] = p;
-    });
+    const entries = profiles
+      .filter((p) => p.created_by_id)
+      .map((p) => ({
+        user_id: p.created_by_id,
+        username: p.visibility === "anonymous" ? "Anonymous" : (p.username || "User"),
+        profile_photo: p.profile_photo || null,
+        plan: p.plan || "free",
+        is_verified: p.is_verified || false,
+        connections: p.connections_count || 0,
+      }));
 
-    const countByUser = {};
-    memories.forEach((m) => {
-      const uid = m.created_by_id;
-      if (!uid) return;
-      countByUser[uid] = (countByUser[uid] || 0) + 1;
-    });
-
-    const entries = Object.entries(countByUser).map(([uid, count]) => ({
-      user_id: uid,
-      username: profileMap[uid]?.username || "Anonymous",
-      profile_photo: profileMap[uid]?.profile_photo || null,
-      is_verified: profileMap[uid]?.is_verified || false,
-      connections: count,
-    }));
     entries.sort((a, b) => b.connections - a.connections);
 
-    const myCount = countByUser[user.id] || 0;
+    const myEntry = entries.find((e) => e.user_id === user.id);
+    const myCount = myEntry?.connections || 0;
     const myIndex = entries.findIndex((e) => e.user_id === user.id);
     const myRank = myIndex >= 0 ? myIndex + 1 : entries.length + 1;
+    const totalConnections = entries.reduce((sum, e) => sum + e.connections, 0);
 
     return Response.json({
-      leaderboard: entries.slice(0, 10),
+      leaderboard: entries.slice(0, 50),
       myRank,
       myCount,
       totalUsers: entries.length,
-      totalConnections: memories.length,
+      totalConnections,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

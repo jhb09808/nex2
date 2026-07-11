@@ -30,6 +30,7 @@ import Premium from '@/pages/Premium';
 import EditProfile from '@/pages/EditProfile';
 import AdminPanel from '@/pages/AdminPanel';
 import PlatinumFeed from '@/pages/PlatinumFeed';
+import Leaderboard from '@/pages/Leaderboard';
 import AppLayout from '@/components/nex/AppLayout';
 
 const AuthenticatedApp = () => {
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<NearbyMap />} />
           <Route path="/discover" element={<Home />} />
           <Route path="/platinum-lounge" element={<PlatinumFeed />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/map" element={<NearbyMap />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/notifications" element={<Notifications />} />
