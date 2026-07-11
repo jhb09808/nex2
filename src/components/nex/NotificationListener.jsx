@@ -99,7 +99,7 @@ export default function NotificationListener() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -60, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm"
+          className="fixed top-28 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm"
           onClick={() => {
             setToast(null);
             navigate("/notifications");
