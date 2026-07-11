@@ -7,7 +7,6 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
-import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
 
 import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
@@ -27,10 +26,9 @@ export default function NearbyMap() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
   const [areaRestricted, setAreaRestricted] = useState(null);
-  const [safetyUser, setSafetyUser] = useState(null);
   const [capabilities, setCapabilities] = useState(null);
   const [paywallVariant, setPaywallVariant] = useState(null);
-  const [waveJustSent, setWaveJustSent] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
   const [myProfile, setMyProfile] = useState(null);
   const [showRadarOnboarding, setShowRadarOnboarding] = useState(false);
   const [viewMode, setViewMode] = useState("best");
@@ -50,29 +48,6 @@ export default function NearbyMap() {
     window.addEventListener("nex-open-filters", openFilters);
     return () => window.removeEventListener("nex-open-filters", openFilters);
   }, []);
-
-  const [connectionCount, setConnectionCount] = useState(null);
-
-  useEffect(() => {
-    if (!selectedUser) {
-      setConnectionCount(null);
-      return;
-    }
-    const targetId = selectedUser.created_by_id || selectedUser.id;
-    (async () => {
-      try {
-        const sent = await base44.entities.Wave.filter({ sender_id: targetId, status: "accepted" });
-        const received = await base44.entities.Wave.filter({ receiver_id: targetId, status: "accepted" });
-        const connections = new Set();
-        sent.forEach((w) => connections.add(w.receiver_id));
-        received.forEach((w) => connections.add(w.sender_id));
-        setConnectionCount(connections.size);
-      } catch (e) {
-        console.error(e);
-        setConnectionCount(null);
-      }
-    })();
-  }, [selectedUser]);
 
   // Save real GPS to profile on app open so nearby users can see each other
   const checkLocation = async () => {
@@ -539,10 +514,10 @@ export default function NearbyMap() {
                       {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
                     </span>
                   )}
-                  {connectionCount != null && (
+                  {selectedUser.connections_count != null && (
                     <span className="text-white/40 text-xs flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      {connectionCount} {connectionCount === 1 ? "connection" : "connections"}
+                      {selectedUser.connections_count} {selectedUser.connections_count === 1 ? "connection" : "connections"}
                     </span>
                   )}
                 </div>
@@ -593,18 +568,17 @@ export default function NearbyMap() {
                           return;
                         }
                         const targetId = selectedUser.created_by_id || selectedUser.id;
-                        const waveRes = await base44.functions.invoke("submitWave", { receiver_id: targetId });
-                        const data = waveRes.data;
+                        const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
+                        const data = res.data;
                         if (data?.mutual_match && data?.conversation_id) {
                           setSelectedUser(null);
                           navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
                         } else if (data?.error) {
-                          console.error("Wave error:", data.error);
+                          console.error("Request error:", data.error);
                         } else {
-                          // Wave sent — show confirmation and close
                           setSelectedUser(null);
-                          setWaveJustSent(true);
-                          setTimeout(() => setWaveJustSent(false), 3000);
+                          setRequestSent(true);
+                          setTimeout(() => setRequestSent(false), 3000);
                         }
                       } catch (err) {
                         console.error(err);
@@ -612,31 +586,14 @@ export default function NearbyMap() {
                     }}
                     className="flex-1 py-3 rounded-xl gradient-blue text-white font-medium text-sm flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
                   >
-                    <MessageCircle className="w-4 h-4" /> Message
+                    <MessageCircle className="w-4 h-4" /> Request Chat
                   </button>
                 )}
-                <button
-                  onClick={() => setSafetyUser(selectedUser)}
-                  className="w-12 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:scale-[0.98] transition-transform"
-                >
-                  <Shield className="w-4 h-4 text-white/40" />
-                </button>
               </div>
             </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Block / Report Sheet */}
-      <BlockReportSheet
-        user={safetyUser}
-        open={!!safetyUser}
-        onClose={() => setSafetyUser(null)}
-        onBlocked={() => {
-          setSelectedUser(null);
-          loadUsers();
-        }}
-      />
 
       {/* Paywall Prompts */}
       <PaywallPrompt
@@ -645,9 +602,9 @@ export default function NearbyMap() {
         onClose={() => setPaywallVariant(null)}
       />
 
-      {/* Wave Sent Confirmation */}
+      {/* Request Sent Confirmation */}
       <AnimatePresence>
-        {waveJustSent && (
+        {requestSent && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -656,7 +613,7 @@ export default function NearbyMap() {
           >
             <div className="glass-strong rounded-2xl px-5 py-3 flex items-center gap-2">
               <Check className="w-5 h-5 text-green-400" />
-              <p className="text-white text-sm font-medium">Chat request sent! You'll be notified when they accept.</p>
+              <p className="text-white text-sm font-medium">Chat request sent!</p>
             </div>
           </motion.div>
         )}
