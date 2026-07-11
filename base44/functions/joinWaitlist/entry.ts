@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, already_registered: true });
     }
 
-    await base44.asServiceRole.entities.Waitlist.create({ email, zip_code });
+    await base44.asServiceRole.entities.Waitlist.create({ email, zip_code, status: 'waitlisted' });
 
     // Send email notification to the admin
     try {

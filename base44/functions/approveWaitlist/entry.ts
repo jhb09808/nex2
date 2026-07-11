@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     if (!entry) return Response.json({ error: 'Waitlist entry not found' }, { status: 404 });
 
     // Update status to approved
-    await base44.asServiceRole.entities.Waitlist.update(entryId, { status: 'approved' });
+    await base44.asServiceRole.entities.Waitlist.update(entryId, { status: 'active' });
 
     return Response.json({ success: true });
   } catch (error) {

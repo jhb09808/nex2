@@ -62,6 +62,9 @@
     "longitude": {
       "type": "number"
     },
+    "zip_code": {
+      "type": "string"
+    },
     "proximity_tier": {
       "type": "string",
       "enum": [
