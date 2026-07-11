@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Zap, MapPin, Loader2, Mail, Phone, Check, UserPlus } from "lucide-react";
+import { Flame, Zap, MapPin, Loader2, Mail, Phone, Check, UserPlus, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AreaCounters() {
@@ -17,6 +17,11 @@ export default function AreaCounters() {
   const [joined, setJoined] = useState(false);
   const [joinError, setJoinError] = useState("");
 
+  // Status check state
+  const [checking, setChecking] = useState(false);
+  const [statusResult, setStatusResult] = useState(null);
+  const [statusError, setStatusError] = useState("");
+
   const handleCheck = async () => {
     if (!/^\d{5}$/.test(zip.trim())) {
       setError("Enter a valid 5-digit ZIP");
@@ -32,6 +37,25 @@ export default function AreaCounters() {
       setError("Couldn't load counts. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCheckStatus = async () => {
+    setStatusError("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(joinEmail.trim())) {
+      setStatusError("Enter the email you signed up with");
+      return;
+    }
+    setChecking(true);
+    setStatusResult(null);
+    try {
+      const res = await base44.functions.invoke("checkWaitlistApproval", { email: joinEmail.trim() });
+      setStatusResult(res.data);
+    } catch (err) {
+      console.error(err);
+      setStatusError("Couldn't check status. Try again.");
+    } finally {
+      setChecking(false);
     }
   };
 
@@ -214,15 +238,48 @@ export default function AreaCounters() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-strong rounded-2xl p-4 flex items-center gap-3 mt-3"
+            className="glass-strong rounded-2xl p-4 mt-3 space-y-3"
           >
-            <div className="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center flex-shrink-0">
-              <Check className="w-5 h-5 text-green-400" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center flex-shrink-0">
+                <Check className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-white text-sm font-medium">You're on the list!</p>
+                <p className="text-white/40 text-xs">We'll notify you when NEX2 launches in your area.</p>
+              </div>
             </div>
-            <div>
-              <p className="text-white text-sm font-medium">You're on the list!</p>
-              <p className="text-white/40 text-xs">We'll notify you when NEX2 launches in your area.</p>
-            </div>
+
+            {statusResult && (
+              <div className={`rounded-xl p-3 ${statusResult.approved ? "bg-green-500/10 border border-green-500/20" : "bg-white/[0.04] border border-white/[0.08]"}`}>
+                {statusResult.approved ? (
+                  <div className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-400" />
+                    <div>
+                      <p className="text-green-400 text-sm font-medium">You're approved!</p>
+                      <p className="text-white/50 text-xs">Create an account to get started.</p>
+                    </div>
+                  </div>
+                ) : statusResult.status === "not_found" ? (
+                  <p className="text-white/50 text-xs">No waitlist entry found for this email. Double-check and try again.</p>
+                ) : (
+                  <p className="text-white/50 text-xs">
+                    Your status: <span className="text-white/70 font-medium capitalize">{statusResult.status?.replace("_", " ")}</span>. Check back soon!
+                  </p>
+                )}
+              </div>
+            )}
+
+            {statusError && <p className="text-red-400/70 text-xs text-center">{statusError}</p>}
+
+            <button
+              onClick={handleCheckStatus}
+              disabled={checking}
+              className="w-full py-3 rounded-xl glass text-white/70 font-medium text-sm disabled:opacity-40 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            >
+              {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              Check your status
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
