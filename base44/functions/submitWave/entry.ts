@@ -87,6 +87,17 @@ Deno.serve(async (req) => {
         conversation_id: convo.id,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
+
+      // Increment connection count for both users on mutual match
+      await base44.asServiceRole.entities.UserProfile.updateMany(
+        { created_by_id: user.id },
+        { $inc: { connections_count: 1 } }
+      );
+      await base44.asServiceRole.entities.UserProfile.updateMany(
+        { created_by_id: receiver_id },
+        { $inc: { connections_count: 1 } }
+      );
+
       return Response.json({
         wave: newWave,
         mutual_match: true,

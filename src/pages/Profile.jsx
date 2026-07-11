@@ -97,7 +97,7 @@ export default function Profile() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <GlassCard className="text-center !p-3">
-          <p className="text-xl font-bold gradient-text">0</p>
+          <p className="text-xl font-bold gradient-text">{profile?.connections_count || 0}</p>
           <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
         </GlassCard>
         <GlassCard className="text-center !p-3">

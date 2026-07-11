@@ -50,6 +50,16 @@ Deno.serve(async (req) => {
       sender_id: user.id,
     });
 
+    // Increment connection count for both users
+    await base44.asServiceRole.entities.UserProfile.updateMany(
+      { created_by_id: user.id },
+      { $inc: { connections_count: 1 } }
+    );
+    await base44.asServiceRole.entities.UserProfile.updateMany(
+      { created_by_id: wave.sender_id },
+      { $inc: { connections_count: 1 } }
+    );
+
     return Response.json({ conversation_id: convo.id, wave_id });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

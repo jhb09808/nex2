@@ -19,7 +19,6 @@ export default function UserDetail() {
   const [myProfile, setMyProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [safetyOpen, setSafetyOpen] = useState(false);
-  const [connectionCount, setConnectionCount] = useState(null);
 
   useEffect(() => {
     loadUser();
@@ -39,14 +38,6 @@ export default function UserDetail() {
       const me = await base44.auth.me();
       const myP = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (myP.length > 0) setMyProfile(myP[0]);
-
-      const targetId = targetUser.created_by_id || targetUser.id;
-      const sent = await base44.entities.Wave.filter({ sender_id: targetId, status: "accepted" });
-      const received = await base44.entities.Wave.filter({ receiver_id: targetId, status: "accepted" });
-      const connections = new Set();
-      sent.forEach((w) => connections.add(w.receiver_id));
-      received.forEach((w) => connections.add(w.sender_id));
-      setConnectionCount(connections.size);
     } catch (err) {
       console.error(err);
     } finally {
@@ -91,10 +82,10 @@ export default function UserDetail() {
           <VerifiedBadges isVerified={user.is_verified} isOg={user.is_og} size="lg" />
         </div>
         <p className="text-white/30 text-xs font-mono mb-2">#{getUserNumber(user)}</p>
-        {connectionCount != null && (
+        {user?.connections_count != null && (
           <div className="flex items-center gap-1.5 text-white/40 text-sm mb-1">
             <Users className="w-4 h-4" />
-            <span>{connectionCount} {connectionCount === 1 ? "connection" : "connections"}</span>
+            <span>{user.connections_count} {user.connections_count === 1 ? "connection" : "connections"}</span>
           </div>
         )}
       </div>
