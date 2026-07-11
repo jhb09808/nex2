@@ -103,6 +103,16 @@ Deno.serve(async (req) => {
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     });
 
+    // Notify the receiver that someone wants to connect
+    await base44.asServiceRole.entities.Notification.create({
+      user_id: receiver_id,
+      type: 'match',
+      title: 'New chat request',
+      body: `${sender.username || 'Someone nearby'} wants to connect with you`,
+      related_id: newWave.id,
+      sender_id: user.id,
+    });
+
     return Response.json({ wave: newWave, mutual_match: false });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -9,7 +9,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
-import ChatApprovalModal from "@/components/nex/ChatApprovalModal";
+
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
@@ -29,7 +29,7 @@ export default function NearbyMap() {
   const [safetyUser, setSafetyUser] = useState(null);
   const [capabilities, setCapabilities] = useState(null);
   const [paywallVariant, setPaywallVariant] = useState(null);
-  const [chatApprovalUser, setChatApprovalUser] = useState(null);
+  const [waveJustSent, setWaveJustSent] = useState(false);
   const [myProfile, setMyProfile] = useState(null);
   const [showRadarOnboarding, setShowRadarOnboarding] = useState(false);
   const [viewMode, setViewMode] = useState("best");
@@ -534,7 +534,20 @@ export default function NearbyMap() {
                           setPaywallVariant("chat_limit");
                           return;
                         }
-                        setChatApprovalUser(selectedUser);
+                        const targetId = selectedUser.created_by_id || selectedUser.id;
+                        const waveRes = await base44.functions.invoke("submitWave", { receiver_id: targetId });
+                        const data = waveRes.data;
+                        if (data?.mutual_match && data?.conversation_id) {
+                          setSelectedUser(null);
+                          navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
+                        } else if (data?.error) {
+                          console.error("Wave error:", data.error);
+                        } else {
+                          // Wave sent — show confirmation and close
+                          setSelectedUser(null);
+                          setWaveJustSent(true);
+                          setTimeout(() => setWaveJustSent(false), 3000);
+                        }
                       } catch (err) {
                         console.error(err);
                       }
@@ -574,41 +587,22 @@ export default function NearbyMap() {
         onClose={() => setPaywallVariant(null)}
       />
 
-      {/* Chat Approval Modal */}
-      <ChatApprovalModal
-        user={chatApprovalUser}
-        onAccept={async () => {
-          if (!chatApprovalUser) return;
-          try {
-            const existing = await base44.entities.Conversation.filter({});
-            const convo = existing.find(
-              (c) =>
-                c.participants?.includes(chatApprovalUser.created_by_id) ||
-                c.participants?.includes(chatApprovalUser.id)
-            );
-            let conversationId;
-            if (convo) {
-              conversationId = convo.id;
-            } else {
-              const me = await base44.auth.me();
-              const newConvo = await base44.entities.Conversation.create({
-                participants: [me.id, chatApprovalUser.created_by_id || chatApprovalUser.id],
-                last_message: "",
-                is_active: true,
-              });
-              conversationId = newConvo.id;
-            }
-            setChatApprovalUser(null);
-            setSelectedUser(null);
-            navigate(`/chat/${conversationId}`, { state: { chatUser: chatApprovalUser } });
-          } catch (err) {
-            console.error(err);
-            setChatApprovalUser(null);
-          }
-        }}
-        onReject={() => setChatApprovalUser(null)}
-        onClose={() => setChatApprovalUser(null)}
-      />
+      {/* Wave Sent Confirmation */}
+      <AnimatePresence>
+        {waveJustSent && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute bottom-24 left-1/2 -translate-x-1/2 z-40"
+          >
+            <div className="glass-strong rounded-2xl px-5 py-3 flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-400" />
+              <p className="text-white text-sm font-medium">Chat request sent! You'll be notified when they accept.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Radar Onboarding Overlay */}
       <AnimatePresence>
