@@ -5,11 +5,13 @@ import { ArrowLeft, Users, Flag, BarChart3, Shield, BadgeCheck, Star, Ban, Check
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
+import EmailListPanel from "@/components/nex/admin/EmailListPanel";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("reports");
   const [users, setUsers] = useState([]);
+  const [allRegisteredUsers, setAllRegisteredUsers] = useState([]);
   const [reports, setReports] = useState([]);
   const [zones, setZones] = useState([]);
   const [waitlist, setWaitlist] = useState([]);
@@ -23,13 +25,15 @@ export default function AdminPanel() {
 
   const loadData = async () => {
     try {
-      const [u, r, z, w] = await Promise.all([
+      const [u, r, z, w, registered] = await Promise.all([
         base44.entities.UserProfile.list("-created_date", 50),
         base44.entities.Report.list("-created_date", 50),
         base44.entities.GeoZone.list("-created_date", 50),
         base44.entities.Waitlist.list("-created_date", 200),
+        base44.entities.User.list("-created_date", 500),
       ]);
       setUsers(u);
+      setAllRegisteredUsers(registered);
       // Sort reports: high severity first, then pending, then by date
       const sorted = [...r].sort((a, b) => {
         if (a.is_high_severity !== b.is_high_severity) return b.is_high_severity ? 1 : -1;
@@ -115,6 +119,7 @@ export default function AdminPanel() {
     { key: "reports", label: "Reports", icon: Flag },
     { key: "users", label: "Users", icon: Users },
     { key: "waitlist", label: "Waitlist", icon: Mail },
+    { key: "emails", label: "Emails", icon: Mail },
     { key: "zones", label: "Zones", icon: MapPin },
     { key: "analytics", label: "Analytics", icon: BarChart3 },
   ];
@@ -323,6 +328,11 @@ export default function AdminPanel() {
             </GlassCard>
           )}
         </div>
+      )}
+
+      {/* Emails Tab */}
+      {tab === "emails" && (
+        <EmailListPanel waitlist={waitlist} users={allRegisteredUsers} />
       )}
 
       {/* Zones Tab */}
