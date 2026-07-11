@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Shield, Users } from "lucide-react";
+import { ArrowLeft, Shield, Handshake } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -84,7 +84,7 @@ export default function UserDetail() {
         <p className="text-white/30 text-xs font-mono mb-2">#{getUserNumber(user)}</p>
         {user?.connections_count != null && (
           <div className="flex items-center gap-1.5 text-white/40 text-sm mb-1">
-            <Users className="w-4 h-4" />
+            <Handshake className="w-4 h-4" />
             <span>{user.connections_count} {user.connections_count === 1 ? "connection" : "connections"}</span>
           </div>
         )}

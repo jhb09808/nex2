@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -516,7 +516,7 @@ export default function NearbyMap() {
                   )}
                   {selectedUser.connections_count != null && (
                     <span className="text-white/40 text-xs flex items-center gap-1">
-                      <Users className="w-3 h-3" />
+                      <Handshake className="w-3 h-3" />
                       {selectedUser.connections_count} {selectedUser.connections_count === 1 ? "connection" : "connections"}
                     </span>
                   )}
