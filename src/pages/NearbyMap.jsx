@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -13,6 +13,7 @@ import PaywallPrompt from "@/components/nex/PaywallPrompt";
 import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
+import RadarList from "@/components/nex/radar/RadarList";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -33,6 +34,7 @@ export default function NearbyMap() {
   const [myProfile, setMyProfile] = useState(null);
   const [showRadarOnboarding, setShowRadarOnboarding] = useState(false);
   const [viewMode, setViewMode] = useState("best");
+  const [layoutMode, setLayoutMode] = useState("sonar");
   const [activeFilters, setActiveFilters] = useState([]);
   const [expandedClusters, setExpandedClusters] = useState({});
   const [zoom, setZoom] = useState(1);
@@ -297,8 +299,22 @@ export default function NearbyMap() {
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
-          <div className="absolute top-4 left-4 right-16 z-20 flex items-center safe-top">
+          <div className="absolute top-4 left-4 right-16 z-20 flex items-center gap-3 safe-top">
             <h1 className="text-xl font-bold text-white">Nearby</h1>
+            <div className="glass-strong rounded-full p-0.5 flex gap-0.5">
+              <button
+                onClick={() => setLayoutMode("sonar")}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "gradient-blue text-white" : "text-white/40"}`}
+              >
+                <Radar className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setLayoutMode("list")}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "gradient-blue text-white" : "text-white/40"}`}
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* View Toggle */}
@@ -325,22 +341,26 @@ export default function NearbyMap() {
         </>
       )}
 
-      {/* Radar Scope — tactical radar with privacy jitter on blip positions */}
-      <RadarScope
-        center={userLocation}
-        markers={markers}
-        effectiveRadius={effectiveRadius}
-        getUserLatLng={getUserLatLng}
-        distanceMiles={distanceMiles}
-        onUserClick={(user) => setSelectedUser(user)}
-        onClusterClick={(key) => handleExpandCluster(key)}
-        blurred={showRadarOnboarding}
-        zoom={zoom}
-        onZoomChange={setZoom}
-      />
+      {/* Radar Scope / List View */}
+      {layoutMode === "sonar" ? (
+        <RadarScope
+          center={userLocation}
+          markers={markers}
+          effectiveRadius={effectiveRadius}
+          getUserLatLng={getUserLatLng}
+          distanceMiles={distanceMiles}
+          onUserClick={(user) => setSelectedUser(user)}
+          onClusterClick={(key) => handleExpandCluster(key)}
+          blurred={showRadarOnboarding}
+          zoom={zoom}
+          onZoomChange={setZoom}
+        />
+      ) : (
+        <RadarList users={displayUsers} onUserClick={(user) => setSelectedUser(user)} />
+      )}
 
       {/* Zoom controls */}
-      {!showRadarOnboarding && (
+      {!showRadarOnboarding && layoutMode === "sonar" && (
         <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
           <button
             onClick={() => setZoom((z) => Math.min(5, z + 1))}
