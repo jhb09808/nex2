@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Zap, MapPin, Loader2 } from "lucide-react";
+import { Flame, Zap, MapPin, Loader2, Mail, Phone, Check, UserPlus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AreaCounters() {
@@ -8,6 +8,14 @@ export default function AreaCounters() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+
+  // Join form state
+  const [showJoin, setShowJoin] = useState(false);
+  const [joinEmail, setJoinEmail] = useState("");
+  const [joinPhone, setJoinPhone] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [joinError, setJoinError] = useState("");
 
   const handleCheck = async () => {
     if (!/^\d{5}$/.test(zip.trim())) {
@@ -24,6 +32,36 @@ export default function AreaCounters() {
       setError("Couldn't load counts. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJoin = async () => {
+    setJoinError("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(joinEmail.trim())) {
+      setJoinError("Enter a valid email");
+      return;
+    }
+    if (!/^\d{5}$/.test(zip.trim())) {
+      setJoinError("Enter a valid 5-digit ZIP first");
+      return;
+    }
+    setJoining(true);
+    try {
+      const res = await base44.functions.invoke("joinWaitlist", {
+        email: joinEmail.trim(),
+        phone: joinPhone.trim(),
+        zip_code: zip.trim(),
+      });
+      if (res.data?.success) {
+        setJoined(true);
+      } else {
+        setJoinError(res.data?.error || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      setJoinError("Couldn't join. Try again.");
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -112,6 +150,79 @@ export default function AreaCounters() {
             <p className="text-center text-white/30 text-xs pt-1">
               We launch in your area once we hit 100 nearby
             </p>
+
+            {/* Join waitlist CTA */}
+            {!joined && (
+              <button
+                onClick={() => setShowJoin(!showJoin)}
+                className="w-full py-3 rounded-xl glass text-white/70 font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+              >
+                <UserPlus className="w-4 h-4" /> Join the waitlist
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Join form */}
+      <AnimatePresence>
+        {showJoin && !joined && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="glass-strong rounded-2xl p-4 space-y-3 mt-3">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={joinEmail}
+                  onChange={(e) => setJoinEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl glass text-white text-sm placeholder:text-white/30 outline-none focus:border-blue-500/30 transition-colors"
+                />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <input
+                  type="tel"
+                  placeholder="Phone number (optional)"
+                  value={joinPhone}
+                  onChange={(e) => setJoinPhone(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl glass text-white text-sm placeholder:text-white/30 outline-none focus:border-blue-500/30 transition-colors"
+                />
+              </div>
+              {joinError && <p className="text-red-400/70 text-xs text-center">{joinError}</p>}
+              <button
+                onClick={handleJoin}
+                disabled={joining}
+                className="w-full py-3 rounded-xl gradient-blue text-white font-medium text-sm disabled:opacity-40 active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                {joining ? <Loader2 className="w-4 h-4 animate-spin" /> : "Reserve my spot"}
+              </button>
+              <p className="text-center text-white/30 text-[11px]">
+                We'll text or email you when NEX2 launches near {zip}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {joined && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-strong rounded-2xl p-4 flex items-center gap-3 mt-3"
+          >
+            <div className="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center flex-shrink-0">
+              <Check className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-medium">You're on the list!</p>
+              <p className="text-white/40 text-xs">We'll notify you when NEX2 launches in your area.</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

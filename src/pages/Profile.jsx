@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut } from "lucide-react";
+import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2 } from "lucide-react";
+import ShareButton from "@/components/nex/ShareButton";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -57,8 +58,9 @@ export default function Profile() {
   return (
     <div className="px-4 pt-6 safe-top space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between pr-12">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">Profile</h1>
+        <ShareButton profile={profile} />
       </div>
 
       {/* Profile Card */}

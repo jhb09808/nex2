@@ -8,6 +8,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
+import ShareButton from "@/components/nex/ShareButton";
 import { getUserDisplayName, getUserNumber } from "@/components/nex/userDisplay";
 
 export default function UserDetail() {
@@ -132,6 +133,7 @@ export default function UserDetail() {
         <div className="flex-1">
           <WaveButton targetUser={user} onMutualMatch={handleMutualMatch} />
         </div>
+        <ShareButton profile={user} />
         <button
           onClick={() => setSafetyOpen(true)}
           className="w-14 py-4 rounded-2xl glass flex items-center justify-center active:scale-95 transition-transform flex-shrink-0"

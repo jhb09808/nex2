@@ -5,6 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
     const email = body?.email?.trim()?.toLowerCase();
+    const phone = body?.phone?.trim() || undefined;
     const zip_code = body?.zip_code?.trim();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -17,17 +18,21 @@ Deno.serve(async (req) => {
     // Check for existing entry (service role — waitlist is public, no user auth needed)
     const existing = await base44.asServiceRole.entities.Waitlist.filter({ email });
     if (existing.length > 0) {
+      // Update phone if provided and not already stored
+      if (phone && !existing[0].phone) {
+        await base44.asServiceRole.entities.Waitlist.update(existing[0].id, { phone });
+      }
       return Response.json({ success: true, already_registered: true });
     }
 
-    await base44.asServiceRole.entities.Waitlist.create({ email, zip_code, status: 'waitlisted' });
+    await base44.asServiceRole.entities.Waitlist.create({ email, phone, zip_code, status: 'waitlisted' });
 
     // Send email notification to the admin
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: "whosnex2me@gmail.com",
         subject: "New Waitlist Signup",
-        body: `A new user joined the NEX2 waitlist!\n\nEmail: ${email}\nZIP Code: ${zip_code}\n\nManage your waitlist from the Admin Panel.`,
+        body: `A new user joined the NEX2 waitlist!\n\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ""}ZIP Code: ${zip_code}\n\nManage your waitlist from the Admin Panel.`,
       });
     } catch (emailErr) {
       // Don't fail the whole request if email fails

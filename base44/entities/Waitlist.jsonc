@@ -6,6 +6,9 @@
       "type": "string",
       "format": "email"
     },
+    "phone": {
+      "type": "string"
+    },
     "zip_code": {
       "type": "string"
     },
