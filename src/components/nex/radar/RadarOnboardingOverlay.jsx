@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Radar } from "lucide-react";
-import { RADAR_INTERESTS, MIN_INTEREST_SELECTIONS } from "./constants";
+import { RADAR_INTERESTS, MIN_INTEREST_SELECTIONS, MAX_INTEREST_SELECTIONS } from "./constants";
 
 export default function RadarOnboardingOverlay({ onComplete }) {
   const [selected, setSelected] = useState([]);
 
-  const canEnter = selected.length >= MIN_INTEREST_SELECTIONS;
+  const canEnter = selected.length >= MIN_INTEREST_SELECTIONS && selected.length <= MAX_INTEREST_SELECTIONS;
 
   const toggleInterest = (interest) => {
-    setSelected((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    );
+    setSelected((prev) => {
+      if (prev.includes(interest)) return prev.filter((i) => i !== interest);
+      if (prev.length >= MAX_INTEREST_SELECTIONS) return prev;
+      return [...prev, interest];
+    });
   };
 
   const handleEnter = () => {
@@ -44,16 +46,16 @@ export default function RadarOnboardingOverlay({ onComplete }) {
               <Radar className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-xl font-bold text-white mb-1">Calibrate Your Radar</h2>
-            <p className="text-white/40 text-sm">Pick at least 3 interests to find your best matches nearby</p>
+            <p className="text-white/40 text-sm">Pick {MAX_INTEREST_SELECTIONS} interests to find your best matches nearby</p>
           </div>
 
           {/* Progress indicator */}
           <div className="flex items-center justify-between mb-4 px-1">
             <span className="text-xs text-white/40 font-medium">
-              {Math.min(selected.length, MIN_INTEREST_SELECTIONS)} of {MIN_INTEREST_SELECTIONS} selected
+              {selected.length} of {MAX_INTEREST_SELECTIONS} selected
             </span>
             <div className="flex gap-1.5">
-              {Array.from({ length: MIN_INTEREST_SELECTIONS }).map((_, i) => (
+              {Array.from({ length: MAX_INTEREST_SELECTIONS }).map((_, i) => (
                 <div
                   key={i}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -102,6 +104,7 @@ export default function RadarOnboardingOverlay({ onComplete }) {
               `Select ${MIN_INTEREST_SELECTIONS - selected.length} more`
             )}
           </button>
+          <p className="text-white/25 text-[11px] text-center mt-2">Max {MAX_INTEREST_SELECTIONS} — pick what matters most</p>
         </div>
       </motion.div>
     </motion.div>

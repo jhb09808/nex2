@@ -4,13 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import InterestTag from "@/components/nex/InterestTag";
-
-const ALL_INTERESTS = [
-  "Technology", "Fitness", "Business", "Cars", "Nightlife", "Photography",
-  "Travel", "Food", "Creators", "Startups", "Sports", "Music",
-  "Art", "Gaming", "Fashion", "Movies", "Reading", "Hiking",
-  "Yoga", "Cooking", "Design", "Crypto", "Science", "Pets", "420"
-];
+import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
 const VISIBILITY_OPTIONS = [
   { value: "anonymous", icon: EyeOff, label: "Anonymous", desc: "Hide your identity completely" },
@@ -29,9 +23,11 @@ export default function Onboarding() {
   const [saving, setSaving] = useState(false);
 
   const toggleInterest = (interest) => {
-    setInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    );
+    setInterests((prev) => {
+      if (prev.includes(interest)) return prev.filter((i) => i !== interest);
+      if (prev.length >= MAX_INTEREST_SELECTIONS) return prev;
+      return [...prev, interest];
+    });
   };
 
   const handleComplete = async () => {
@@ -67,7 +63,7 @@ export default function Onboarding() {
 
   const canProceed = () => {
     if (step === 0) return username.length >= 3 && parseInt(age) >= 18;
-    if (step === 1) return interests.length >= 3;
+    if (step === 1) return interests.length >= 3 && interests.length <= MAX_INTEREST_SELECTIONS;
     return true;
   };
 
@@ -121,10 +117,10 @@ export default function Onboarding() {
     <motion.div key="interests" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white mb-1">Pick your interests</h2>
-        <p className="text-white/40 text-sm">Select at least 3 to help us find your people</p>
+        <p className="text-white/40 text-sm">Choose up to {MAX_INTEREST_SELECTIONS} that define you</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        {ALL_INTERESTS.map((interest) => (
+        {RADAR_INTERESTS.map((interest) => (
           <InterestTag
             key={interest}
             label={interest}
@@ -133,7 +129,7 @@ export default function Onboarding() {
           />
         ))}
       </div>
-      <p className="text-white/30 text-xs text-center">{interests.length} selected</p>
+      <p className="text-white/30 text-xs text-center">{interests.length} of {MAX_INTEREST_SELECTIONS} selected</p>
     </motion.div>,
 
     // Step 2: Visibility

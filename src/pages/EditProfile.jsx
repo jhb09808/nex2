@@ -3,13 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import InterestTag from "@/components/nex/InterestTag";
-
-const ALL_INTERESTS = [
-  "Technology", "Fitness", "Business", "Cars", "Nightlife", "Photography",
-  "Travel", "Food", "Creators", "Startups", "Sports", "Music",
-  "Art", "Gaming", "Fashion", "Movies", "Reading", "Hiking",
-  "Yoga", "Cooking", "Design", "Crypto", "Science", "Pets"
-];
+import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -49,9 +43,11 @@ export default function EditProfile() {
   };
 
   const toggleInterest = (interest) => {
-    setInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    );
+    setInterests((prev) => {
+      if (prev.includes(interest)) return prev.filter((i) => i !== interest);
+      if (prev.length >= MAX_INTEREST_SELECTIONS) return prev;
+      return [...prev, interest];
+    });
   };
 
   const isPremium = profile?.plan === "pro" || profile?.plan === "platinum";
@@ -102,9 +98,9 @@ export default function EditProfile() {
         </div>
 
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Interests</label>
+          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Interests (max {MAX_INTEREST_SELECTIONS})</label>
           <div className="flex flex-wrap gap-2">
-            {ALL_INTERESTS.map((interest) => (
+            {RADAR_INTERESTS.map((interest) => (
               <InterestTag
                 key={interest}
                 label={interest}
@@ -113,6 +109,7 @@ export default function EditProfile() {
               />
             ))}
           </div>
+          <p className="text-white/30 text-xs mt-2">{interests.length} of {MAX_INTEREST_SELECTIONS} selected</p>
         </div>
       </div>
     </div>
