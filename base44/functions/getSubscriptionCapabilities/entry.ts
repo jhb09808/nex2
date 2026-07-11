@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 const TIER_CONFIG = {
   free: {
     radius_miles: 1,
-    daily_chat_limit: 3,
+    daily_chat_limit: 10,
     filters: 'basic',
     invisible_mode: false,
     analytics: false,

@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const FREE_DAILY_CHAT_LIMIT = 3;
+const FREE_DAILY_CHAT_LIMIT = 10;
 
 Deno.serve(async (req) => {
   try {
