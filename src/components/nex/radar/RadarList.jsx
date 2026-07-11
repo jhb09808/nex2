@@ -3,7 +3,7 @@ import { MapPin, EyeOff, Sparkles, MessageCircle } from "lucide-react";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
-import { getInterestIcon } from "@/components/nex/radar/interestIcons";
+import { getInterestIcon, getInterestColor } from "@/components/nex/radar/interestIcons";
 import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
 
 export default function RadarList({ users, onUserClick }) {
@@ -57,11 +57,21 @@ export default function RadarList({ users, onUserClick }) {
                 )}
               </div>
               {user.interests?.length > 0 && (
-                <div className="flex gap-1 mt-1.5">
+                <div className="flex gap-1.5 mt-1.5">
                   {user.interests.slice(0, 5).map((interest) => {
                     const Icon = getInterestIcon(interest);
                     if (!Icon) return null;
-                    return <Icon key={interest} className="w-3.5 h-3.5 text-white/30" />;
+                    const color = getInterestColor(interest);
+                    return (
+                      <Icon
+                        key={interest}
+                        className="w-4 h-4"
+                        style={{
+                          color: color,
+                          filter: `drop-shadow(0 0 4px ${color}AA) drop-shadow(0 0 8px ${color}55)`,
+                        }}
+                      />
+                    );
                   })}
                 </div>
               )}

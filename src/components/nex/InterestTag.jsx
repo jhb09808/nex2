@@ -1,8 +1,9 @@
 import React from "react";
-import { getInterestIcon } from "@/components/nex/radar/interestIcons";
+import { getInterestIcon, getInterestColor } from "@/components/nex/radar/interestIcons";
 
 export default function InterestTag({ label, selected, onClick, size = "md", iconOnly = false }) {
   const Icon = getInterestIcon(label);
+  const color = getInterestColor(label);
 
   if (iconOnly && Icon) {
     const containerSize = size === "sm" ? "w-8 h-8" : "w-10 h-10";
@@ -11,13 +12,19 @@ export default function InterestTag({ label, selected, onClick, size = "md", ico
       <button
         onClick={onClick}
         title={label}
-        className={`${containerSize} rounded-xl flex items-center justify-center transition-all duration-200 ${
+        className={`${containerSize} rounded-xl flex items-center justify-center transition-all duration-200 active:scale-95 ${
           selected
-            ? "gradient-blue text-white glow-blue-sm"
-            : "bg-white/[0.04] border border-white/[0.08] text-white/60 hover:text-white/80 active:scale-95"
+            ? "bg-white/[0.06] border border-white/[0.1]"
+            : "bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.06]"
         }`}
       >
-        <Icon className={iconSize} />
+        <Icon
+          className={iconSize}
+          style={{
+            color: color,
+            filter: `drop-shadow(0 0 4px ${color}AA) drop-shadow(0 0 8px ${color}55)`,
+          }}
+        />
       </button>
     );
   }
@@ -33,7 +40,12 @@ export default function InterestTag({ label, selected, onClick, size = "md", ico
           : "bg-white/[0.04] border border-white/[0.08] text-white/60 hover:text-white/80 active:scale-95"
       }`}
     >
-      {Icon && <Icon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />}
+      {Icon && (
+        <Icon
+          className="w-3.5 h-3.5 inline mr-1 -mt-0.5"
+          style={{ color: selected ? "#ffffff" : color, filter: selected ? "none" : `drop-shadow(0 0 3px ${color}88)` }}
+        />
+      )}
       {label}
     </button>
   );
