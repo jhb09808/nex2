@@ -4,14 +4,14 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const email = body?.email;
+    const email = body?.email?.trim()?.toLowerCase();
 
     if (!email || typeof email !== "string") {
       return Response.json({ approved: false, error: "Email is required" }, { status: 400 });
     }
 
     const entries = await base44.asServiceRole.entities.Waitlist.filter({
-      email: email.trim()
+      email
     });
 
     if (entries.length === 0) {
