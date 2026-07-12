@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock, Loader2, ArrowRight, Mail, CheckCircle2, MapPin } from "lucide-react";
+import { Lock, Loader2, ArrowRight, Mail, CheckCircle2, MapPin, Globe, Check } from "lucide-react";
 import { appParams } from "@/lib/app-params";
 
 const SESSION_KEY = "nex_access_granted";
@@ -17,6 +17,8 @@ export default function PasswordGate() {
   // Waitlist state
   const [email, setEmail] = useState("");
   const [zipCode, setZipCode] = useState("");
+  const [isInternational, setIsInternational] = useState(false);
+  const [internationalLocation, setInternationalLocation] = useState("");
   const [waitlistDone, setWaitlistDone] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -47,14 +49,24 @@ export default function PasswordGate() {
   const handleWaitlist = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    if (!zipCode.trim()) return;
+    if (isInternational) {
+      if (!internationalLocation.trim()) return;
+    } else {
+      if (!zipCode.trim()) return;
+    }
     setError("");
     setLoading(true);
     try {
+      const payload = { email: email.trim(), is_international: isInternational };
+      if (isInternational) {
+        payload.international_location = internationalLocation.trim();
+      } else {
+        payload.zip_code = zipCode.trim();
+      }
       const response = await fetch(`/api/apps/${appParams.appId}/functions/joinWaitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), zip_code: zipCode.trim() }),
+        body: JSON.stringify(payload),
       });
       const text = await response.text();
       let data;
@@ -245,24 +257,56 @@ export default function PasswordGate() {
               />
             </div>
 
-            <div className="relative">
-              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-              <input
-                type="text"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-                placeholder="ZIP code"
-                inputMode="numeric"
-                maxLength={5}
-                className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-              />
-            </div>
+            {/* International checkbox */}
+            <button
+              type="button"
+              onClick={() => setIsInternational(!isInternational)}
+              className="w-full flex items-center gap-3 py-1 group"
+            >
+              <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${isInternational ? "gradient-blue border-transparent" : "border-white/20 bg-white/[0.04] group-hover:border-white/30"}`}>
+                {isInternational && <Check className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <span className="text-white/60 text-sm">I live outside the US</span>
+            </button>
+
+            {/* ZIP code OR international location */}
+            {!isInternational ? (
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                <input
+                  type="text"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  placeholder="ZIP code"
+                  inputMode="numeric"
+                  maxLength={5}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="relative">
+                  <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                  <input
+                    type="text"
+                    value={internationalLocation}
+                    onChange={(e) => setInternationalLocation(e.target.value)}
+                    placeholder="e.g. Lahore, Pakistan"
+                    autoFocus
+                    className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  />
+                </div>
+                <p className="text-white/30 text-xs pl-1">
+                  We'll notify you when we expand there 🌍
+                </p>
+              </div>
+            )}
 
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
             <button
               type="submit"
-              disabled={loading || !email.trim() || !zipCode.trim()}
+              disabled={loading || !email.trim() || (isInternational ? !internationalLocation.trim() : !zipCode.trim())}
               className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
             >
               {loading ? (
@@ -271,6 +315,11 @@ export default function PasswordGate() {
                 <>Join waitlist <ArrowRight className="w-4 h-4" /></>
               )}
             </button>
+
+            {/* Permanent caption */}
+            <p className="text-center text-white/25 text-[11px] pt-1">
+              NEX2 works best in dense areas — we're starting in NYC and expanding city by city.
+            </p>
 
             <button
               type="button"
