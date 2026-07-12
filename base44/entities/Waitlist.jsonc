@@ -12,6 +12,13 @@
     "zip_code": {
       "type": "string"
     },
+    "is_international": {
+      "type": "boolean",
+      "default": false
+    },
+    "international_location": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -25,8 +32,7 @@
     }
   },
   "required": [
-    "email",
-    "zip_code"
+    "email"
   ],
   "rls": {
     "create": true,
