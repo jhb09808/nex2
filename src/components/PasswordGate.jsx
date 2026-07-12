@@ -257,6 +257,20 @@ export default function PasswordGate() {
               />
             </div>
 
+            {/* ZIP code */}
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="ZIP code"
+                inputMode="numeric"
+                maxLength={5}
+                className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+            </div>
+
             {/* International checkbox */}
             <button
               type="button"
@@ -269,21 +283,8 @@ export default function PasswordGate() {
               <span className="text-white/60 text-sm">I live outside the US</span>
             </button>
 
-            {/* ZIP code OR international location */}
-            {!isInternational ? (
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                <input
-                  type="text"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  placeholder="ZIP code"
-                  inputMode="numeric"
-                  maxLength={5}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-                />
-              </div>
-            ) : (
+            {/* International location — shown when checkbox is checked */}
+            {isInternational && (
               <div className="space-y-2">
                 <div className="relative">
                   <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
