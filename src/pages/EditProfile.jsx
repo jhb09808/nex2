@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useToast } from "@/components/ui/use-toast";
 import InterestTag from "@/components/nex/InterestTag";
 import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
@@ -12,6 +13,8 @@ export default function EditProfile() {
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     loadProfile();
@@ -32,8 +35,19 @@ export default function EditProfile() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const usernameChanged = username !== (profile.username || "");
+      if (isPremium && usernameChanged && username.trim().length >= 3) {
+        const existing = await base44.entities.UserProfile.filter({ username: username.trim() });
+        if (existing.length > 0) {
+          setUsernameError("Username taken — try another");
+          setSaving(false);
+          return;
+        }
+      }
+      setUsernameError("");
       const updates = { username, bio, interests };
       await base44.entities.UserProfile.update(profile.id, updates);
+      toast({ title: "Profile saved" });
       navigate("/profile");
     } catch (e) {
       console.error(e);
@@ -76,7 +90,7 @@ export default function EditProfile() {
           {isPremium ? (
             <input
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => { setUsername(e.target.value); setUsernameError(""); }}
               className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
             />
           ) : (
@@ -84,6 +98,9 @@ export default function EditProfile() {
               <span className="text-white/50">{username}</span>
               <span className="text-white/20 text-xs">— Custom usernames are a Pro feature</span>
             </div>
+          )}
+          {usernameError && (
+            <p className="text-red-400 text-xs mt-1.5">{usernameError}</p>
           )}
         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap } from "lucide-react";
+import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import InterestTag from "@/components/nex/InterestTag";
 import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
@@ -21,6 +21,20 @@ export default function Onboarding() {
   const [interests, setInterests] = useState([]);
   const [visibility, setVisibility] = useState("full_profile");
   const [saving, setSaving] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+
+  const checkUsernameTaken = async (value) => {
+    if (!value || value.length < 3) return false;
+    const existing = await base44.entities.UserProfile.filter({ username: value });
+    return existing.length > 0;
+  };
+
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setUsername(value);
+    setUsernameError("");
+  };
 
   const toggleInterest = (interest) => {
     setInterests((prev) => {
@@ -33,6 +47,13 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setSaving(true);
     try {
+      const taken = await checkUsernameTaken(username);
+      if (taken) {
+        setUsernameError("Username taken — try another");
+        setSaving(false);
+        setStep(0);
+        return;
+      }
       const allUsers = await base44.entities.UserProfile.list("created_date", 500);
       const realUserCount = allUsers.filter(u => !String(u.created_by_id).startsWith("service_")).length;
       const nextNumber = realUserCount + 1;
@@ -80,10 +101,13 @@ export default function Onboarding() {
           <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Username</label>
           <input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={handleUsernameChange}
             placeholder="Choose a unique username"
             className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
           />
+          {usernameError && (
+            <p className="text-red-400 text-xs mt-1.5">{usernameError}</p>
+          )}
         </div>
         <div>
           <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Age</label>
