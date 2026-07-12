@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2 } from "lucide-react";
+import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2, Handshake } from "lucide-react";
 import ShareButton from "@/components/nex/ShareButton";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
@@ -17,6 +17,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connectionCount, setConnectionCount] = useState(0);
 
   useEffect(() => {
     loadProfile();
@@ -27,6 +28,9 @@ export default function Profile() {
       const me = await base44.auth.me();
       const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (profiles.length > 0) setProfile(profiles[0]);
+      // Compute actual connections from accepted conversations
+      const conversations = await base44.entities.Conversation.filter({ participants: me.id });
+      setConnectionCount(conversations.length);
     } catch (err) {
       console.error(err);
     } finally {
@@ -97,7 +101,10 @@ export default function Profile() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <GlassCard className="text-center !p-3">
-          <p className="text-xl font-bold gradient-text">{profile?.connections_count || 0}</p>
+          <div className="flex items-center justify-center gap-1">
+            <Handshake className="w-3.5 h-3.5 text-blue-400" />
+            <p className="text-xl font-bold gradient-text">{connectionCount}</p>
+          </div>
           <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
         </GlassCard>
         <GlassCard className="text-center !p-3">
