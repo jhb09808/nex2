@@ -89,7 +89,7 @@ Find a specific, natural common ground. Make it feel authentic, not generic. Ref
       <div className="flex items-start justify-between mb-4">
         <div className="relative">
           <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-blue-500/20 to-violet-500/20 blur-md" />
-          <UserAvatar src={user.profile_photo} size="lg" isOnline={user.is_online} className="relative" />
+          <UserAvatar name={user.username} size="lg" isOnline={user.is_online} className="relative" />
         </div>
         <div className="relative w-14 h-14">
           <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">

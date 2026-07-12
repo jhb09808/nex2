@@ -141,7 +141,7 @@ Generate:
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-500/20 to-violet-500/20 blur" />
-            <UserAvatar src={match.user.profile_photo} size="lg" isOnline={match.user.is_online} className="relative" />
+            <UserAvatar name={match.user.username} size="lg" isOnline={match.user.is_online} className="relative" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
