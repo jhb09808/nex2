@@ -205,13 +205,8 @@ export default function NearbyMap() {
   const tierCeiling = capabilities?.radius_miles_max;
   const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 0.5;
 
-  // Filter by interest chips
-  const interestFiltered = activeFilters.length > 0
-    ? allProfiles.filter((u) => (u.interests || []).some((i) => activeFilters.includes(i)))
-    : allProfiles;
-
-  // Filter by radius and online status (skip users without stored coordinates)
-  const radiusFiltered = interestFiltered.filter((u) => {
+  // Interests affect ranking only — everyone within range is always visible
+  const radiusFiltered = allProfiles.filter((u) => {
     if (filters.onlineOnly && !u.is_online) return false;
     const coords = getUserLatLng(u);
     if (!coords) return false;
@@ -442,7 +437,7 @@ export default function NearbyMap() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-white/40 uppercase tracking-wider">Interests</label>
+                  <label className="text-xs text-white/40 uppercase tracking-wider">Prioritize Interests</label>
                   {activeFilters.length > 0 && (
                     <button onClick={clearFilters} className="text-[10px] text-blue-400 font-medium">
                       Clear all
@@ -466,7 +461,10 @@ export default function NearbyMap() {
                   })}
                 </div>
                 {activeFilters.length === 0 && (
-                  <p className="text-white/30 text-[11px] mt-2">Showing all interests. Tap to filter.</p>
+                  <p className="text-white/30 text-[11px] mt-2">Showing all interests. Tap to prioritize.</p>
+                )}
+                {activeFilters.length > 0 && (
+                  <p className="text-white/30 text-[11px] mt-2">Prioritizing selected interests. All nearby users still visible.</p>
                 )}
               </div>
             </GlassCard>
