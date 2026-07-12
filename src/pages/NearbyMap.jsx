@@ -22,7 +22,7 @@ export default function NearbyMap() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ distance: 0.5, onlineOnly: false });
+  const [filters, setFilters] = useState({ distance: 5, onlineOnly: false });
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
   const [areaRestricted, setAreaRestricted] = useState(null);
@@ -175,7 +175,7 @@ export default function NearbyMap() {
   };
 
   const saveRadius = async () => {
-    if (myProfile && filters.distance !== (myProfile.radius_miles ?? 0.5)) {
+    if (myProfile && filters.distance !== (myProfile.radius_miles ?? 5)) {
       try {
         await base44.entities.UserProfile.update(myProfile.id, { radius_miles: filters.distance });
         setMyProfile({ ...myProfile, radius_miles: filters.distance });
@@ -203,7 +203,7 @@ export default function NearbyMap() {
   };
 
   const tierCeiling = capabilities?.radius_miles_max;
-  const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 0.5;
+  const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 5;
 
   // Interests affect ranking only — everyone within range is always visible
   const radiusFiltered = allProfiles.filter((u) => {
@@ -412,7 +412,7 @@ export default function NearbyMap() {
                   min="0.5"
                   step="0.5"
                   max={tierCeiling == null ? 100 : tierCeiling}
-                  value={filters.distance}
+                  value={filters.distance || 5}
                   onChange={(e) => {
                     const val = parseFloat(e.target.value);
                     if (tierCeiling != null && val > tierCeiling) {

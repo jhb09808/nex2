@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const TIER_CONFIG = {
   free: {
-    radius_miles: 1,
+    radius_miles: 10,
     daily_chat_limit: 10,
     filters: 'basic',
     invisible_mode: false,
@@ -103,10 +103,10 @@ Deno.serve(async (req) => {
       staleUpdates.has_verified_photo_badge = false;
     }
 
-    // Initialize default radius (0.5 mi) for new accounts; cap at tier ceiling
+    // Initialize default radius (5 mi) for new accounts; cap at tier ceiling
     const tierMax = TIER_CONFIG[tier]?.radius_miles;
     if (profile.radius_miles == null) {
-      staleUpdates.radius_miles = 0.5;
+      staleUpdates.radius_miles = 5;
     } else if (tierMax != null && profile.radius_miles > tierMax) {
       staleUpdates.radius_miles = tierMax;
     }
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
 
     const config = TIER_CONFIG[tier] || TIER_CONFIG.free;
     const canStartChat = config.daily_chat_limit === null || dailyChatCount < config.daily_chat_limit;
-    const finalRadius = staleUpdates.radius_miles !== undefined ? staleUpdates.radius_miles : (profile.radius_miles ?? 0.5);
+    const finalRadius = staleUpdates.radius_miles !== undefined ? staleUpdates.radius_miles : (profile.radius_miles ?? 5);
 
     return Response.json({
       tier,
