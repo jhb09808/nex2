@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap } from "lucide-react";
 import AreaCounters from "@/components/nex/AreaCounters";
+import GlobalCounters from "@/components/nex/GlobalCounters";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -36,6 +37,15 @@ export default function Welcome() {
         <p className="text-white/50 text-lg leading-relaxed max-w-xs">
           Discover people nearby who share your interests. No followers needed.
         </p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.6 }}
+        className="w-full"
+      >
+        <GlobalCounters />
       </motion.div>
 
       <motion.div
