@@ -5,46 +5,21 @@ import CountUp from "@/components/nex/home/CountUp";
 import { base44 } from "@/api/base44Client";
 
 export default function GlobalCounters() {
-  const [counts, setCounts] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [counts, setCounts] = useState({ active_count: 0, waitlist_count: 0 });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    loadCounts();
+    base44.functions.invoke("getGlobalCounts", {})
+      .then((res) => setCounts(res.data))
+      .catch((err) => console.error("GlobalCounters error:", err))
+      .finally(() => setLoaded(true));
   }, []);
-
-  const loadCounts = async () => {
-    try {
-      const res = await base44.functions.invoke("getGlobalCounts", {});
-      setCounts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading || !counts) {
-    return (
-      <div className="flex gap-3 w-full">
-        <div className="flex-1 glass-strong rounded-2xl p-4 animate-pulse">
-          <div className="w-10 h-10 rounded-xl bg-white/5 mb-2" />
-          <div className="h-6 w-12 bg-white/5 rounded" />
-          <div className="h-3 w-20 bg-white/5 rounded mt-1" />
-        </div>
-        <div className="flex-1 glass-strong rounded-2xl p-4 animate-pulse">
-          <div className="w-10 h-10 rounded-xl bg-white/5 mb-2" />
-          <div className="h-6 w-12 bg-white/5 rounded" />
-          <div className="h-3 w-20 bg-white/5 rounded mt-1" />
-        </div>
-      </div>
-    );
-  }
 
   const stats = [
     {
       icon: Users,
       label: "Active members",
-      value: counts.active_count,
+      value: counts.active_count || 0,
       color: "text-blue-400",
       bg: "bg-blue-500/15",
       ring: "border-blue-500/20",
@@ -53,7 +28,7 @@ export default function GlobalCounters() {
     {
       icon: Flame,
       label: "On the waitlist",
-      value: counts.waitlist_count,
+      value: counts.waitlist_count || 0,
       color: "text-orange-400",
       bg: "bg-orange-500/15",
       ring: "border-orange-500/20",
@@ -66,7 +41,7 @@ export default function GlobalCounters() {
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: loaded ? 0 : 1, y: loaded ? 12 : 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
           className="flex-1 relative glass-strong rounded-2xl p-4 overflow-hidden"
