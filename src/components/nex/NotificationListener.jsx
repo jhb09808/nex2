@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, X } from "lucide-react";
+import { Bell, X, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
@@ -91,39 +91,64 @@ export default function NotificationListener() {
     };
   }, []);
 
+  const isChat = toast?.type === "message" || toast?.type === "match";
+  const Icon = isChat ? MessageCircle : Bell;
+
   return (
     <AnimatePresence>
       {toast && (
         <motion.div
-          initial={{ opacity: 0, y: -60, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -60, scale: 0.95 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-28 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[70] flex items-center justify-center px-6"
           onClick={() => {
             setToast(null);
             navigate("/notifications");
           }}
         >
-          <div className="glass-strong rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center flex-shrink-0 glow-blue-sm">
-              <Bell className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white font-semibold text-sm">{toast.title}</p>
-              {toast.body && <p className="text-white/50 text-xs mt-0.5 line-clamp-2">{toast.body}</p>}
-              <p className="text-blue-400 text-[10px] mt-1 font-medium">Tap to view</p>
-            </div>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+            className="relative w-full max-w-sm glass-strong rounded-3xl p-6 ai-glow"
+          >
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setToast(null);
               }}
-              className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center text-white/40 hover:text-white/80 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
-          </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl gradient-blue flex items-center justify-center mb-4 glow-blue">
+                <Icon className="w-8 h-8 text-white" />
+              </div>
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
+                {isChat ? "New Chat" : "Notification"}
+              </p>
+              <p className="text-white font-bold text-lg mb-1">{toast.title}</p>
+              {toast.body && (
+                <p className="text-white/50 text-sm leading-relaxed">{toast.body}</p>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setToast(null);
+                  navigate("/notifications");
+                }}
+                className="mt-5 w-full py-3.5 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              >
+                View <Icon className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
