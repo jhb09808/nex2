@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     }
 
     const entry = entries[0];
-    if (entry.status === "approved") {
+    if (entry.status === "active" || entry.status === "approved") {
       return Response.json({ approved: true });
     } else {
       return Response.json({ approved: false, status: entry.status });
