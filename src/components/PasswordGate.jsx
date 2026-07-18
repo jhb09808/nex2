@@ -141,7 +141,7 @@ export default function PasswordGate() {
 
   const Logo = () => (
     <div className="relative inline-block mb-5">
-      <img src={LOGO_URL} alt="nex2" className="h-14 sm:h-16 object-contain relative z-10" />
+      <img src={LOGO_URL} alt="nex2" className="h-28 sm:h-32 object-contain relative z-10" />
       <div className="absolute inset-0 z-0 flex items-center justify-center">
         <div className="w-40 h-40 rounded-full blur-3xl opacity-30" style={{ background: "radial-gradient(circle, rgba(59,130,246,0.5), transparent 70%)" }} />
       </div>
