@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Lock, Loader2, ArrowRight, Mail, CheckCircle2, MapPin, Globe, Check } from "lucide-react";
 import { appParams } from "@/lib/app-params";
+import GlobalCounters from "@/components/nex/GlobalCounters";
 
 const SESSION_KEY = "nex_access_granted";
 
@@ -338,6 +339,10 @@ export default function PasswordGate() {
             </button>
           </form>
         )}
+
+        <div className="mt-8">
+          <GlobalCounters />
+        </div>
       </div>
     </div>
   );
