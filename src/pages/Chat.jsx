@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import ChatWingman from "@/components/nex/ai/ChatWingman";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
+import NotificationListener from "@/components/nex/NotificationListener";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
@@ -139,6 +140,7 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen bg-[hsl(0,0%,4%)] max-w-lg mx-auto">
+      <NotificationListener />
       {/* Header */}
       <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top">
         <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
