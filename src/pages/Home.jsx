@@ -8,6 +8,7 @@ import BriefingStrip from "@/components/nex/home/BriefingStrip";
 import TopMatch from "@/components/nex/home/TopMatch";
 import MissionStrip from "@/components/nex/home/MissionStrip";
 import OpportunityFeed from "@/components/nex/ai/OpportunityFeed";
+import GlobalCounters from "@/components/nex/GlobalCounters";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -82,6 +83,11 @@ export default function Home() {
             </div>
             <h1 className="text-3xl font-bold holo-text">{profile?.username || "User"}</h1>
           </div>
+        </motion.div>
+
+        {/* Community counters */}
+        <motion.div variants={fadeUp}>
+          <GlobalCounters />
         </motion.div>
 
         {/* Briefing Strip */}
