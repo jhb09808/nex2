@@ -158,7 +158,7 @@ export default function PasswordGate() {
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center px-6 bg-[hsl(0,0%,4%)] overflow-y-auto py-10">
+    <div className="fixed inset-0 flex items-center justify-center px-6 bg-black overflow-y-auto py-10">
       <div className="w-full max-w-sm">
         {/* ===== LANDING MODE ===== */}
         {mode === "landing" && (
