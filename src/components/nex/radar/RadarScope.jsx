@@ -215,7 +215,7 @@ export default function RadarScope({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at center, rgba(0,80,160,0.04) 0%, transparent 60%)`,
+          background: `radial-gradient(ellipse at center, ${sweepColor}0A 0%, transparent 60%)`,
           animation: "nex-ambient-breathe 8s ease-in-out infinite",
         }}
       />
@@ -224,7 +224,7 @@ export default function RadarScope({
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
         style={{
-          background: `radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${sweepColor}0D 0%, transparent 70%)`,
         }}
       />
 
@@ -238,8 +238,8 @@ export default function RadarScope({
             top: `${p.y}%`,
             width: `${p.size}px`,
             height: `${p.size}px`,
-            background: "rgba(59,130,246,0.4)",
-            boxShadow: "0 0 4px rgba(59,130,246,0.3)",
+            background: `${sweepColor}66`,
+            boxShadow: `0 0 4px ${sweepColor}4D`,
             "--dx": `${p.dx}px`,
             "--dy": `${p.dy}px`,
             animation: `nex-particle-drift ${p.duration}s ease-in-out ${p.delay}s infinite`,
@@ -254,7 +254,7 @@ export default function RadarScope({
           className="absolute inset-0 rounded-full"
           style={{
             background: `radial-gradient(circle at center, rgba(2,8,18,0.9) 0%, #000000 100%)`,
-            boxShadow: `inset 0 0 60px rgba(59,130,246,0.03), inset 0 0 120px rgba(0,0,0,0.5)`,
+            boxShadow: `inset 0 0 60px ${sweepColor}08, inset 0 0 120px rgba(0,0,0,0.5)`,
           }}
         />
 
@@ -355,13 +355,13 @@ export default function RadarScope({
           />
         </div>
 
-        {/* Center marker — sharp cyan core with pulsing ring */}
+        {/* Center marker — sharp core with pulsing ring, adapts to sweep color */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="relative flex items-center justify-center">
-            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(59,130,246,0.25)", animation: "nex-center-pulse 2.5s ease-out infinite" }} />
-            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(59,130,246,0.25)", animation: "nex-center-pulse 2.5s ease-out 1.25s infinite" }} />
-            <div className="absolute w-4 h-4 rounded-full bg-blue-400/15 blur-md" />
-            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.cyan, boxShadow: `0 0 6px ${PALETTE.cyan}, 0 0 14px ${PALETTE.cyan}, 0 0 24px ${PALETTE.cyan}40` }} />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: `${sweepColor}40`, animation: "nex-center-pulse 2.5s ease-out infinite" }} />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: `${sweepColor}40`, animation: "nex-center-pulse 2.5s ease-out 1.25s infinite" }} />
+            <div className="absolute w-4 h-4 rounded-full blur-md" style={{ background: `${sweepColor}26` }} />
+            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: sweepColor, boxShadow: `0 0 6px ${sweepColor}, 0 0 14px ${sweepColor}, 0 0 24px ${sweepColor}40` }} />
           </div>
         </div>
 
