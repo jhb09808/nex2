@@ -305,8 +305,8 @@ export default function RadarScope({
           style={{
             background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 180deg, ${sweepColor}06 280deg, ${sweepColor}10 320deg, ${sweepColor}08 350deg, ${sweepColor}04 360deg, transparent 360deg)`,
             animation: "nex-sweep-rotate 5s linear infinite",
-            maskImage: "radial-gradient(circle, white 48%, transparent 50%)",
-            WebkitMaskImage: "radial-gradient(circle, white 48%, transparent 50%)",
+            maskImage: "radial-gradient(circle, white 99%, transparent 100%)",
+            WebkitMaskImage: "radial-gradient(circle, white 99%, transparent 100%)",
           }}
         />
 
@@ -316,8 +316,8 @@ export default function RadarScope({
           style={{
             background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 210deg, ${sweepColor}08 280deg, ${sweepColor}15 315deg, ${sweepColor}30 340deg, ${sweepColor}66 355deg, ${sweepColor}BB 359deg, ${sweepColor}FF 360deg, transparent 360deg)`,
             animation: "nex-sweep-rotate 5s linear infinite",
-            maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
-            WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
+            maskImage: "radial-gradient(circle, white 99%, transparent 100%)",
+            WebkitMaskImage: "radial-gradient(circle, white 99%, transparent 100%)",
           }}
         />
 
