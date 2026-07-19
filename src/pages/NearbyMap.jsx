@@ -362,7 +362,7 @@ export default function NearbyMap() {
             </span>
           </div>
           <p className="text-[10px] font-cyber text-blue-400/30 tracking-widest">
-            {users.length > 0 ? "BEST MATCH DETECTED" : "SCANNING"} · {effectiveRadius} MI RADIUS
+            {users.length > 0 ? `BEST MATCH DETECTED · ${ranked[0]?._dist < 0.1 ? `${Math.round(ranked[0]._dist * 5280)}FT` : `${ranked[0]?._dist?.toFixed(1)} MI`} AWAY` : "SCANNING"}
           </p>
         </div>
       )}
