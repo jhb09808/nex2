@@ -182,8 +182,8 @@ export default function NeuralCircuitBackground() {
       if (!circuit) { raf = requestAnimationFrame(render); return; }
 
       const reveal = Math.min(1, smoothMag * 1.8); // 0..1 overall brightness, amplified
-      // Base ambient (very dim) + reveal — potent
-      const baseGlow = 0.02 + reveal * 0.65;
+      // Base ambient (faintly visible at rest) + potent reveal on tilt
+      const baseGlow = 0.1 + reveal * 0.65;
 
       ctx.save();
       ctx.translate(parallaxX, parallaxY);
@@ -210,8 +210,8 @@ export default function NeuralCircuitBackground() {
         const dirDot = (ddx * s.smoothTiltX + ddy * s.smoothTiltY);
         const dirBoost = Math.max(0, dirDot / radius) * reveal;
 
-        const alpha = baseGlow * proximity * 0.8 + dirBoost * 1.1 + 0.02;
-        if (alpha < 0.02) continue;
+        const alpha = baseGlow * (0.25 + proximity * 0.75) + dirBoost * 1.1;
+        if (alpha < 0.015) continue;
 
         ctx.strokeStyle = `rgba(60, 180, 255, ${Math.min(0.95, alpha)})`;
         ctx.beginPath();
@@ -235,13 +235,13 @@ export default function NeuralCircuitBackground() {
         const dirDot = (ddx * s.smoothTiltX + ddy * s.smoothTiltY);
         const dirBoost = Math.max(0, dirDot / radius) * reveal;
 
-        const nodeAlpha = (baseGlow * proximity * 2.2) + dirBoost * 1.4 + 0.04;
-        if (nodeAlpha < 0.03) continue;
+        const nodeAlpha = (baseGlow * (0.3 + proximity * 1.9)) + dirBoost * 1.4 + 0.05;
+        if (nodeAlpha < 0.02) continue;
 
         const size = n.size * (1.2 + proximity * 1.8) * (0.8 + pulse * 0.4);
 
         // glow halo — saturated electric blue
-        if (proximity > 0.25 && reveal > 0.08) {
+        if (proximity > 0.2 || reveal > 0.05) {
           const halo = ctx.createRadialGradient(nx, ny, 0, nx, ny, size * 8);
           halo.addColorStop(0, `rgba(80, 200, 255, ${Math.min(0.8, nodeAlpha * 0.7 * proximity)})`);
           halo.addColorStop(0.4, `rgba(50, 150, 255, ${nodeAlpha * 0.3 * proximity})`);
@@ -323,17 +323,17 @@ export default function NeuralCircuitBackground() {
         aria-hidden="true"
       />
       {needsPermission && (
-        <div className="absolute inset-x-0 bottom-24 z-20 flex justify-center px-4 pointer-events-none">
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex justify-center px-4 pointer-events-none">
           <button
             onClick={requestTiltPermission}
-            className="pointer-events-auto px-4 py-2 rounded-full cyber-frame text-blue-200/70 text-[11px] font-cyber tracking-wider flex items-center gap-2"
+            className="pointer-events-auto px-5 py-3 rounded-2xl neon-btn text-white text-xs font-cyber font-bold tracking-wider flex items-center gap-2 shadow-2xl"
           >
             {requesting ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 ai-dot" />
+              <span className="w-2 h-2 rounded-full bg-white ai-dot" />
             )}
-            TILT TO REVEAL THE GRID
+            ENABLE TILT TO REVEAL THE GRID
           </button>
         </div>
       )}
