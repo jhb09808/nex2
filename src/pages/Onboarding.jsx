@@ -92,31 +92,31 @@ export default function Onboarding() {
     // Step 0: Profile
     <motion.div key="profile" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Create your profile</h2>
-        <p className="text-white/40 text-sm">Tell us about yourself</p>
+        <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-1">CREATE YOUR PROFILE</h2>
+        <p className="text-blue-200/50 text-xs tracking-wide">Tell us about yourself</p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Username</label>
+          <label className="text-[10px] font-cyber font-medium text-blue-200/40 uppercase tracking-widest mb-2 block">Username</label>
           <input
             value={username}
             onChange={handleUsernameChange}
             placeholder="Choose a unique username"
-            className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+            className="w-full px-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none text-sm"
           />
           {usernameError && (
             <p className="text-red-400 text-xs mt-1.5">{usernameError}</p>
           )}
         </div>
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Age</label>
+          <label className="text-[10px] font-cyber font-medium text-blue-200/40 uppercase tracking-widest mb-2 block">Age</label>
           <input
             type="number"
             value={age}
             onChange={(e) => setAge(e.target.value)}
             placeholder="Must be 18+"
-            className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+            className="w-full px-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none text-sm"
           />
           {age && parseInt(age) < 18 && (
             <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
@@ -125,13 +125,13 @@ export default function Onboarding() {
           )}
         </div>
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Bio</label>
+          <label className="text-[10px] font-cyber font-medium text-blue-200/40 uppercase tracking-widest mb-2 block">Bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder="A short intro about you..."
             rows={3}
-            className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm resize-none"
+            className="w-full px-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none text-sm resize-none"
           />
         </div>
       </div>
@@ -140,8 +140,8 @@ export default function Onboarding() {
     // Step 1: Interests
     <motion.div key="interests" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Pick your interests</h2>
-        <p className="text-white/40 text-sm">Choose up to {MAX_INTEREST_SELECTIONS} that define you</p>
+        <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-1">PICK YOUR INTERESTS</h2>
+        <p className="text-blue-200/50 text-xs tracking-wide">Choose up to {MAX_INTEREST_SELECTIONS} that define you</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {RADAR_INTERESTS.map((interest) => (
@@ -153,14 +153,14 @@ export default function Onboarding() {
           />
         ))}
       </div>
-      <p className="text-white/30 text-xs text-center">{interests.length} of {MAX_INTEREST_SELECTIONS} selected</p>
+      <p className="text-blue-200/40 text-xs text-center font-cyber tracking-wider">{interests.length} OF {MAX_INTEREST_SELECTIONS} SELECTED</p>
     </motion.div>,
 
     // Step 2: Visibility
     <motion.div key="visibility" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Choose your visibility</h2>
-        <p className="text-white/40 text-sm">Control how others see you</p>
+        <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-1">CHOOSE YOUR VISIBILITY</h2>
+        <p className="text-blue-200/50 text-xs tracking-wide">Control how others see you</p>
       </div>
       <div className="space-y-3">
         {VISIBILITY_OPTIONS.map((opt) => {
@@ -171,15 +171,15 @@ export default function Onboarding() {
               key={opt.value}
               onClick={() => setVisibility(opt.value)}
               className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${
-                selected ? "glass-strong ring-1 ring-blue-500/50" : "glass"
+                selected ? "neon-card-active" : "neon-card"
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selected ? "gradient-blue" : "bg-white/5"}`}>
-                <Icon className={`w-5 h-5 ${selected ? "text-white" : "text-white/40"}`} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${selected ? "neon-btn" : "bg-white/5"}`}>
+                <Icon className={`w-5 h-5 ${selected ? "text-white" : "text-blue-200/40"}`} />
               </div>
               <div className="text-left">
-                <p className={`font-medium text-sm ${selected ? "text-white" : "text-white/60"}`}>{opt.label}</p>
-                <p className="text-white/30 text-xs">{opt.desc}</p>
+                <p className={`font-medium text-sm ${selected ? "text-white" : "text-blue-200/60"}`}>{opt.label}</p>
+                <p className="text-blue-200/30 text-xs">{opt.desc}</p>
               </div>
             </button>
           );
@@ -190,13 +190,13 @@ export default function Onboarding() {
     // Step 3: Location
     <motion.div key="location" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6 text-center">
       <div className="flex justify-center">
-        <div className="w-24 h-24 rounded-full glass-strong flex items-center justify-center">
-          <MapPin className="w-10 h-10 text-blue-400" />
+        <div className="w-24 h-24 rounded-full cyber-frame flex items-center justify-center">
+          <MapPin className="w-10 h-10 text-cyan-400" />
         </div>
       </div>
       <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Enable Location</h2>
-        <p className="text-white/40 text-sm leading-relaxed max-w-xs mx-auto">
+        <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-2">ENABLE LOCATION</h2>
+        <p className="text-blue-200/50 text-xs leading-relaxed max-w-xs mx-auto tracking-wide">
           NEX2 uses your location to find people nearby. Your exact location is never shared — only your approximate distance.
         </p>
       </div>
@@ -204,27 +204,27 @@ export default function Onboarding() {
 
     // Step 4: Launch
     <motion.div key="launch" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-8 text-center flex flex-col items-center justify-center flex-1">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-cyan-500/10 blur-[100px] pointer-events-none" />
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative"
       >
-        <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-2xl animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-cyan-500/20 blur-2xl animate-pulse" />
         <button
           onClick={handleComplete}
           disabled={saving}
-          className="relative w-40 h-40 rounded-full gradient-blue glow-blue flex flex-col items-center justify-center active:scale-95 transition-transform group"
+          className="relative w-40 h-40 rounded-full neon-btn flex flex-col items-center justify-center active:scale-95 transition-transform group"
         >
-          <div className="absolute inset-0 rounded-full border border-white/10 animate-ping" style={{ animationDuration: "3s" }} />
+          <div className="absolute inset-0 rounded-full border border-cyan-400/20 animate-ping" style={{ animationDuration: "3s" }} />
           {saving ? (
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
           ) : (
             <>
               <Zap className="w-8 h-8 text-white group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-              <span className="text-white font-bold text-2xl mt-1">NEX2</span>
-              <span className="text-white/60 text-[10px] uppercase tracking-widest mt-0.5">Tap to enter</span>
+              <span className="text-white font-cyber font-bold text-2xl mt-1">NEX2</span>
+              <span className="text-white/60 text-[10px] font-cyber uppercase tracking-widest mt-0.5">Tap to enter</span>
             </>
           )}
         </button>
@@ -234,8 +234,8 @@ export default function Onboarding() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <h2 className="text-2xl font-bold text-white mb-2">You're all set</h2>
-        <p className="text-white/40 text-sm leading-relaxed max-w-xs">
+        <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-2">YOU'RE ALL SET</h2>
+        <p className="text-blue-200/50 text-xs leading-relaxed max-w-xs tracking-wide">
           Your radar is live. Tap NEX2 to discover people nearby.
         </p>
       </motion.div>
@@ -243,13 +243,13 @@ export default function Onboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[hsl(0,0%,4%)] px-6 py-8 safe-top safe-bottom max-w-lg mx-auto flex flex-col">
+    <div className="min-h-screen cyber-bg px-6 py-8 safe-top safe-bottom max-w-lg mx-auto flex flex-col">
       {/* Progress */}
       <div className="flex gap-2 mb-8">
         {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden bg-white/10">
+          <div key={i} className="flex-1 h-1 rounded-full overflow-hidden bg-white/5">
             <motion.div
-              className="h-full gradient-blue"
+              className="h-full neon-btn rounded-full"
               initial={{ width: 0 }}
               animate={{ width: i <= step ? "100%" : "0%" }}
               transition={{ duration: 0.3 }}
@@ -265,9 +265,9 @@ export default function Onboarding() {
 
       {/* Navigation */}
       <div className="flex gap-3 mt-8">
-        {step > 0 && (
-          <button onClick={() => setStep(step - 1)} className="w-14 h-14 rounded-2xl glass flex items-center justify-center active:scale-95 transition-transform">
-            <ArrowLeft className="w-5 h-5 text-white/60" />
+        {step > 0 && step < 4 && (
+          <button onClick={() => setStep(step - 1)} className="w-14 h-14 rounded-2xl cyber-frame flex items-center justify-center active:scale-95 transition-transform">
+            <ArrowLeft className="w-5 h-5 text-blue-200/60" />
           </button>
         )}
         {step < 4 && (
@@ -283,15 +283,20 @@ export default function Onboarding() {
               }
             }}
             disabled={!canProceed() || saving}
-            className="flex-1 py-4 rounded-2xl gradient-blue text-white font-semibold text-base flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-transform"
+            className="flex-1 py-4 rounded-2xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-transform"
           >
             {saving ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : step === 3 ? (
-              <>Enable & Continue <ArrowRight className="w-5 h-5" /></>
+              <>ENABLE & CONTINUE <ArrowRight className="w-4 h-4" /></>
             ) : (
-              <>Continue <ArrowRight className="w-5 h-5" /></>
+              <>CONTINUE <ArrowRight className="w-4 h-4" /></>
             )}
+          </button>
+        )}
+        {step === 4 && (
+          <button onClick={() => setStep(3)} className="w-14 h-14 rounded-2xl cyber-frame flex items-center justify-center active:scale-95 transition-transform">
+            <ArrowLeft className="w-5 h-5 text-blue-200/60" />
           </button>
         )}
       </div>
