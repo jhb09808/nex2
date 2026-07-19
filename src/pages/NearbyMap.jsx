@@ -527,7 +527,7 @@ export default function NearbyMap() {
 
                 <div className="flex items-center gap-5 mb-4">
                   <div>
-                    <p className="text-2xl font-cyber font-bold text-white neon-text">{matchPct}%</p>
+                    <p className="text-2xl font-cyber font-bold text-white neon-text">{Math.round(matchPct)}%</p>
                     <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">interest match</p>
                   </div>
                   <div className="h-8 w-px bg-blue-500/10" />
