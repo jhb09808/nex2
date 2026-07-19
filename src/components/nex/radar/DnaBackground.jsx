@@ -62,15 +62,15 @@ export default function DnaBackground() {
       const dx = Math.max(-1, Math.min(1, gamma / 45));
       const dy = Math.max(-1, Math.min(1, (beta - 30) / 45)); // neutral ~30deg hold
       const magnitude = Math.sqrt(dx * dx + dy * dy);
-      if (magnitude > 0.05) {
+      if (magnitude > 0.03) {
         s.targetAngle = Math.atan2(dy, dx);
-        s.targetGlow = 0.2 + Math.min(0.6, magnitude * 0.7); // tilt harder → brighter
+        s.targetGlow = 0.4 + Math.min(1.4, magnitude * 1.6); // tilt harder → much brighter
       } else {
-        s.targetGlow = 0.18;
+        s.targetGlow = 0.22;
       }
       // Move the glow origin proportionally to tilt within the screen
-      s.tx = s.w / 2 + dx * (s.w * 0.3);
-      s.ty = s.h / 2 + dy * (s.h * 0.3);
+      s.tx = s.w / 2 + dx * (s.w * 0.4);
+      s.ty = s.h / 2 + dy * (s.h * 0.4);
       s.usingTilt = true;
     };
 
@@ -128,30 +128,43 @@ export default function DnaBackground() {
       ctx.clearRect(0, 0, w, h);
 
       // Underglow follows tilt direction
-      const glowRadius = Math.max(w, h) * 0.7;
-      const gx = mx + Math.cos(angle) * 120;
-      const gy = my + Math.sin(angle) * 120;
+      const glowRadius = Math.max(w, h) * 0.85;
+      const gx = mx + Math.cos(angle) * 140;
+      const gy = my + Math.sin(angle) * 140;
       const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, glowRadius);
-      const hue = 195 + Math.sin(angle) * 25;
-      grad.addColorStop(0, `hsla(${hue}, 100%, 55%, ${glow})`);
-      grad.addColorStop(0.35, `hsla(${hue + 20}, 100%, 50%, ${glow * 0.35})`);
+      const hue = 190 + Math.sin(angle) * 30;
+      const g = Math.min(1, glow);
+      grad.addColorStop(0, `hsla(${hue}, 100%, 65%, ${g})`);
+      grad.addColorStop(0.25, `hsla(${hue + 15}, 100%, 55%, ${g * 0.7})`);
+      grad.addColorStop(0.6, `hsla(${hue + 25}, 100%, 45%, ${g * 0.3})`);
       grad.addColorStop(1, "hsla(200, 100%, 40%, 0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
+
+      // Secondary bloom for extra punch when tilting hard
+      if (g > 0.5) {
+        const bloom = ctx.createRadialGradient(gx, gy, 0, gx, gy, glowRadius * 0.45);
+        bloom.addColorStop(0, `hsla(${hue - 10}, 100%, 75%, ${(g - 0.5) * 0.8})`);
+        bloom.addColorStop(1, "hsla(200, 100%, 50%, 0)");
+        ctx.fillStyle = bloom;
+        ctx.fillRect(0, 0, w, h);
+      }
 
       // Directional beam matching tilt angle
       ctx.save();
       ctx.translate(mx, my);
       ctx.rotate(angle);
-      const beamGrad = ctx.createLinearGradient(0, 0, 320, 0);
-      beamGrad.addColorStop(0, `hsla(${hue}, 100%, 60%, ${glow * 0.4})`);
+      const beamLen = 400;
+      const beamGrad = ctx.createLinearGradient(0, 0, beamLen, 0);
+      beamGrad.addColorStop(0, `hsla(${hue}, 100%, 70%, ${g * 0.7})`);
+      beamGrad.addColorStop(0.5, `hsla(${hue + 10}, 100%, 60%, ${g * 0.3})`);
       beamGrad.addColorStop(1, "hsla(200, 100%, 50%, 0)");
       ctx.fillStyle = beamGrad;
       ctx.beginPath();
-      ctx.moveTo(0, -2);
-      ctx.lineTo(320, -40);
-      ctx.lineTo(320, 40);
-      ctx.lineTo(0, 2);
+      ctx.moveTo(0, -3);
+      ctx.lineTo(beamLen, -55);
+      ctx.lineTo(beamLen, 55);
+      ctx.lineTo(0, 3);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -193,14 +206,14 @@ export default function DnaBackground() {
           const dx = Math.max(-1, Math.min(1, gamma / 45));
           const dy = Math.max(-1, Math.min(1, (beta - 30) / 45));
           const magnitude = Math.sqrt(dx * dx + dy * dy);
-          if (magnitude > 0.05) {
+          if (magnitude > 0.03) {
             s.targetAngle = Math.atan2(dy, dx);
-            s.targetGlow = 0.2 + Math.min(0.6, magnitude * 0.7);
+            s.targetGlow = 0.4 + Math.min(1.4, magnitude * 1.6);
           } else {
-            s.targetGlow = 0.18;
+            s.targetGlow = 0.22;
           }
-          s.tx = s.w / 2 + dx * (s.w * 0.3);
-          s.ty = s.h / 2 + dy * (s.h * 0.3);
+          s.tx = s.w / 2 + dx * (s.w * 0.4);
+          s.ty = s.h / 2 + dy * (s.h * 0.4);
           s.usingTilt = true;
         }, true);
         setNeedsPermission(false);
@@ -217,7 +230,7 @@ export default function DnaBackground() {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 pointer-events-none"
-        style={{ opacity: 0.85 }}
+        style={{ opacity: 1 }}
         aria-hidden="true"
       />
       {needsPermission && (
