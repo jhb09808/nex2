@@ -298,7 +298,7 @@ export default function NearbyMap() {
         <>
           <div className="absolute top-4 left-4 z-20 safe-top">
             <h1 className="text-xl font-cyber font-bold text-white neon-text tracking-wider">NEARBY</h1>
-            <p className="text-[10px] font-cyber text-cyan-400/40 tracking-widest mt-0.5">{users.length} {users.length === 1 ? "PERSON" : "PEOPLE"} NEARBY</p>
+            <p className="text-[10px] font-cyber text-blue-400/40 tracking-widest mt-0.5">{users.length} {users.length === 1 ? "PERSON" : "PEOPLE"} NEARBY</p>
           </div>
 
           {/* View Toggle — reduced glow, centered beneath title */}
@@ -307,7 +307,7 @@ export default function NearbyMap() {
               <button
                 onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
                 className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "best" ? "bg-cyan-500/15 text-cyan-300" : "text-white/40"
+                  viewMode === "best" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
                 }`}
               >
                 <Sparkles className="w-3 h-3" /> Best Matches
@@ -315,7 +315,7 @@ export default function NearbyMap() {
               <button
                 onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
                 className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "all" ? "bg-cyan-500/15 text-cyan-300" : "text-white/40"
+                  viewMode === "all" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
                 }`}
               >
                 <Users className="w-3 h-3" /> All Nearby
@@ -350,7 +350,7 @@ export default function NearbyMap() {
       {/* Live status */}
       {!showRadarOnboarding && !selectedUser && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 text-center pointer-events-none">
-          <p className="text-[10px] font-cyber text-cyan-400/30 tracking-widest">
+          <p className="text-[10px] font-cyber text-blue-400/30 tracking-widest">
             {users.length > 0 ? "BEST MATCH DETECTED" : "SCANNING"} · {effectiveRadius} MI RADIUS
           </p>
         </div>
@@ -363,16 +363,16 @@ export default function NearbyMap() {
             <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
               <button
                 onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-cyan-300/70 active:scale-90 transition-transform"
+                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
               >
                 <Plus className="w-4 h-4" />
               </button>
-              <div className="px-2 py-1.5 border-t border-b border-cyan-500/10">
-                <span className="text-[10px] font-cyber text-cyan-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
+              <div className="px-2 py-1.5 border-t border-b border-blue-500/10">
+                <span className="text-[10px] font-cyber text-blue-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
               </div>
               <button
                 onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-cyan-300/70 active:scale-90 transition-transform"
+                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -382,13 +382,13 @@ export default function NearbyMap() {
           <div className="cyber-frame rounded-full p-0.5 flex flex-col gap-0.5">
             <button
               onClick={() => setLayoutMode("sonar")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-cyan-500/15 text-cyan-300" : "text-white/30"}`}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
             >
               <Radar className="w-4 h-4" />
             </button>
             <button
               onClick={() => setLayoutMode("list")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-cyan-500/15 text-cyan-300" : "text-white/30"}`}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
             >
               <List className="w-4 h-4" />
             </button>
@@ -504,18 +504,18 @@ export default function NearbyMap() {
             className="absolute bottom-24 left-0 right-0 z-30 px-4"
           >
             <div className="cyber-frame rounded-2xl p-5 relative overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+              <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
               <button onClick={() => setSelectedUser(null)} className="absolute top-3 right-3 z-10">
                 <X className="w-4 h-4 text-white/30" />
               </button>
 
               <div className="relative">
-                <p className="text-[10px] font-cyber text-cyan-400/50 tracking-widest mb-2">NEARBY MATCH</p>
+                <p className="text-[10px] font-cyber text-blue-400/50 tracking-widest mb-2">NEARBY MATCH</p>
 
                 {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-4">
                     {selectedUser.interests.slice(0, 5).map((interest) => (
-                      <span key={interest} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-cyan-500/8 text-cyan-300/80 border border-cyan-500/10">
+                      <span key={interest} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/8 text-blue-300/80 border border-blue-500/10">
                         {interest}
                       </span>
                     ))}
@@ -528,21 +528,21 @@ export default function NearbyMap() {
                 <div className="flex items-center gap-5 mb-4">
                   <div>
                     <p className="text-2xl font-cyber font-bold text-white neon-text">{matchPct}%</p>
-                    <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">interest match</p>
+                    <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">interest match</p>
                   </div>
-                  <div className="h-8 w-px bg-cyan-500/10" />
+                  <div className="h-8 w-px bg-blue-500/10" />
                   <div>
                     <p className="text-lg font-cyber font-bold text-white">
                       {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)}ft` : `${selectedUser._dist?.toFixed(1)}mi`}
                     </p>
-                    <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">away</p>
+                    <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">away</p>
                   </div>
                   {selectedUser.connections_count != null && (
                     <>
-                      <div className="h-8 w-px bg-cyan-500/10" />
+                      <div className="h-8 w-px bg-blue-500/10" />
                       <div>
                         <p className="text-lg font-cyber font-bold text-white">{selectedUser.connections_count}</p>
-                        <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">connections</p>
+                        <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">connections</p>
                       </div>
                     </>
                   )}

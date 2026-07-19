@@ -3,14 +3,14 @@ import { getRadarSweepColor } from "@/hooks/useRadarSweepColor";
 
 const PALETTE = {
   bg: "#000000",
-  grid: "rgba(0, 212, 255, 0.05)",
-  gridBright: "rgba(0, 212, 255, 0.09)",
-  green: "#39FF6A",
-  blue: "#4AC9FF",
+  grid: "rgba(59, 130, 246, 0.05)",
+  gridBright: "rgba(59, 130, 246, 0.09)",
+  green: "#93C5FD",
+  blue: "#60A5FA",
   orange: "#FF9A2E",
   purple: "#B463FF",
   white: "#ffffff",
-  cyan: "#00D4FF",
+  cyan: "#3B82F6",
 };
 
 const INTEREST_COLORS = {
@@ -224,7 +224,7 @@ export default function RadarScope({
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
         style={{
-          background: `radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)`,
+          background: `radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)`,
         }}
       />
 
@@ -238,8 +238,8 @@ export default function RadarScope({
             top: `${p.y}%`,
             width: `${p.size}px`,
             height: `${p.size}px`,
-            background: "rgba(0,212,255,0.4)",
-            boxShadow: "0 0 4px rgba(0,212,255,0.3)",
+            background: "rgba(59,130,246,0.4)",
+            boxShadow: "0 0 4px rgba(59,130,246,0.3)",
             "--dx": `${p.dx}px`,
             "--dy": `${p.dy}px`,
             animation: `nex-particle-drift ${p.duration}s ease-in-out ${p.delay}s infinite`,
@@ -254,7 +254,7 @@ export default function RadarScope({
           className="absolute inset-0 rounded-full"
           style={{
             background: `radial-gradient(circle at center, rgba(2,8,18,0.9) 0%, #000000 100%)`,
-            boxShadow: `inset 0 0 60px rgba(0,212,255,0.03), inset 0 0 120px rgba(0,0,0,0.5)`,
+            boxShadow: `inset 0 0 60px rgba(59,130,246,0.03), inset 0 0 120px rgba(0,0,0,0.5)`,
           }}
         />
 
@@ -324,9 +324,9 @@ export default function RadarScope({
         {/* Center marker — sharp cyan core with pulsing ring */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="relative flex items-center justify-center">
-            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.25)", animation: "nex-center-pulse 2.5s ease-out infinite" }} />
-            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.25)", animation: "nex-center-pulse 2.5s ease-out 1.25s infinite" }} />
-            <div className="absolute w-4 h-4 rounded-full bg-cyan-400/15 blur-md" />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(59,130,246,0.25)", animation: "nex-center-pulse 2.5s ease-out infinite" }} />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(59,130,246,0.25)", animation: "nex-center-pulse 2.5s ease-out 1.25s infinite" }} />
+            <div className="absolute w-4 h-4 rounded-full bg-blue-400/15 blur-md" />
             <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.cyan, boxShadow: `0 0 6px ${PALETTE.cyan}, 0 0 14px ${PALETTE.cyan}, 0 0 24px ${PALETTE.cyan}40` }} />
           </div>
         </div>
@@ -342,7 +342,7 @@ export default function RadarScope({
               <button onClick={() => onClusterClick(blip.key)} className="active:scale-90 transition-transform">
                 <div className="relative w-8 h-8 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: PALETTE.blue, opacity: 0.1 }} />
-                  <div className="relative w-6 h-6 rounded-full border border-cyan-400/20 flex items-center justify-center text-white text-[10px] font-cyber font-bold" style={{ background: `${PALETTE.blue}22`, boxShadow: `0 0 8px ${PALETTE.blue}44` }}>
+                  <div className="relative w-6 h-6 rounded-full border border-blue-400/20 flex items-center justify-center text-white text-[10px] font-cyber font-bold" style={{ background: `${PALETTE.blue}22`, boxShadow: `0 0 8px ${PALETTE.blue}44` }}>
                     {blip.count}
                   </div>
                 </div>
@@ -365,7 +365,7 @@ function Blip({ blip, onUserClick, isBestMatch }) {
       <div className="relative flex items-center justify-center">
         {/* Best match pulsing ring */}
         {isBestMatch && (
-          <div className="absolute w-5 h-5 rounded-full border border-green-400/30" style={{ animation: "nex-best-pulse 2s ease-in-out infinite" }} />
+          <div className="absolute w-5 h-5 rounded-full border border-blue-300/30" style={{ animation: "nex-best-pulse 2s ease-in-out infinite" }} />
         )}
         {/* Scan glow — brightens when sweep passes */}
         <div
