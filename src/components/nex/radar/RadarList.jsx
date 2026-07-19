@@ -10,11 +10,11 @@ export default function RadarList({ users, onUserClick }) {
   if (users.length === 0) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
-        <div className="w-20 h-20 rounded-full glass-strong flex items-center justify-center mb-4">
-          <MapPin className="w-8 h-8 text-white/20" />
+        <div className="w-20 h-20 rounded-full cyber-frame flex items-center justify-center mb-4">
+          <MapPin className="w-8 h-8 text-blue-400/30" />
         </div>
-        <p className="text-white/40 text-sm mb-1">No one nearby</p>
-        <p className="text-white/20 text-xs">Try expanding your radius or adjusting filters</p>
+        <p className="text-white/40 font-cyber text-sm mb-1 neon-text">No one nearby</p>
+        <p className="text-blue-200/30 text-xs">Try expanding your radius or adjusting filters</p>
       </div>
     );
   }

@@ -13,6 +13,7 @@ import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDis
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
 import RadarList from "@/components/nex/radar/RadarList";
+import ChatRequestOverlay from "@/components/nex/radar/ChatRequestOverlay";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -293,21 +294,21 @@ export default function NearbyMap() {
       {!showRadarOnboarding && (
         <>
           <div className="absolute top-4 left-4 z-20 safe-top">
-            <h1 className="text-xl font-bold text-white">Nearby</h1>
+            <h1 className="text-xl font-cyber font-bold text-white neon-text tracking-wider">NEARBY</h1>
           </div>
 
           {/* Sonar / List toggle */}
           <div className="absolute top-16 right-4 z-20">
-            <div className="glass-strong rounded-full p-0.5 flex gap-0.5">
+            <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
               <button
                 onClick={() => setLayoutMode("sonar")}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "gradient-blue text-white" : "text-white/40"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "neon-btn text-white" : "text-white/40"}`}
               >
                 <Radar className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setLayoutMode("list")}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "gradient-blue text-white" : "text-white/40"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "neon-btn text-white" : "text-white/40"}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -316,19 +317,19 @@ export default function NearbyMap() {
 
           {/* View Toggle */}
           <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20">
-            <div className="glass-strong rounded-full p-1 flex gap-1">
+            <div className="cyber-frame rounded-full p-1 flex gap-1">
               <button
                 onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "best" ? "gradient-blue text-white" : "text-white/40"
+                className={`px-4 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "best" ? "neon-btn text-white" : "text-white/40"
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" /> Best Matches
               </button>
               <button
                 onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "all" ? "gradient-blue text-white" : "text-white/40"
+                className={`px-4 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "all" ? "neon-btn text-white" : "text-white/40"
                 }`}
               >
                 <Users className="w-3.5 h-3.5" /> All Nearby
@@ -337,6 +338,9 @@ export default function NearbyMap() {
           </div>
         </>
       )}
+
+      {/* Chat Request Overlay — glass circle in radar center */}
+      <ChatRequestOverlay blurred={showRadarOnboarding} />
 
       {/* Radar Scope / List View */}
       {layoutMode === "sonar" ? (
@@ -361,14 +365,14 @@ export default function NearbyMap() {
         <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
           <button
             onClick={() => setZoom((z) => Math.min(5, z + 1))}
-            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
+            className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
           >
             +
           </button>
-          <span className="text-center text-[10px] font-mono text-white/30">{zoom < 1 ? "1x" : `${zoom.toFixed(1)}x`}</span>
+          <span className="text-center text-[10px] font-cyber text-blue-200/30">{zoom < 1 ? "1x" : `${zoom.toFixed(1)}x`}</span>
           <button
             onClick={() => setZoom((z) => Math.max(1, z - 1))}
-            className="w-10 h-10 rounded-xl glass-strong flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
+            className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
           >
             −
           </button>
@@ -387,7 +391,7 @@ export default function NearbyMap() {
           >
             <GlassCard strong className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-semibold">Filters</h3>
+                <h3 className="text-white font-cyber font-bold neon-text tracking-wider">FILTERS</h3>
                 <button onClick={handleCloseFilters}>
                   <X className="w-5 h-5 text-white/40" />
                 </button>
@@ -395,13 +399,13 @@ export default function NearbyMap() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-white/40 uppercase tracking-wider">
+                  <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider">
                     Radius: {tierCeiling == null ? "Global" : `${filters.distance} mi`}
                   </label>
                   {tierCeiling != null && (
                     <button
                       onClick={() => setPaywallVariant("radius")}
-                      className="text-[10px] text-blue-400 font-medium flex items-center gap-1"
+                      className="text-[10px] text-blue-400 font-cyber font-medium flex items-center gap-1"
                     >
                       Expand →
                     </button>
@@ -426,7 +430,7 @@ export default function NearbyMap() {
               </div>
 
               <label className="flex items-center justify-between">
-                <span className="text-white/60 text-sm">Online only</span>
+                <span className="text-blue-200/60 text-sm">Online only</span>
                 <button
                   onClick={() => setFilters({ ...filters, onlineOnly: !filters.onlineOnly })}
                   className={`w-11 h-6 rounded-full transition-colors relative ${filters.onlineOnly ? "gradient-blue" : "bg-white/10"}`}
@@ -437,7 +441,7 @@ export default function NearbyMap() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-white/40 uppercase tracking-wider">Prioritize Interests</label>
+                  <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider">Prioritize Interests</label>
                   {activeFilters.length > 0 && (
                     <button onClick={clearFilters} className="text-[10px] text-blue-400 font-medium">
                       Clear all
@@ -452,7 +456,7 @@ export default function NearbyMap() {
                         key={interest}
                         onClick={() => toggleFilter(interest)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 ${
-                          isActive ? "gradient-blue text-white glow-blue-sm" : "glass text-white/40"
+                          isActive ? "neon-btn text-white" : "cyber-input text-white/40"
                         }`}
                       >
                         {interest}
@@ -488,19 +492,19 @@ export default function NearbyMap() {
               </button>
               <div className="flex items-center gap-4 mb-4">
                 {selectedUser.visibility === "anonymous" ? (
-                  <div className="w-14 h-14 rounded-full glass flex items-center justify-center">
-                    <EyeOff className="w-6 h-6 text-white/40" />
+                  <div className="w-14 h-14 rounded-full cyber-input flex items-center justify-center">
+                    <EyeOff className="w-6 h-6 text-blue-400/50" />
                   </div>
                 ) : selectedUser.visibility === "first_name" ? (
-                  <div className="w-14 h-14 rounded-full gradient-blue flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
+                  <div className="w-14 h-14 rounded-full neon-btn flex items-center justify-center">
+                    <span className="text-xl font-cyber font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
                   </div>
                 ) : (
                   <UserAvatar name={getDisplayName(selectedUser)} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
                 )}
                 <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-white font-semibold text-lg truncate">{getDisplayName(selectedUser)}</p>
+                  <p className="text-white font-cyber font-bold text-lg truncate neon-text">{getDisplayName(selectedUser)}</p>
                   <VerifiedBadges isVerified={selectedUser.is_verified} isOg={selectedUser.is_og} size="md" />
                   {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
                 </div>
@@ -545,14 +549,14 @@ export default function NearbyMap() {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
-                  className="flex-1 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
+                  className="flex-1 py-3 rounded-xl cyber-input text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
                 >
                   View Profile
                 </button>
                 {capabilities && !capabilities.can_start_chat ? (
                   <button
                     onClick={() => setPaywallVariant("chat_limit")}
-                    className="flex-1 py-3 rounded-xl glass flex items-center justify-center gap-1.5 text-white/40 font-medium text-sm"
+                    className="flex-1 py-3 rounded-xl cyber-input flex items-center justify-center gap-1.5 text-white/40 font-medium text-sm"
                   >
                     <Lock className="w-4 h-4" /> Chat limit reached
                   </button>
@@ -582,9 +586,9 @@ export default function NearbyMap() {
                         console.error(err);
                       }
                     }}
-                    className="flex-1 py-3 rounded-xl gradient-blue text-white font-medium text-sm flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
+                    className="flex-1 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
                   >
-                    <MessageCircle className="w-4 h-4" /> Request Chat
+                    <MessageCircle className="w-4 h-4" /> REQUEST CHAT
                   </button>
                 )}
               </div>
@@ -609,9 +613,9 @@ export default function NearbyMap() {
             exit={{ opacity: 0, y: 20 }}
             className="absolute bottom-24 left-1/2 -translate-x-1/2 z-40"
           >
-            <div className="glass-strong rounded-2xl px-5 py-3 flex items-center gap-2">
+            <div className="cyber-frame rounded-2xl px-5 py-3 flex items-center gap-2">
               <Check className="w-5 h-5 text-green-400" />
-              <p className="text-white text-sm font-medium">Chat request sent!</p>
+              <p className="text-white text-sm font-cyber font-medium neon-text">Chat request sent!</p>
             </div>
           </motion.div>
         )}

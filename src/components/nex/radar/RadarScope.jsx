@@ -3,13 +3,14 @@ import { getRadarSweepColor } from "@/hooks/useRadarSweepColor";
 
 // Exact palette from the design spec
 const PALETTE = {
-  bg: "#05080a",
-  grid: "#0b2024",
-  green: "#2ecc71",
-  blue: "#3498db",
-  orange: "#e67e22",
-  purple: "#9b59b6",
+  bg: "#000000",
+  grid: "rgba(0, 212, 255, 0.07)",
+  green: "#39FF6A",
+  blue: "#4AC9FF",
+  orange: "#FF9A2E",
+  purple: "#B463FF",
   white: "#ffffff",
+  cyan: "#00D4FF",
 };
 
 const INTEREST_COLORS = {
@@ -185,7 +186,7 @@ export default function RadarScope({
       onWheel={onWheel}
       className="absolute inset-0 z-0 flex items-center justify-center"
       style={{
-        background: `radial-gradient(circle at center, ${PALETTE.bg} 0%, #020405 75%)`,
+        background: `radial-gradient(circle at center, ${PALETTE.bg} 0%, #000000 75%)`,
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
         touchAction: "none",
@@ -196,7 +197,7 @@ export default function RadarScope({
         {/* Scope background */}
         <div
           className="absolute inset-0 rounded-full"
-          style={{ background: `radial-gradient(circle at center, #060a0c 0%, #020405 100%)` }}
+          style={{ background: `radial-gradient(circle at center, rgba(2,6,14,0.8) 0%, #000000 100%)` }}
         />
 
         {/* Concentric range rings */}
@@ -240,12 +241,12 @@ export default function RadarScope({
           }}
         />
 
-        {/* Center marker — white dot */}
+        {/* Center marker — cyan core */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="relative flex items-center justify-center">
-            <div className="absolute w-4 h-4 rounded-full border border-white/20" />
-            <div className="absolute w-4 h-4 rounded-full bg-white/5 animate-ping" style={{ animationDuration: "3s" }} />
-            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.white, boxShadow: `0 0 8px ${PALETTE.white}` }} />
+            <div className="absolute w-4 h-4 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.3)" }} />
+            <div className="absolute w-4 h-4 rounded-full animate-ping" style={{ background: "rgba(0,212,255,0.15)", animationDuration: "3s" }} />
+            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.cyan, boxShadow: `0 0 8px ${PALETTE.cyan}, 0 0 16px ${PALETTE.cyan}` }} />
           </div>
         </div>
 

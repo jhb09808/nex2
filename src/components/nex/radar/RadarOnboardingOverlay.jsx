@@ -30,28 +30,28 @@ export default function RadarOnboardingOverlay({ onComplete }) {
       className="fixed inset-0 z-[90] flex items-center justify-center px-4"
     >
       {/* Ambient dim layer */}
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/40" />
 
-      {/* Glass card */}
+      {/* Cyber card */}
       <motion.div
         initial={{ scale: 0.92, y: 30 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="glass-strong rounded-3xl p-7">
+        <div className="cyber-frame cyber-corners rounded-3xl p-7">
           {/* Icon + title */}
           <div className="text-center mb-6">
-            <div className="w-16 h-16 rounded-2xl gradient-blue flex items-center justify-center mx-auto mb-4 glow-blue">
+            <div className="w-16 h-16 rounded-2xl neon-btn flex items-center justify-center mx-auto mb-4">
               <Radar className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-1">Calibrate Your Radar</h2>
-            <p className="text-white/40 text-sm">Pick {MAX_INTEREST_SELECTIONS} interests to find your best matches nearby</p>
+            <h2 className="text-xl font-cyber font-bold text-white neon-text mb-1">Calibrate Your Radar</h2>
+            <p className="text-blue-200/50 text-sm">Pick {MAX_INTEREST_SELECTIONS} interests to find your best matches nearby</p>
           </div>
 
           {/* Progress indicator */}
           <div className="flex items-center justify-between mb-4 px-1">
-            <span className="text-xs text-white/40 font-medium">
+            <span className="text-xs text-blue-200/50 font-cyber tracking-wide">
               {selected.length} of {MAX_INTEREST_SELECTIONS} selected
             </span>
             <div className="flex gap-1.5">
@@ -59,7 +59,7 @@ export default function RadarOnboardingOverlay({ onComplete }) {
                 <div
                   key={i}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i < selected.length ? "gradient-blue scale-110" : "bg-white/15"
+                    i < selected.length ? "neon-btn scale-110" : "bg-white/15"
                   }`}
                 />
               ))}
@@ -76,8 +76,8 @@ export default function RadarOnboardingOverlay({ onComplete }) {
                   onClick={() => toggleInterest(interest)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
                     isSelected
-                      ? "gradient-blue text-white glow-blue-sm"
-                      : "glass text-white/50 hover:text-white/70"
+                      ? "neon-btn text-white"
+                      : "cyber-input text-blue-200/50 hover:text-blue-200/70"
                   }`}
                 >
                   {interest}
@@ -90,21 +90,21 @@ export default function RadarOnboardingOverlay({ onComplete }) {
           <button
             onClick={handleEnter}
             disabled={!canEnter}
-            className={`w-full py-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+            className={`w-full py-4 rounded-2xl font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-all ${
               canEnter
-                ? "gradient-blue text-white glow-blue active:scale-[0.98]"
+                ? "neon-btn text-white active:scale-[0.98]"
                 : "bg-white/5 text-white/20 cursor-not-allowed"
             }`}
           >
             {canEnter ? (
               <>
-                <Radar className="w-4 h-4" /> Enter the Radar
+                <Radar className="w-4 h-4" /> ENTER THE RADAR
               </>
             ) : (
               `Select ${MIN_INTEREST_SELECTIONS - selected.length} more`
             )}
           </button>
-          <p className="text-white/25 text-[11px] text-center mt-2">Max {MAX_INTEREST_SELECTIONS} — pick what matters most</p>
+          <p className="text-blue-200/30 text-[11px] text-center mt-2">Max {MAX_INTEREST_SELECTIONS} — pick what matters most</p>
         </div>
       </motion.div>
     </motion.div>
