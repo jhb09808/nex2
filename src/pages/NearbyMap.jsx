@@ -14,6 +14,7 @@ import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverla
 import RadarScope from "@/components/nex/radar/RadarScope";
 import RadarList from "@/components/nex/radar/RadarList";
 import ChatRequestOverlay from "@/components/nex/radar/ChatRequestOverlay";
+import DnaBackground from "@/components/nex/radar/DnaBackground";
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -290,6 +291,9 @@ export default function NearbyMap() {
 
   return (
     <div className="relative overflow-hidden" style={{ height: "100vh" }}>
+      {/* Interactive DNA background that follows movement */}
+      <DnaBackground />
+
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
