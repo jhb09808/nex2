@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import EmailListPanel from "@/components/nex/admin/EmailListPanel";
+import GrowthDashboard from "@/components/nex/admin/GrowthDashboard";
 
 export default function AdminPanel() {
   const navigate = useNavigate();
@@ -401,6 +402,7 @@ export default function AdminPanel() {
       {/* Analytics Tab */}
       {tab === "analytics" && (
         <div className="space-y-4">
+          <GrowthDashboard />
           <div className="grid grid-cols-2 gap-3">
             <GlassCard className="text-center">
               <p className="text-3xl font-bold gradient-text">{users.length}</p>
