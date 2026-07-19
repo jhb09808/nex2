@@ -12,6 +12,7 @@ import { getUserNumber } from "@/components/nex/userDisplay";
 import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
 import NetworkingStreak from "@/components/nex/ai/NetworkingStreak";
 import NetworkRankCard from "@/components/nex/ai/NetworkRankCard";
+import AchievementGrid from "@/components/nex/AchievementGrid";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -31,6 +32,10 @@ export default function Profile() {
       // Compute actual connections from accepted conversations
       const conversations = await base44.entities.Conversation.filter({ participants: me.id });
       setConnectionCount(conversations.length);
+      // Sync connections_count on the profile so other users see accurate numbers
+      if (profiles[0] && profiles[0].connections_count !== conversations.length) {
+        await base44.entities.UserProfile.update(profiles[0].id, { connections_count: conversations.length });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -116,6 +121,9 @@ export default function Profile() {
           <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
         </GlassCard>
       </div>
+
+      {/* Achievements */}
+      <AchievementGrid connectionCount={connectionCount} profile={profile} />
 
       {/* Networking Streak & XP */}
       <NetworkingStreak streakMessage="Keep your streak alive — connect with 1 more person today!" />
