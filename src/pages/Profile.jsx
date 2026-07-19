@@ -9,9 +9,6 @@ import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import { getUserNumber } from "@/components/nex/userDisplay";
-import StreakVisualizer from "@/components/nex/ai/StreakVisualizer";
-import NetworkingStreak from "@/components/nex/ai/NetworkingStreak";
-import NetworkRankCard from "@/components/nex/ai/NetworkRankCard";
 import AchievementGrid from "@/components/nex/AchievementGrid";
 
 export default function Profile() {
@@ -88,51 +85,37 @@ export default function Profile() {
             <span className={`text-xs font-medium ${badge.color}`}>{badge.label}</span>
           </div>
         )}
-        {profile?.bio && <p className="text-white/40 text-sm max-w-xs">{profile.bio}</p>}
-      </GlassCard>
+        {profile?.bio && <p className="text-white/40 text-sm max-w-xs mb-3">{profile.bio}</p>}
 
-      {/* Interests */}
-      {profile?.interests?.length > 0 && (
-        <GlassCard>
-          <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">Interests</p>
-          <div className="flex flex-wrap gap-2">
+        {profile?.interests?.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
             {profile.interests.map((interest) => (
               <InterestTag key={interest} label={interest} size="sm" />
             ))}
           </div>
-        </GlassCard>
-      )}
+        )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <GlassCard className="text-center !p-3">
-          <div className="flex items-center justify-center gap-1">
-            <Handshake className="w-3.5 h-3.5 text-blue-400" />
-            <p className="text-xl font-bold gradient-text">{connectionCount}</p>
+        <div className="grid grid-cols-3 gap-2 w-full">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Handshake className="w-3.5 h-3.5 text-blue-400" />
+              <p className="text-xl font-bold gradient-text">{connectionCount}</p>
+            </div>
+            <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
           </div>
-          <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
-        </GlassCard>
-        <GlassCard className="text-center !p-3">
-          <p className="text-xl font-bold gradient-text">0</p>
-          <p className="text-white/30 text-[10px] mt-0.5">Chats</p>
-        </GlassCard>
-        <GlassCard className="text-center !p-3">
-          <p className="text-xl font-bold gradient-text">{profile?.badges?.length || 0}</p>
-          <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
-        </GlassCard>
-      </div>
+          <div className="text-center border-x border-white/5">
+            <p className="text-xl font-bold gradient-text">0</p>
+            <p className="text-white/30 text-[10px] mt-0.5">Chats</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-bold gradient-text">{profile?.badges?.length || 0}</p>
+            <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
+          </div>
+        </div>
+      </GlassCard>
 
       {/* Achievements */}
       <AchievementGrid connectionCount={connectionCount} profile={profile} />
-
-      {/* Networking Streak & XP */}
-      <NetworkingStreak streakMessage="Keep your streak alive — connect with 1 more person today!" />
-
-      {/* Global Network Rank & Leaderboard */}
-      <NetworkRankCard />
-
-      {/* Networking Streak Visualizer */}
-      <StreakVisualizer profile={profile} />
 
       {/* Menu */}
       <div className="space-y-1">

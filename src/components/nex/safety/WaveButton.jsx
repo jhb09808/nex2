@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Hand, Loader2, Check, MessageCircle } from "lucide-react";
+import { Loader2, Check, MessageCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function WaveButton({ targetUser, onMutualMatch, compact = false }) {
@@ -52,10 +52,10 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
             <Check className="w-4 h-4" /> Matched!
           </>
         ) : status === "sent" ? (
-          "Wave sent"
+          "Sent"
         ) : (
           <>
-            <Hand className="w-4 h-4" /> Wave
+            <MessageCircle className="w-4 h-4" /> Chat
           </>
         )}
       </button>
@@ -85,17 +85,17 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
             <Check className="w-5 h-5" /> Mutual match! Chat open
           </>
         ) : status === "sent" ? (
-          "Wave sent — waiting for response"
+          "Request sent — waiting for response"
         ) : (
           <>
-            <Hand className="w-5 h-5" /> Wave to connect
+            <MessageCircle className="w-5 h-5" /> Request to chat
           </>
         )}
       </motion.button>
       {error && <p className="text-red-400 text-xs text-center">{error}</p>}
       {status === "idle" && (
         <p className="text-white/20 text-xs text-center">
-          Both people must wave before a chat opens. No unsolicited messages.
+          Both people must accept before a chat opens. No unsolicited messages.
         </p>
       )}
     </div>

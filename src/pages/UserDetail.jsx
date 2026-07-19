@@ -9,6 +9,7 @@ import InterestTag from "@/components/nex/InterestTag";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import ShareButton from "@/components/nex/ShareButton";
+import AchievementGrid from "@/components/nex/AchievementGrid";
 import { getUserDisplayName, getUserNumber } from "@/components/nex/userDisplay";
 
 export default function UserDetail() {
@@ -110,7 +111,7 @@ export default function UserDetail() {
       )}
 
       {user.interests?.length > 0 && (
-        <GlassCard className="mb-6">
+        <GlassCard className="mb-4">
           <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">All Interests</p>
           <div className="flex flex-wrap gap-2">
             {user.interests.map((i) => (
@@ -119,6 +120,26 @@ export default function UserDetail() {
           </div>
         </GlassCard>
       )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <GlassCard className="text-center !p-3">
+          <div className="flex items-center justify-center gap-1">
+            <Handshake className="w-3.5 h-3.5 text-blue-400" />
+            <p className="text-xl font-bold gradient-text">{user.connections_count || 0}</p>
+          </div>
+          <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
+        </GlassCard>
+        <GlassCard className="text-center !p-3">
+          <p className="text-xl font-bold gradient-text">{user.badges?.length || 0}</p>
+          <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
+        </GlassCard>
+      </div>
+
+      {/* Achievements */}
+      <div className="mb-6">
+        <AchievementGrid connectionCount={user.connections_count || 0} profile={user} />
+      </div>
 
       <div className="flex gap-3 items-start">
         <div className="flex-1">
