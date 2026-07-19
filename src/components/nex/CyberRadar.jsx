@@ -1,12 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const NODES = [
-  { angle: 30, dist: 55, delay: 0 },
-  { angle: 95, dist: 38, delay: 0.4 },
-  { angle: 175, dist: 62, delay: 0.8 },
-  { angle: 250, dist: 45, delay: 1.2 },
-  { angle: 320, dist: 52, delay: 1.6 },
+const BLIPS = [
+  { angle: 195, dist: 50, color: "#FFA500", delay: 0 },
+  { angle: 215, dist: 32, color: "#00BFFF", delay: 0.4 },
+  { angle: 225, dist: 20, color: "#0047AB", delay: 0.8 },
+  { angle: 5, dist: 38, color: "#00FF00", delay: 1.2 },
+  { angle: 145, dist: 48, color: "#FFA500", delay: 1.6 },
+  { angle: 155, dist: 58, color: "#8A2BE2", delay: 2.0 },
 ];
 
 export default function CyberRadar() {
@@ -15,7 +16,7 @@ export default function CyberRadar() {
       {/* Outer glow */}
       <div
         className="absolute inset-0 rounded-full blur-2xl opacity-30"
-        style={{ background: "radial-gradient(circle, rgba(0,122,255,0.4), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(0,71,171,0.4), transparent 70%)" }}
       />
 
       {/* Concentric rings */}
@@ -29,8 +30,8 @@ export default function CyberRadar() {
 
       {/* Center dot */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400"
-        style={{ boxShadow: "0 0 10px rgba(0,212,255,0.8)" }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400"
+        style={{ boxShadow: "0 0 8px rgba(0,212,255,0.8)" }}
       />
 
       {/* Sweep */}
@@ -38,27 +39,30 @@ export default function CyberRadar() {
         className="absolute inset-0 rounded-full"
         style={{
           background:
-            "conic-gradient(from 0deg, transparent 0deg, rgba(0,212,255,0.1) 20deg, rgba(0,212,255,0.22) 45deg, transparent 60deg)",
+            "conic-gradient(from 0deg, transparent 0deg, rgba(0,71,171,0.1) 20deg, rgba(0,71,171,0.25) 45deg, transparent 60deg)",
         }}
         animate={{ rotate: 360 }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
       />
 
-      {/* Nodes */}
-      {NODES.map((node, i) => {
-        const rad = (node.angle * Math.PI) / 180;
-        const x = 50 + Math.cos(rad) * (node.dist / 2);
-        const y = 50 + Math.sin(rad) * (node.dist / 2);
+      {/* Colored blips */}
+      {BLIPS.map((blip, i) => {
+        const rad = (blip.angle * Math.PI) / 180;
+        const x = 50 + Math.cos(rad) * (blip.dist / 2);
+        const y = 50 + Math.sin(rad) * (blip.dist / 2);
         return (
           <motion.div
             key={i}
-            className="absolute w-5 h-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/20 border border-blue-400/50 flex items-center justify-center"
-            style={{ left: `${x}%`, top: `${y}%`, boxShadow: "0 0 8px rgba(0,212,255,0.3)" }}
-            animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: node.delay, ease: "easeInOut" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-300" />
-          </motion.div>
+            className="absolute w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              left: `${x}%`,
+              top: `${y}%`,
+              backgroundColor: blip.color,
+              boxShadow: `0 0 8px ${blip.color}, 0 0 16px ${blip.color}80`,
+            }}
+            animate={{ opacity: [0.3, 1, 0.3], scale: [0.7, 1.15, 0.7] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: blip.delay, ease: "easeInOut" }}
+          />
         );
       })}
     </div>
