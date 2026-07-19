@@ -238,15 +238,7 @@ export default function PasswordGate() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-blue-500/10">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/30" style={{ zIndex: 3 - i }} />
-                  ))}
-                </div>
-                <span className="text-blue-200/40 text-[10px]">Seen by 8</span>
-              </div>
+            <div className="flex items-center justify-center pt-3 border-t border-blue-500/10">
               <div className="flex items-center gap-1.5">
                 <Lock className="w-3 h-3 text-blue-200/40" />
                 <span className="text-blue-200/40 text-[10px] tracking-wide">Anonymous by design</span>
