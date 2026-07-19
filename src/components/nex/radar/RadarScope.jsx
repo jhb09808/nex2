@@ -299,21 +299,19 @@ export default function RadarScope({
           })}
         </svg>
 
-        {/* Radar sweep — smooth trailing fade with sharp bright leading edge */}
+        {/* Radar trail — smooth ease-out fade, most brightness compressed near leading edge */}
         <div
           className="absolute inset-0 rounded-full pointer-events-none"
           style={{
             background: `conic-gradient(from 0deg,
               ${sweepColor}00 0deg,
-              ${sweepColor}00 270deg,
-              ${sweepColor}06 285deg,
-              ${sweepColor}10 300deg,
-              ${sweepColor}1A 315deg,
-              ${sweepColor}33 330deg,
-              ${sweepColor}55 342deg,
-              ${sweepColor}88 352deg,
-              ${sweepColor}CC 358deg,
-              ${sweepColor}FF 360deg
+              ${sweepColor}00 280deg,
+              ${sweepColor}02 310deg,
+              ${sweepColor}06 332deg,
+              ${sweepColor}10 345deg,
+              ${sweepColor}22 354deg,
+              ${sweepColor}44 358deg,
+              ${sweepColor}88 360deg
             )`,
             animation: "nex-sweep-rotate 5s linear infinite",
             maskImage: "radial-gradient(circle, white 99%, transparent 100%)",
@@ -321,21 +319,41 @@ export default function RadarScope({
           }}
         />
 
-        {/* Sharp leading edge line — thin bright beam at the sweep front */}
+        {/* Glowing beam — real light bloom at the leading edge */}
         <div
-          className="absolute inset-0 rounded-full pointer-events-none"
+          className="absolute inset-0 rounded-full pointer-events-none overflow-hidden"
           style={{
-            background: `conic-gradient(from 0deg,
-              ${sweepColor}00 0deg,
-              ${sweepColor}00 357deg,
-              ${sweepColor}FF 359deg,
-              ${sweepColor}FF 360deg
-            )`,
             animation: "nex-sweep-rotate 5s linear infinite",
             maskImage: "radial-gradient(circle, white 99%, transparent 100%)",
             WebkitMaskImage: "radial-gradient(circle, white 99%, transparent 100%)",
           }}
-        />
+        >
+          {/* Soft wide glow */}
+          <div
+            className="absolute left-1/2"
+            style={{
+              bottom: '50%',
+              width: '10px',
+              height: '50%',
+              marginLeft: '-5px',
+              background: `linear-gradient(to top, ${sweepColor}00 0%, ${sweepColor}22 40%, ${sweepColor}44 100%)`,
+              filter: 'blur(6px)',
+            }}
+          />
+          {/* Bright core beam */}
+          <div
+            className="absolute left-1/2"
+            style={{
+              bottom: '50%',
+              width: '2px',
+              height: '50%',
+              marginLeft: '-1px',
+              background: `linear-gradient(to top, ${sweepColor}44 0%, ${sweepColor}FF 60%, ${sweepColor}DD 100%)`,
+              boxShadow: `0 0 6px ${sweepColor}, 0 0 14px ${sweepColor}AA, 0 0 28px ${sweepColor}55`,
+              borderRadius: '1px',
+            }}
+          />
+        </div>
 
         {/* Center marker — sharp cyan core with pulsing ring */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
