@@ -8,18 +8,15 @@ Deno.serve(async (req) => {
       || req.headers.get("x-real-ip")
       || "unknown";
 
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
     const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({
-      ip_address: ip,
-      created_date: { $gte: yesterday }
+      ip_address: ip
     });
 
-    const MAX_PER_DAY = 3;
-    if (attempts.length >= MAX_PER_DAY) {
+    const MAX_PER_DEVICE = 1;
+    if (attempts.length >= MAX_PER_DEVICE) {
       return Response.json({
         allowed: false,
-        error: "Too many accounts created from this device. Please try again later."
+        error: "An account has already been created from this device."
       });
     }
 
