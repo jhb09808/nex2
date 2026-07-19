@@ -248,7 +248,7 @@ export default function RadarScope({
       ))}
 
       {/* Radar scope circle — 15% larger, shifted up */}
-      <div className="relative w-full h-full max-w-[640px] max-h-[640px] aspect-square" style={{ transform: "translateY(-3%)" }}>
+      <div className="relative w-full h-full max-w-[440px] max-h-[440px] aspect-square" style={{ transform: "translateY(-3%)" }}>
         {/* Scope background with glass depth */}
         <div
           className="absolute inset-0 rounded-full"
