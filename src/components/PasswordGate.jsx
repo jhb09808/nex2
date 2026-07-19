@@ -3,6 +3,7 @@ import { Loader2, ArrowRight, ArrowLeft, Mail, CheckCircle2, MapPin, Globe, Chec
 import { appParams } from "@/lib/app-params";
 import GlobalCounters from "@/components/nex/GlobalCounters";
 import CyberRadar from "@/components/nex/CyberRadar";
+import { base44 } from "@/api/base44Client";
 
 const SESSION_KEY = "nex_access_granted";
 
@@ -25,6 +26,9 @@ export default function PasswordGate() {
   const [zipCheck, setZipCheck] = useState("");
   const [zipResult, setZipResult] = useState(null);
   const [zipLoading, setZipLoading] = useState(false);
+
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -137,6 +141,22 @@ export default function PasswordGate() {
     }
   };
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!loginEmail.trim() || !loginPassword.trim()) return;
+    setError("");
+    setLoading(true);
+    try {
+      await base44.auth.loginViaEmailPassword(loginEmail, loginPassword);
+      sessionStorage.setItem(SESSION_KEY, "true");
+      window.location.href = "/";
+    } catch (err) {
+      setError(err.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const CyberHeader = () => (
     <div className="flex items-center justify-between">
       <img
@@ -246,15 +266,17 @@ export default function PasswordGate() {
           </div>
         )}
 
-        {/* ===== ACCESS CODE MODE ===== */}
+        {/* ===== ACCESS CODE + LOGIN MODE ===== */}
         {mode === "password" && (
           <div className="space-y-5">
             <CyberHeader />
             <BackButton />
             <div className="text-center space-y-1.5">
               <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">ENTER TO CONTINUE</h1>
-              <p className="text-blue-200/50 text-xs">Enter your access code to explore.</p>
+              <p className="text-blue-200/50 text-xs">Enter your access code or log in to your account.</p>
             </div>
+
+            {/* Access code form */}
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="password"
@@ -264,7 +286,6 @@ export default function PasswordGate() {
                 autoFocus
                 className="w-full px-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-center text-lg tracking-widest font-cyber focus:outline-none"
               />
-              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
               <button
                 type="submit"
                 disabled={loading || !password.trim()}
@@ -272,14 +293,57 @@ export default function PasswordGate() {
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>UNLOCK <ArrowRight className="w-4 h-4" /></>}
               </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-blue-500/10" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase">
+                <span className="bg-black px-3 text-blue-200/40 font-cyber tracking-wider">or log in</span>
+              </div>
+            </div>
+
+            {/* Login form */}
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
+                />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
+                />
+              </div>
+              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
               <button
-                type="button"
-                onClick={() => { setMode("check"); setError(""); setEmail(""); }}
-                className="w-full text-center text-blue-200/40 text-xs hover:text-blue-200/70 transition-colors pt-1"
+                type="submit"
+                disabled={loading || !loginEmail.trim() || !loginPassword.trim()}
+                className="w-full py-3.5 rounded-xl bg-transparent border border-blue-400/20 text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform hover:border-blue-400/40 disabled:opacity-40"
               >
-                Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>LOG IN <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
+
+            <button
+              type="button"
+              onClick={() => { setMode("check"); setError(""); setEmail(""); }}
+              className="w-full text-center text-blue-200/40 text-xs hover:text-blue-200/70 transition-colors pt-1"
+            >
+              Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
+            </button>
           </div>
         )}
 
