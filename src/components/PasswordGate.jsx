@@ -239,7 +239,7 @@ export default function PasswordGate() {
 
             {/* Footer */}
             <div className="flex items-center justify-center pt-3 border-t border-blue-500/10">
-              <span className="text-blue-200/40 text-[10px] tracking-wide">© 2026 NEX2™</span>
+              <span className="text-blue-200/40 text-[10px] tracking-wide">© 2026 NEX2, Inc. All Rights Reserved.</span>
             </div>
           </div>
         )}
