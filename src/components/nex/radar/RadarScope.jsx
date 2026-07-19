@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
-import { getRadarSweepColor } from "@/hooks/useRadarSweepColor";
+import { getRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
 
 const PALETTE = {
   bg: "#000000",
@@ -42,12 +42,19 @@ const INTEREST_COLORS = {
 
 const DEFAULT_BLIP_COLOR = PALETTE.blue;
 
+const BLIP_PALETTE = RADAR_SWEEP_COLORS.map((c) => c.value);
+
 function getBlipColor(user) {
   const interests = user.interests || [];
   for (const interest of interests) {
     if (INTEREST_COLORS[interest]) return INTEREST_COLORS[interest];
   }
   return DEFAULT_BLIP_COLOR;
+}
+
+function getBlipColorByHash(user) {
+  const id = user.id || user.created_by_id || "x";
+  return BLIP_PALETTE[hashStr(id) % BLIP_PALETTE.length];
 }
 
 function hashStr(s) {
@@ -106,7 +113,7 @@ export default function RadarScope({
         const hash = hashStr(m.user.id || "x");
         const jx = ((hash % 100) / 100 - 0.5) * 4;
         const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
-        const color = getBlipColor(m.user);
+        const color = getBlipColorByHash(m.user);
         const pulseDelay = (hash % 40) / 10;
         raw.push({
           ...m,
