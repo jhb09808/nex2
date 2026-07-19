@@ -300,7 +300,7 @@ export default function NearbyMap() {
             <img
               src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
               alt="NEX2"
-              className="h-8 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           </div>
 
