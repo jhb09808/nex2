@@ -107,7 +107,7 @@ export default function PasswordGate() {
       const data = await response.json();
       if (data.approved) {
         sessionStorage.setItem(SESSION_KEY, "true");
-        window.location.href = data.has_account ? "/login" : "/register";
+        window.location.href = `/approved?has_account=${data.has_account}`;
       } else if (data.status === "waitlisted" || data.status === "pending") {
         setError("You're on the list, but not approved yet. Check back soon!");
       } else if (data.status === "rejected") {

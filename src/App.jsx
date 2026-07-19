@@ -14,6 +14,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import ApprovalConfirmed from '@/pages/ApprovalConfirmed';
 
 // App pages
 import Welcome from '@/pages/Welcome';
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/approved" element={<ApprovalConfirmed />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/welcome" replace />} />}>
         <Route path="/onboarding" element={<Onboarding />} />
