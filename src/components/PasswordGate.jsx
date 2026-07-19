@@ -102,7 +102,7 @@ export default function PasswordGate() {
       const data = await response.json();
       if (data.approved) {
         sessionStorage.setItem(SESSION_KEY, "true");
-        window.location.reload();
+        window.location.href = "/login";
       } else if (data.status === "waitlisted" || data.status === "pending") {
         setError("You're on the list, but not approved yet. Check back soon!");
       } else if (data.status === "rejected") {
