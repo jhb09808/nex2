@@ -10,7 +10,6 @@ import { toast } from "@/components/ui/use-toast";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
@@ -19,10 +18,6 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
     setLoading(true);
     try {
       const limitRes = await base44.functions.invoke("checkRegistrationLimit", {});
@@ -190,25 +185,9 @@ export default function Register() {
             />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <label htmlFor="confirm" className="text-blue-200/60 text-xs font-cyber tracking-wider">CONFIRM PASSWORD</label>
-          <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" aria-hidden="true" />
-            <input
-              id="confirm"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
-              required
-            />
-          </div>
-        </div>
         <button
           type="submit"
-          disabled={loading || !email.trim() || !password.trim() || !confirmPassword.trim()}
+          disabled={loading || !email.trim() || !password.trim()}
           className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform disabled:opacity-40"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>CREATE ACCOUNT <ArrowRight className="w-4 h-4" /></>}
