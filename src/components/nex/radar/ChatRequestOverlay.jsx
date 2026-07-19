@@ -96,11 +96,11 @@ export default function ChatRequestOverlay({ blurred = false }) {
     <AnimatePresence>
       {activeWave && !blurred && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.7 }}
+          initial={{ opacity: 0, scale: 0.7, x: "-50%", y: "-50%" }}
+          animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+          exit={{ opacity: 0, scale: 0.7, x: "-50%", y: "-50%" }}
           transition={{ type: "spring", damping: 22, stiffness: 280 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto"
+          className="absolute top-1/2 left-1/2 z-30 pointer-events-auto"
         >
           {/* Pulsing rings */}
           <motion.div
@@ -117,8 +117,14 @@ export default function ChatRequestOverlay({ blurred = false }) {
           />
 
           {/* Circular glass window */}
-          <div className="relative w-56 h-56 rounded-full cyber-frame cyber-corners flex flex-col items-center justify-center p-6 text-center"
-            style={{ boxShadow: "0 0 40px rgba(0,122,255,0.15), 0 0 80px rgba(0,212,255,0.08)" }}
+          <div className="relative w-56 h-56 rounded-full cyber-corners flex flex-col items-center justify-center p-6 text-center"
+            style={{
+              background: "rgba(2, 6, 14, 0.25)",
+              backdropFilter: "blur(8px) saturate(1.3)",
+              WebkitBackdropFilter: "blur(8px) saturate(1.3)",
+              border: "1px solid rgba(0, 212, 255, 0.18)",
+              boxShadow: "0 0 40px rgba(0,122,255,0.15), 0 0 80px rgba(0,212,255,0.08)",
+            }}
           >
             {/* Close button */}
             <button
