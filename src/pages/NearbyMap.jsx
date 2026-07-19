@@ -296,9 +296,17 @@ export default function NearbyMap() {
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
-          <div className="absolute top-4 left-4 z-20 safe-top">
-            <h1 className="text-xl font-cyber font-bold text-white neon-text tracking-wider">NEARBY</h1>
-            <p className="text-[10px] font-cyber text-blue-400/40 tracking-widest mt-0.5">{users.length} {users.length === 1 ? "PERSON" : "PEOPLE"} NEARBY</p>
+          <div className="absolute top-4 left-4 z-20 safe-top flex items-center gap-2">
+            <div className="relative w-2 h-2 rounded-full bg-green-400">
+              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping" />
+            </div>
+            <span className="text-[11px] font-cyber text-white/70 tracking-wider">
+              {users.filter((u) => u.is_online).length} users online
+            </span>
+          </div>
+
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 safe-top">
+            <h1 className="text-2xl font-cyber font-extrabold text-white neon-text tracking-[0.3em]">NEX2</h1>
           </div>
 
           {/* View Toggle — reduced glow, centered beneath title */}
