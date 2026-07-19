@@ -403,7 +403,7 @@ export default function RadarScope({
 }
 
 function Blip({ blip, onUserClick, isBestMatch }) {
-  const color = isBestMatch ? PALETTE.green : (blip.color || DEFAULT_BLIP_COLOR);
+  const color = blip.color || DEFAULT_BLIP_COLOR;
 
   return (
     <button onClick={() => onUserClick(blip.user)} className="active:scale-90 transition-transform">
