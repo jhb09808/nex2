@@ -4,6 +4,7 @@ import { appParams } from "@/lib/app-params";
 import GlobalCounters from "@/components/nex/GlobalCounters";
 import CyberRadar from "@/components/nex/CyberRadar";
 import { base44 } from "@/api/base44Client";
+import GoogleIcon from "@/components/GoogleIcon";
 
 const SESSION_KEY = "nex_access_granted";
 
@@ -106,7 +107,7 @@ export default function PasswordGate() {
       const data = await response.json();
       if (data.approved) {
         sessionStorage.setItem(SESSION_KEY, "true");
-        window.location.href = "/login";
+        window.location.href = data.has_account ? "/login" : "/register";
       } else if (data.status === "waitlisted" || data.status === "pending") {
         setError("You're on the list, but not approved yet. Check back soon!");
       } else if (data.status === "rejected") {
@@ -155,6 +156,10 @@ export default function PasswordGate() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogle = () => {
+    base44.auth.loginWithProvider("google", "/");
   };
 
   const CyberHeader = () => (
@@ -336,6 +341,16 @@ export default function PasswordGate() {
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>LOG IN <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
+
+            {/* Google login */}
+            <button
+              type="button"
+              onClick={handleGoogle}
+              className="w-full py-3.5 rounded-xl bg-transparent border border-blue-400/20 text-white font-cyber font-semibold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform hover:border-blue-400/40"
+            >
+              <GoogleIcon className="w-4 h-4" />
+              CONTINUE WITH GOOGLE
+            </button>
 
             <button
               type="button"

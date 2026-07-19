@@ -20,7 +20,8 @@ Deno.serve(async (req) => {
 
     const entry = entries[0];
     if (entry.status === "active" || entry.status === "approved") {
-      return Response.json({ approved: true });
+      const users = await base44.asServiceRole.entities.User.filter({ email });
+      return Response.json({ approved: true, has_account: users.length > 0 });
     } else {
       return Response.json({ approved: false, status: entry.status });
     }

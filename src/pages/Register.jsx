@@ -25,6 +25,11 @@ export default function Register() {
     }
     setLoading(true);
     try {
+      const limitRes = await base44.functions.invoke("checkRegistrationLimit", {});
+      if (!limitRes.data.allowed) {
+        setError(limitRes.data.error || "Too many accounts from this device. Try again later.");
+        return;
+      }
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
