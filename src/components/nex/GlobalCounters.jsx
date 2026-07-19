@@ -22,8 +22,8 @@ export default function GlobalCounters() {
       value: counts.active_count || 0,
       color: "text-blue-400",
       bg: "bg-blue-500/15",
-      ring: "border-blue-500/20",
-      glow: "bg-blue-500/10",
+      border: "border-blue-400/25",
+      glow: "rgba(0, 122, 255, 0.06)",
     },
     {
       icon: Flame,
@@ -31,8 +31,8 @@ export default function GlobalCounters() {
       value: counts.waitlist_count || 0,
       color: "text-orange-400",
       bg: "bg-orange-500/15",
-      ring: "border-orange-500/20",
-      glow: "bg-orange-500/10",
+      border: "border-orange-400/25",
+      glow: "rgba(255, 136, 0, 0.05)",
     },
   ];
 
@@ -44,17 +44,18 @@ export default function GlobalCounters() {
           initial={{ opacity: loaded ? 0 : 1, y: loaded ? 12 : 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
-          className="flex-1 relative glass-strong rounded-2xl p-4 overflow-hidden"
+          className={`flex-1 relative rounded-2xl p-4 overflow-hidden border ${stat.border}`}
+          style={{ background: "rgba(0, 50, 150, 0.04)", boxShadow: `0 0 15px ${stat.glow}` }}
         >
-          <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full ${stat.glow} blur-2xl`} />
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl" style={{ background: stat.glow }} />
           <div className="relative">
-            <div className={`w-10 h-10 rounded-xl ${stat.bg} border ${stat.ring} flex items-center justify-center mb-2`}>
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            <div className={`w-9 h-9 rounded-lg ${stat.bg} border ${stat.border} flex items-center justify-center mb-2.5`}>
+              <stat.icon className={`w-4 h-4 ${stat.color}`} />
             </div>
-            <p className="text-2xl font-bold text-white leading-none">
+            <p className="font-cyber text-2xl font-bold text-white leading-none">
               <CountUp to={stat.value} />
             </p>
-            <p className="text-white/40 text-xs mt-1">{stat.label}</p>
+            <p className="text-blue-200/50 text-[10px] mt-1.5 font-cyber tracking-wider uppercase">{stat.label}</p>
           </div>
         </motion.div>
       ))}

@@ -1,29 +1,27 @@
 import React, { useState } from "react";
-import { Loader2, ArrowRight, Mail, CheckCircle2, MapPin, Globe, Check, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Mail, CheckCircle2, MapPin, Globe, Check, Lock } from "lucide-react";
 import { appParams } from "@/lib/app-params";
 import GlobalCounters from "@/components/nex/GlobalCounters";
+import CyberRadar from "@/components/nex/CyberRadar";
 
 const SESSION_KEY = "nex_access_granted";
-const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/81104c4b7_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png";
 
 export function hasAccess() {
   return sessionStorage.getItem(SESSION_KEY) === "true";
 }
 
 export default function PasswordGate() {
-  const [mode, setMode] = useState("landing"); // "landing" | "password" | "waitlist" | "check"
+  const [mode, setMode] = useState("landing");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Waitlist state
   const [email, setEmail] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [isInternational, setIsInternational] = useState(false);
   const [internationalLocation, setInternationalLocation] = useState("");
   const [waitlistDone, setWaitlistDone] = useState(false);
 
-  // ZIP area check (landing page)
   const [zipCheck, setZipCheck] = useState("");
   const [zipResult, setZipResult] = useState(null);
   const [zipLoading, setZipLoading] = useState(false);
@@ -139,11 +137,14 @@ export default function PasswordGate() {
     }
   };
 
-  const Logo = () => (
-    <div className="relative inline-block mb-5">
-      <img src={LOGO_URL} alt="nex2" className="h-28 sm:h-32 object-contain relative z-10" />
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
-        <div className="w-40 h-40 rounded-full blur-3xl opacity-30" style={{ background: "radial-gradient(circle, rgba(59,130,246,0.5), transparent 70%)" }} />
+  const CyberHeader = () => (
+    <div className="flex items-center justify-between">
+      <span className="font-cyber text-lg font-bold tracking-wider text-white">
+        nex2<span className="text-blue-400 text-[10px] align-top">™</span>
+      </span>
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400 ai-dot" />
+        <span className="text-[10px] font-cyber font-semibold text-green-400 tracking-widest">EARLY ACCESS</span>
       </div>
     </div>
   );
@@ -151,33 +152,38 @@ export default function PasswordGate() {
   const BackButton = () => (
     <button
       onClick={() => { setMode("landing"); setError(""); }}
-      className="flex items-center gap-1 text-white/40 text-sm hover:text-white/70 transition-colors mb-4"
+      className="flex items-center gap-1 text-blue-200/40 text-xs hover:text-blue-200/70 transition-colors"
     >
-      <ArrowLeft className="w-4 h-4" /> Back
+      <ArrowLeft className="w-3.5 h-3.5" /> BACK
     </button>
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center px-6 bg-black overflow-y-auto py-10">
-      <div className="w-full max-w-sm">
+    <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4 py-8 overflow-y-auto">
+      <div className="w-full max-w-md cyber-frame cyber-corners relative rounded-2xl p-6 sm:p-8">
         {/* ===== LANDING MODE ===== */}
         {mode === "landing" && (
-          <div className="text-center">
-            <Logo />
-            <p className="text-white/50 text-sm max-w-xs mx-auto mb-7">
-              Discover people nearby who share your interests. No followers needed.
-            </p>
+          <div className="space-y-5">
+            <CyberHeader />
 
-            {/* Community counters */}
-            <div className="mb-6">
-              <GlobalCounters />
+            <CyberRadar />
+
+            <div className="text-center space-y-1.5">
+              <h1 className="font-cyber text-xl sm:text-2xl font-bold tracking-wider text-white neon-text">
+                DISCOVER PEOPLE NEARBY
+              </h1>
+              <p className="text-[11px] sm:text-xs text-blue-200/60 tracking-wide">
+                WHO SHARE YOUR INTERESTS. NO FOLLOWERS. NO PRESSURE.
+              </p>
             </div>
 
-            {/* ZIP area check */}
-            <form onSubmit={handleZipCheck} className="mb-5">
+            <GlobalCounters />
+
+            {/* ZIP check */}
+            <form onSubmit={handleZipCheck}>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                   <input
                     type="text"
                     value={zipCheck}
@@ -185,158 +191,181 @@ export default function PasswordGate() {
                     placeholder="Your ZIP code"
                     inputMode="numeric"
                     maxLength={5}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={zipLoading || !zipCheck.trim()}
-                  className="px-6 py-3.5 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-1 active:scale-[0.98] transition-transform disabled:opacity-50"
+                  className="px-5 py-3 rounded-xl neon-btn text-white font-cyber font-semibold text-xs tracking-wider flex items-center justify-center gap-1 transition-transform disabled:opacity-40"
                 >
-                  {zipLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Check"}
+                  {zipLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>CHECK <ArrowRight className="w-3.5 h-3.5" /></>}
                 </button>
               </div>
               {zipResult && !zipResult.error && (
-                <p className="text-white/60 text-xs mt-2.5 text-center">
+                <p className="text-blue-200/60 text-xs mt-2.5 text-center">
                   {zipResult.active_count > 0
-                    ? `${zipResult.active_count} active member${zipResult.active_count === 1 ? "" : "s"} near you! 🎉`
+                    ? `${zipResult.active_count} active member${zipResult.active_count === 1 ? "" : "s"} near you!`
                     : zipResult.waitlist_count > 0
                     ? `${zipResult.waitlist_count} on the waitlist in your area — join now!`
                     : "NEX2 isn't in your area yet. Join the waitlist to be first!"}
                 </p>
               )}
               {zipResult?.error && <p className="text-red-400 text-xs mt-2.5 text-center">{zipResult.error}</p>}
-              <p className="text-white/25 text-[11px] mt-2 text-center">
-                NEX2 works best in dense areas — we're starting in NYC and expanding city by city.
-              </p>
             </form>
 
-            {/* Primary actions */}
-            <div className="space-y-3">
+            {/* Subtext with NYC pill */}
+            <p className="text-center text-[10px] text-blue-200/40 tracking-wide leading-relaxed">
+              NEX2 WORKS BEST IN DENSE AREAS — WE'RE STARTING IN{" "}
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/20 border border-blue-400/30 text-blue-300 font-cyber text-[9px] tracking-wider">NYC</span>
+              {" "}AND EXPANDING CITY BY CITY.
+            </p>
+
+            {/* Primary + secondary buttons */}
+            <div className="space-y-2.5 pt-1">
               <button
                 onClick={() => { setMode("waitlist"); setError(""); }}
-                className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform"
               >
-                Get Started <ArrowRight className="w-4 h-4" />
+                GET STARTED <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => { setMode("password"); setError(""); }}
-                className="w-full py-4 rounded-xl bg-white/[0.06] border border-white/10 text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+                className="w-full py-3.5 rounded-xl bg-transparent border border-blue-400/20 text-white font-cyber font-semibold text-sm tracking-wider transition-transform hover:border-blue-400/40"
               >
-                I already have an account
+                I ALREADY HAVE AN ACCOUNT →
               </button>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-blue-500/10">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/30" style={{ zIndex: 3 - i }} />
+                  ))}
+                </div>
+                <span className="text-blue-200/40 text-[10px]">Seen by 8</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3 h-3 text-blue-200/40" />
+                <span className="text-blue-200/40 text-[10px] tracking-wide">Anonymous by design</span>
+              </div>
             </div>
           </div>
         )}
 
         {/* ===== ACCESS CODE MODE ===== */}
         {mode === "password" && (
-          <>
+          <div className="space-y-5">
+            <CyberHeader />
             <BackButton />
-            <div className="text-center mb-8">
-              <Logo />
-              <h1 className="text-2xl font-bold text-white mb-2">Enter to continue</h1>
-              <p className="text-white/40 text-sm">Enter your access code to explore.</p>
+            <div className="text-center space-y-1.5">
+              <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">ENTER TO CONTINUE</h1>
+              <p className="text-blue-200/50 text-xs">Enter your access code to explore.</p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Access code"
+                placeholder="ACCESS CODE"
                 autoFocus
-                className="w-full px-4 py-4 rounded-xl glass text-white placeholder:text-white/30 text-center text-lg tracking-widest focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                className="w-full px-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-center text-lg tracking-widest font-cyber focus:outline-none"
               />
               {error && <p className="text-red-400 text-sm text-center">{error}</p>}
               <button
                 type="submit"
                 disabled={loading || !password.trim()}
-                className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform disabled:opacity-40"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Unlock <ArrowRight className="w-4 h-4" /></>}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>UNLOCK <ArrowRight className="w-4 h-4" /></>}
               </button>
               <button
                 type="button"
                 onClick={() => { setMode("check"); setError(""); setEmail(""); }}
-                className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors pt-1"
+                className="w-full text-center text-blue-200/40 text-xs hover:text-blue-200/70 transition-colors pt-1"
               >
                 Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
               </button>
             </form>
-          </>
+          </div>
         )}
 
         {/* ===== STATUS CHECK MODE ===== */}
         {mode === "check" && (
-          <>
+          <div className="space-y-5">
+            <CyberHeader />
             <BackButton />
-            <div className="text-center mb-8">
-              <Logo />
-              <h1 className="text-2xl font-bold text-white mb-2">Check your status</h1>
-              <p className="text-white/40 text-sm">Enter the email you used to join the waitlist.</p>
+            <div className="text-center space-y-1.5">
+              <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">CHECK YOUR STATUS</h1>
+              <p className="text-blue-200/50 text-xs">Enter the email you used to join the waitlist.</p>
             </div>
             <form onSubmit={handleCheckApproval} className="space-y-3">
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
                   autoFocus
-                  className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
                 />
               </div>
               {error && <p className="text-amber-400 text-sm text-center">{error}</p>}
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform disabled:opacity-40"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Check status <ArrowRight className="w-4 h-4" /></>}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>CHECK STATUS <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
-          </>
+          </div>
         )}
 
         {/* ===== WAITLIST MODE ===== */}
         {mode === "waitlist" && (
-          <>
+          <div className="space-y-5">
+            <CyberHeader />
             <BackButton />
-            <div className="text-center mb-8">
-              <Logo />
-              <h1 className="text-2xl font-bold text-white mb-2">Join the waitlist</h1>
-              <p className="text-white/40 text-sm">We're launching neighborhood by neighborhood. Enter your email and ZIP code to get notified.</p>
+            <div className="text-center space-y-1.5">
+              <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">JOIN THE WAITLIST</h1>
+              <p className="text-blue-200/50 text-xs">We're launching neighborhood by neighborhood. Enter your email and ZIP code to get notified.</p>
             </div>
             {waitlistDone ? (
               <div className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto">
+                <div
+                  className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-400/30 flex items-center justify-center mx-auto"
+                  style={{ boxShadow: "0 0 20px rgba(0,122,255,0.15)" }}
+                >
                   <CheckCircle2 className="w-8 h-8 text-blue-400" />
                 </div>
                 <p className="text-white text-sm">You're on the list! When you're approved, come back to check your status.</p>
                 <button
                   type="button"
                   onClick={() => { setMode("check"); setWaitlistDone(false); setEmail(""); }}
-                  className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                  className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform"
                 >
-                  Check your status
+                  CHECK YOUR STATUS
                 </button>
               </div>
             ) : (
               <form onSubmit={handleWaitlist} className="space-y-3">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@email.com"
                     autoFocus
-                    className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
                   />
                 </div>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                   <input
                     type="text"
                     value={zipCode}
@@ -344,7 +373,7 @@ export default function PasswordGate() {
                     placeholder="ZIP code"
                     inputMode="numeric"
                     maxLength={5}
-                    className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
                   />
                 </div>
                 <button
@@ -352,45 +381,45 @@ export default function PasswordGate() {
                   onClick={() => setIsInternational(!isInternational)}
                   className="w-full flex items-center gap-3 py-1 group"
                 >
-                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${isInternational ? "gradient-blue border-transparent" : "border-white/20 bg-white/[0.04] group-hover:border-white/30"}`}>
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${isInternational ? "neon-btn border-transparent" : "border-blue-400/20 bg-blue-500/5 group-hover:border-blue-400/30"}`}>
                     {isInternational && <Check className="w-3.5 h-3.5 text-white" />}
                   </div>
-                  <span className="text-white/60 text-sm">I live outside the US</span>
+                  <span className="text-blue-200/60 text-sm">I live outside the US</span>
                 </button>
                 {isInternational && (
                   <div className="space-y-2">
                     <div className="relative">
-                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                       <input
                         type="text"
                         value={internationalLocation}
                         onChange={(e) => setInternationalLocation(e.target.value)}
                         placeholder="e.g. Lahore, Pakistan"
                         autoFocus
-                        className="w-full pl-12 pr-4 py-4 rounded-xl glass text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                        className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
                       />
                     </div>
-                    <p className="text-white/30 text-xs pl-1">We'll notify you when we expand there 🌍</p>
+                    <p className="text-blue-200/30 text-xs pl-1">We'll notify you when we expand there 🌍</p>
                   </div>
                 )}
                 {error && <p className="text-red-400 text-sm text-center">{error}</p>}
                 <button
                   type="submit"
                   disabled={loading || !email.trim() || (isInternational ? !internationalLocation.trim() : !zipCode.trim())}
-                  className="w-full py-4 rounded-xl gradient-blue text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform disabled:opacity-40"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Join waitlist <ArrowRight className="w-4 h-4" /></>}
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>JOIN WAITLIST <ArrowRight className="w-4 h-4" /></>}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setMode("check"); setError(""); setEmail(""); }}
-                  className="w-full text-center text-white/40 text-sm hover:text-white/70 transition-colors pt-1"
+                  className="w-full text-center text-blue-200/40 text-xs hover:text-blue-200/70 transition-colors pt-1"
                 >
                   Already on the waitlist? <span className="text-blue-400 font-medium">Check your status</span>
                 </button>
               </form>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
