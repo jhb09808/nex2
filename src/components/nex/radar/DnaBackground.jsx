@@ -97,18 +97,39 @@ export default function DnaBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    const hasTilt = typeof window.DeviceOrientationEvent !== "undefined";
-    // iOS 13+ requires explicit permission
-    if (hasTilt && typeof DeviceOrientationEvent.requestPermission === "function") {
-      setNeedsPermission(true);
-    } else if (hasTilt) {
-      // Android / older iOS: listen directly
-      window.addEventListener("deviceorientation", onTilt, true);
-    } else {
-      // Desktop fallback
+    const hasTiltAPI = typeof window.DeviceOrientationEvent !== "undefined";
+    let mouseBound = false;
+
+    const bindMouse = () => {
+      if (mouseBound) return;
+      mouseBound = true;
       window.addEventListener("mousemove", onMove);
       window.addEventListener("touchmove", onMove, { passive: true });
       window.addEventListener("mouseleave", onLeave);
+    };
+
+    if (hasTiltAPI && typeof DeviceOrientationEvent.requestPermission === "function") {
+      // iOS 13+ — requires a user gesture; show the permission button.
+      setNeedsPermission(true);
+    } else if (hasTiltAPI) {
+      // Android / older iOS / desktop-with-gyroscope: listen, but fall back
+      // to mouse if no real motion event arrives within ~700ms (desktop browsers
+      // have the API but never fire events).
+      let gotMotion = false;
+      const probe = (e) => {
+        if (e.gamma === null && e.beta === null) return;
+        gotMotion = true;
+        onTilt(e);
+      };
+      window.addEventListener("deviceorientation", probe, true);
+      setTimeout(() => {
+        if (!gotMotion) {
+          window.removeEventListener("deviceorientation", probe, true);
+          bindMouse();
+        }
+      }, 700);
+    } else {
+      bindMouse();
     }
 
     let raf;
