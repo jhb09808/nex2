@@ -2,12 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const BLIPS = [
-  { angle: 195, dist: 50, color: "#FFA500", delay: 0 },
-  { angle: 215, dist: 32, color: "#00BFFF", delay: 0.4 },
-  { angle: 225, dist: 20, color: "#0047AB", delay: 0.8 },
-  { angle: 5, dist: 38, color: "#00FF00", delay: 1.2 },
-  { angle: 145, dist: 48, color: "#FFA500", delay: 1.6 },
-  { angle: 155, dist: 58, color: "#8A2BE2", delay: 2.0 },
+  { angle: 200, dist: 68, color: "#FFA500", delay: 0 },
+  { angle: 235, dist: 44, color: "#00BFFF", delay: 0.4 },
+  { angle: 260, dist: 72, color: "#0047AB", delay: 0.8 },
+  { angle: 10, dist: 64, color: "#00FF00", delay: 1.2 },
+  { angle: 55, dist: 76, color: "#FFA500", delay: 1.6 },
+  { angle: 95, dist: 52, color: "#8A2BE2", delay: 2.0 },
 ];
 
 export default function CyberRadar() {
