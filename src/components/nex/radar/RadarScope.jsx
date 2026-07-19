@@ -113,11 +113,9 @@ export default function RadarScope({
         const hash = hashStr(m.user.id || "x");
         const jx = ((hash % 100) / 100 - 0.5) * 4;
         const jy = (((hash * 31) % 100) / 100 - 0.5) * 4;
-        const color = getBlipColorByHash(m.user);
         const pulseDelay = (hash % 40) / 10;
         raw.push({
           ...m,
-          color,
           pulseDelay,
           scanDelay,
           x: Math.max(8, Math.min(92, 50 + Math.sin(angle) * r + jx)),
@@ -145,6 +143,12 @@ export default function RadarScope({
         }
       }
     }
+    // Assign varied colors by index — each blip cycles through the sweep palette
+    raw.forEach((b, i) => {
+      if (b.type !== "cluster") {
+        b.color = BLIP_PALETTE[i % BLIP_PALETTE.length];
+      }
+    });
     return raw;
   }, [markers, center, visibleRadius, getUserLatLng, distanceMiles]);
 
