@@ -159,6 +159,7 @@ export default function PasswordGate() {
   };
 
   const handleGoogle = () => {
+    sessionStorage.setItem(SESSION_KEY, "true");
     base44.auth.loginWithProvider("google", "/");
   };
 
