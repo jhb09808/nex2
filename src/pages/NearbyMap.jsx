@@ -296,15 +296,6 @@ export default function NearbyMap() {
       {/* Header + controls — hidden during radar onboarding */}
       {!showRadarOnboarding && (
         <>
-          <div className="absolute top-4 left-4 z-20 safe-top flex items-center gap-2">
-            <div className="relative w-2 h-2 rounded-full bg-green-400">
-              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping" />
-            </div>
-            <span className="text-[11px] font-cyber text-white/70 tracking-wider">
-              {users.filter((u) => u.is_online).length} users online
-            </span>
-          </div>
-
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 safe-top">
             <img
               src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
@@ -361,7 +352,15 @@ export default function NearbyMap() {
 
       {/* Live status */}
       {!showRadarOnboarding && !selectedUser && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 text-center pointer-events-none">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 text-center pointer-events-none space-y-1">
+          <div className="flex items-center justify-center gap-1.5">
+            <div className="relative w-1.5 h-1.5 rounded-full bg-green-400">
+              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping" />
+            </div>
+            <span className="text-[11px] font-cyber text-white/70 tracking-wider">
+              {users.filter((u) => u.is_online).length} users online
+            </span>
+          </div>
           <p className="text-[10px] font-cyber text-blue-400/30 tracking-widest">
             {users.length > 0 ? "BEST MATCH DETECTED" : "SCANNING"} · {effectiveRadius} MI RADIUS
           </p>
