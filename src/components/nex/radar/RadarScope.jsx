@@ -5,7 +5,7 @@ const PALETTE = {
   bg: "#000000",
   grid: "rgba(59, 130, 246, 0.05)",
   gridBright: "rgba(59, 130, 246, 0.09)",
-  green: "#93C5FD",
+  green: "#39FF6A",
   blue: "#60A5FA",
   orange: "#FF9A2E",
   purple: "#B463FF",
