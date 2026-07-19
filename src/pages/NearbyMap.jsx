@@ -301,13 +301,6 @@ export default function NearbyMap() {
             <p className="text-[10px] font-cyber text-cyan-400/40 tracking-widest mt-0.5">{users.length} {users.length === 1 ? "PERSON" : "PEOPLE"} NEARBY</p>
           </div>
 
-          {/* Top right: filters */}
-          <div className="absolute top-4 right-4 z-20 safe-top">
-            <button onClick={() => setShowFilters(true)} className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center active:scale-95 transition-transform">
-              <SlidersHorizontal className="w-4 h-4 text-cyan-400/60" />
-            </button>
-          </div>
-
           {/* View Toggle — reduced glow, centered beneath title */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
             <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">

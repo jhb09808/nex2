@@ -53,7 +53,7 @@ export default function NavMenu() {
       {/* Floating menu button */}
       <button
         onClick={() => setOpen(!open)}
-        className="absolute top-4 right-4 pointer-events-auto w-10 h-10 rounded-xl glass-strong flex items-center justify-center active:scale-95 transition-transform safe-top"
+        className="absolute top-4 right-4 pointer-events-auto w-10 h-10 rounded-xl cyber-frame flex items-center justify-center active:scale-95 transition-transform safe-top"
       >
         <AnimatePresence mode="wait">
           {open ? (
