@@ -1,13 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, ArrowRight, Map } from "lucide-react";
+import { CheckCircle2, ArrowRight, Map, Loader2 } from "lucide-react";
 import CyberRadar from "@/components/nex/CyberRadar";
+import { base44 } from "@/api/base44Client";
 
 export default function ApprovalConfirmed() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const hasAccount = params.get("has_account") === "true";
+  const [authed, setAuthed] = useState(null);
+
+  useEffect(() => {
+    if (!hasAccount) return;
+    base44.auth.isAuthenticated().then((isAuthed) => {
+      setAuthed(isAuthed);
+      if (isAuthed) {
+        // Already logged in — send straight to the radar.
+        window.location.href = "/";
+      }
+    });
+  }, [hasAccount]);
+
+  const handleCta = () => {
+    if (hasAccount) {
+      // If logged in go to radar, otherwise log in first.
+      navigate(authed ? "/" : "/login");
+    } else {
+      navigate("/register");
+    }
+  };
+
+  // Brief loading state while we check auth for existing-account users.
+  if (hasAccount && authed === null) {
+    return (
+      <div className="fixed inset-0 cyber-bg flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4 py-8 overflow-y-auto">
@@ -55,11 +86,11 @@ export default function ApprovalConfirmed() {
           className="mt-6"
         >
           <button
-            onClick={() => navigate(hasAccount ? "/" : "/register")}
+            onClick={handleCta}
             className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform"
           >
             {hasAccount ? (
-              <><Map className="w-4 h-4" /> GO TO MAP</>
+              <><Map className="w-4 h-4" /> GO TO RADAR</>
             ) : (
               <>CREATE YOUR PROFILE NOW <ArrowRight className="w-4 h-4" /></>
             )}
