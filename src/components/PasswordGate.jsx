@@ -139,9 +139,11 @@ export default function PasswordGate() {
 
   const CyberHeader = () => (
     <div className="flex items-center justify-between">
-      <span className="font-cyber text-lg font-bold tracking-wider text-white">
-        nex2<span className="text-blue-400 text-[10px] align-top">™</span>
-      </span>
+      <img
+        src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
+        alt="NEX2"
+        className="h-6 w-auto"
+      />
       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30">
         <span className="w-1.5 h-1.5 rounded-full bg-green-400 ai-dot" />
         <span className="text-[10px] font-cyber font-semibold text-green-400 tracking-widest">EARLY ACCESS</span>
