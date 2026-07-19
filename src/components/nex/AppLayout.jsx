@@ -37,7 +37,7 @@ export default function AppLayout() {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-[hsl(0,0%,4%)] flex items-center justify-center max-w-lg mx-auto">
+      <div className="min-h-screen bg-black flex items-center justify-center max-w-lg mx-auto">
         <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
@@ -56,7 +56,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(0,0%,4%)] max-w-lg mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-black max-w-lg mx-auto relative overflow-hidden">
       <NotificationListener />
       <ProximityMatchNudge />
       <Outlet />

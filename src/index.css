@@ -311,7 +311,7 @@
 /* ===== Cyber / Futuristic Theme ===== */
 
 .cyber-bg {
-  background: radial-gradient(ellipse 130% 100% at center, #000000 0%, #050a14 65%, #020408 100%);
+  background: #000000;
 }
 
 .cyber-frame {
