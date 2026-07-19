@@ -308,6 +308,42 @@
 	75%, 100% { transform: scale(2.5); opacity: 0; }
 }
 
+/* ===== Premium Radar Effects ===== */
+@keyframes nex-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes nex-blip-scan {
+  0% { transform: scale(2.2); opacity: 0.7; filter: brightness(2.5); }
+  5% { transform: scale(1.8); opacity: 0.5; filter: brightness(2); }
+  15% { transform: scale(1.3); opacity: 0.25; filter: brightness(1.3); }
+  30% { transform: scale(1); opacity: 0.12; filter: brightness(1); }
+  100% { transform: scale(1); opacity: 0.12; filter: brightness(1); }
+}
+
+@keyframes nex-center-pulse {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+@keyframes nex-particle-drift {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.5; }
+  85% { opacity: 0.5; }
+  100% { transform: translate(var(--dx, 10px), var(--dy, -30px)); opacity: 0; }
+}
+
+@keyframes nex-ambient-breathe {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes nex-best-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+
 /* ===== Cyber / Futuristic Theme ===== */
 
 .cyber-bg {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -265,6 +265,8 @@ export default function NearbyMap() {
     return result;
   };
 
+  const bestMatchId = viewMode === "best" && ranked.length > 0 ? ranked[0].id : null;
+  const matchPct = selectedUser ? Math.min(99, Math.max(35, 50 + (selectedUser._shared || 0) * 8 + Math.max(0, 15 - (selectedUser._dist || 1) * 10))) : 0;
   const markers = computeClusters(displayUsers);
 
   if (areaRestricted?.restricted) {
@@ -296,44 +298,34 @@ export default function NearbyMap() {
         <>
           <div className="absolute top-4 left-4 z-20 safe-top">
             <h1 className="text-xl font-cyber font-bold text-white neon-text tracking-wider">NEARBY</h1>
+            <p className="text-[10px] font-cyber text-cyan-400/40 tracking-widest mt-0.5">{users.length} {users.length === 1 ? "PERSON" : "PEOPLE"} NEARBY</p>
           </div>
 
-          {/* Sonar / List toggle */}
-          <div className="absolute top-16 right-4 z-20">
+          {/* Top right: filters */}
+          <div className="absolute top-4 right-4 z-20 safe-top">
+            <button onClick={() => setShowFilters(true)} className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center active:scale-95 transition-transform">
+              <SlidersHorizontal className="w-4 h-4 text-cyan-400/60" />
+            </button>
+          </div>
+
+          {/* View Toggle — reduced glow, centered beneath title */}
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
             <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
               <button
-                onClick={() => setLayoutMode("sonar")}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "neon-btn text-white" : "text-white/40"}`}
-              >
-                <Radar className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setLayoutMode("list")}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "neon-btn text-white" : "text-white/40"}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* View Toggle */}
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20">
-            <div className="cyber-frame rounded-full p-1 flex gap-1">
-              <button
                 onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "best" ? "neon-btn text-white" : "text-white/40"
+                className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "best" ? "bg-cyan-500/15 text-cyan-300" : "text-white/40"
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5" /> Best Matches
+                <Sparkles className="w-3 h-3" /> Best Matches
               </button>
               <button
                 onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
-                className={`px-4 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "all" ? "neon-btn text-white" : "text-white/40"
+                className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                  viewMode === "all" ? "bg-cyan-500/15 text-cyan-300" : "text-white/40"
                 }`}
               >
-                <Users className="w-3.5 h-3.5" /> All Nearby
+                <Users className="w-3 h-3" /> All Nearby
               </button>
             </div>
           </div>
@@ -356,27 +348,58 @@ export default function NearbyMap() {
           blurred={showRadarOnboarding}
           zoom={zoom}
           onZoomChange={setZoom}
+          bestMatchId={bestMatchId}
         />
       ) : (
         <RadarList users={displayUsers} onUserClick={(user) => setSelectedUser(user)} />
       )}
 
-      {/* Zoom controls */}
-      {!showRadarOnboarding && layoutMode === "sonar" && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
-          <button
-            onClick={() => setZoom((z) => Math.min(5, z + 1))}
-            className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
-          >
-            +
-          </button>
-          <span className="text-center text-[10px] font-cyber text-blue-200/30">{zoom < 1 ? "1x" : `${zoom.toFixed(1)}x`}</span>
-          <button
-            onClick={() => setZoom((z) => Math.max(1, z - 1))}
-            className="w-10 h-10 rounded-xl cyber-frame flex items-center justify-center text-white/70 text-xl font-light active:scale-95 transition-transform"
-          >
-            −
-          </button>
+      {/* Live status */}
+      {!showRadarOnboarding && !selectedUser && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 text-center pointer-events-none">
+          <p className="text-[10px] font-cyber text-cyan-400/30 tracking-widest">
+            {users.length > 0 ? "BEST MATCH DETECTED" : "SCANNING"} · {effectiveRadius} MI RADIUS
+          </p>
+        </div>
+      )}
+
+      {/* Unified zoom control + view toggle */}
+      {!showRadarOnboarding && (
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3">
+          {layoutMode === "sonar" && (
+            <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
+              <button
+                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
+                className="w-10 h-10 flex items-center justify-center text-cyan-300/70 active:scale-90 transition-transform"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <div className="px-2 py-1.5 border-t border-b border-cyan-500/10">
+                <span className="text-[10px] font-cyber text-cyan-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
+              </div>
+              <button
+                onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
+                className="w-10 h-10 flex items-center justify-center text-cyan-300/70 active:scale-90 transition-transform"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          {/* Sonar / List toggle */}
+          <div className="cyber-frame rounded-full p-0.5 flex flex-col gap-0.5">
+            <button
+              onClick={() => setLayoutMode("sonar")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-cyan-500/15 text-cyan-300" : "text-white/30"}`}
+            >
+              <Radar className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setLayoutMode("list")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-cyan-500/15 text-cyan-300" : "text-white/30"}`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -477,123 +500,109 @@ export default function NearbyMap() {
         )}
       </AnimatePresence>
 
-      {/* Selected User Panel */}
+      {/* Selected User Panel — anonymous match card */}
       <AnimatePresence>
         {selectedUser && (
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            transition={{ type: "spring", damping: 32, stiffness: 320 }}
             className="absolute bottom-24 left-0 right-0 z-30 px-4"
           >
-            <GlassCard strong>
-              <button onClick={() => setSelectedUser(null)} className="absolute top-3 right-3">
-                <X className="w-5 h-5 text-white/40" />
+            <div className="cyber-frame rounded-2xl p-5 relative overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+              <button onClick={() => setSelectedUser(null)} className="absolute top-3 right-3 z-10">
+                <X className="w-4 h-4 text-white/30" />
               </button>
-              <div className="flex items-center gap-4 mb-4">
-                {selectedUser.visibility === "anonymous" ? (
-                  <div className="w-14 h-14 rounded-full cyber-input flex items-center justify-center">
-                    <EyeOff className="w-6 h-6 text-blue-400/50" />
+
+              <div className="relative">
+                <p className="text-[10px] font-cyber text-cyan-400/50 tracking-widest mb-2">NEARBY MATCH</p>
+
+                {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {selectedUser.interests.slice(0, 5).map((interest) => (
+                      <span key={interest} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-cyan-500/8 text-cyan-300/80 border border-cyan-500/10">
+                        {interest}
+                      </span>
+                    ))}
                   </div>
-                ) : selectedUser.visibility === "first_name" ? (
-                  <div className="w-14 h-14 rounded-full neon-btn flex items-center justify-center">
-                    <span className="text-xl font-cyber font-bold text-white">{getDisplayName(selectedUser).charAt(0)}</span>
-                  </div>
-                ) : (
-                  <UserAvatar name={getDisplayName(selectedUser)} size="lg" isOnline={selectedUser.is_online} plan={selectedUser.plan} />
                 )}
-                <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-white font-cyber font-bold text-lg truncate neon-text">{getDisplayName(selectedUser)}</p>
-                  <VerifiedBadges isVerified={selectedUser.is_verified} isOg={selectedUser.is_og} size="md" />
-                  {selectedUser.is_premium && <Crown className="w-4 h-4 text-amber-400 flex-shrink-0" />}
-                </div>
-                <p className="text-white/30 text-[11px] font-mono mt-0.5">{getUserNumberLabel(selectedUser)}</p>
-                <div className="flex items-center gap-3 mt-0.5">
-                  {selectedUser._dist != null && (
-                    <span className="text-white/40 text-xs flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft away` : `${selectedUser._dist.toFixed(1)} mi away`}
-                    </span>
-                  )}
-                  {selectedUser.connections_count != null && (
-                    <span className="text-white/40 text-xs flex items-center gap-1">
-                      <Handshake className="w-3 h-3" />
-                      {selectedUser.connections_count} {selectedUser.connections_count === 1 ? "connection" : "connections"}
-                    </span>
-                  )}
-                </div>
-                  {selectedUser.visibility === "anonymous" && (
-                    <p className="text-blue-400/60 text-xs flex items-center gap-1 mt-0.5">
-                      <Shield className="w-3 h-3" /> Anonymous mode
+                {selectedUser.visibility === "anonymous" && (
+                  <p className="text-white/30 text-xs mb-4">Anonymous user — interests hidden</p>
+                )}
+
+                <div className="flex items-center gap-5 mb-4">
+                  <div>
+                    <p className="text-2xl font-cyber font-bold text-white neon-text">{matchPct}%</p>
+                    <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">interest match</p>
+                  </div>
+                  <div className="h-8 w-px bg-cyan-500/10" />
+                  <div>
+                    <p className="text-lg font-cyber font-bold text-white">
+                      {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)}ft` : `${selectedUser._dist?.toFixed(1)}mi`}
                     </p>
-                  )}
-                  {selectedUser.visibility === "first_name" && (
-                    <p className="text-white/30 text-xs mt-0.5">First name only</p>
+                    <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">away</p>
+                  </div>
+                  {selectedUser.connections_count != null && (
+                    <>
+                      <div className="h-8 w-px bg-cyan-500/10" />
+                      <div>
+                        <p className="text-lg font-cyber font-bold text-white">{selectedUser.connections_count}</p>
+                        <p className="text-[9px] font-cyber text-cyan-400/40 tracking-wider uppercase mt-0.5">connections</p>
+                      </div>
+                    </>
                   )}
                 </div>
-              </div>
 
-              {selectedUser.visibility !== "anonymous" && selectedUser.bio && (
-                <p className="text-white/50 text-sm mb-4">{selectedUser.bio}</p>
-              )}
-
-              {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {selectedUser.interests.slice(0, 8).map((interest) => (
-                    <InterestTag key={interest} label={interest} size="sm" iconOnly />
-                  ))}
+                <div className="flex gap-2">
+                  {capabilities && !capabilities.can_start_chat ? (
+                    <button
+                      onClick={() => setPaywallVariant("chat_limit")}
+                      className="flex-1 py-3.5 rounded-xl cyber-input flex items-center justify-center gap-1.5 text-white/40 font-cyber font-medium text-sm"
+                    >
+                      <Lock className="w-4 h-4" /> Chat limit reached
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
+                          if (!enforceRes.data?.allowed) {
+                            setPaywallVariant("chat_limit");
+                            return;
+                          }
+                          const targetId = selectedUser.created_by_id || selectedUser.id;
+                          const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
+                          const data = res.data;
+                          if (data?.mutual_match && data?.conversation_id) {
+                            setSelectedUser(null);
+                            navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
+                          } else if (data?.error) {
+                            console.error("Request error:", data.error);
+                          } else {
+                            setSelectedUser(null);
+                            setRequestSent(true);
+                            setTimeout(() => setRequestSent(false), 3000);
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className="flex-1 py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                    >
+                      <MessageCircle className="w-4 h-4" /> REQUEST CHAT
+                    </button>
+                  )}
+                  <button
+                    onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
+                    className="px-4 py-3.5 rounded-xl cyber-input text-white/60 font-medium text-sm active:scale-[0.98] transition-transform"
+                  >
+                    Profile
+                  </button>
                 </div>
-              )}
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
-                  className="flex-1 py-3 rounded-xl cyber-input text-white/70 font-medium text-sm active:scale-[0.98] transition-transform"
-                >
-                  View Profile
-                </button>
-                {capabilities && !capabilities.can_start_chat ? (
-                  <button
-                    onClick={() => setPaywallVariant("chat_limit")}
-                    className="flex-1 py-3 rounded-xl cyber-input flex items-center justify-center gap-1.5 text-white/40 font-medium text-sm"
-                  >
-                    <Lock className="w-4 h-4" /> Chat limit reached
-                  </button>
-                ) : (
-                  <button
-                    onClick={async () => {
-                      try {
-                        const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
-                        if (!enforceRes.data?.allowed) {
-                          setPaywallVariant("chat_limit");
-                          return;
-                        }
-                        const targetId = selectedUser.created_by_id || selectedUser.id;
-                        const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
-                        const data = res.data;
-                        if (data?.mutual_match && data?.conversation_id) {
-                          setSelectedUser(null);
-                          navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
-                        } else if (data?.error) {
-                          console.error("Request error:", data.error);
-                        } else {
-                          setSelectedUser(null);
-                          setRequestSent(true);
-                          setTimeout(() => setRequestSent(false), 3000);
-                        }
-                      } catch (err) {
-                        console.error(err);
-                      }
-                    }}
-                    className="flex-1 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
-                  >
-                    <MessageCircle className="w-4 h-4" /> REQUEST CHAT
-                  </button>
-                )}
               </div>
-            </GlassCard>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

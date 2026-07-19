@@ -1,10 +1,10 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import { getRadarSweepColor } from "@/hooks/useRadarSweepColor";
 
-// Exact palette from the design spec
 const PALETTE = {
   bg: "#000000",
-  grid: "rgba(0, 212, 255, 0.07)",
+  grid: "rgba(0, 212, 255, 0.05)",
+  gridBright: "rgba(0, 212, 255, 0.09)",
   green: "#39FF6A",
   blue: "#4AC9FF",
   orange: "#FF9A2E",
@@ -70,6 +70,7 @@ export default function RadarScope({
   blurred = false,
   zoom = 1,
   onZoomChange,
+  bestMatchId,
 }) {
   const baseRadius = effectiveRadius || 1;
   const visibleRadius = baseRadius / zoom;
@@ -88,14 +89,18 @@ export default function RadarScope({
         const dist = distanceMiles(center.lat, center.lng, m.lat, m.lng);
         if (dist > visibleRadius) continue;
         const angle = Math.atan2(m.lng - center.lng, m.lat - center.lat);
+        const angleDeg = ((angle * 180) / Math.PI + 360) % 360;
+        const scanDelay = (angleDeg / 360) * 5;
         const fraction = Math.min(dist / visibleRadius, 0.92);
         const r = fraction * 44;
-        raw.push({ ...m, x: 50 + Math.sin(angle) * r, y: 50 - Math.cos(angle) * r });
+        raw.push({ ...m, scanDelay, x: 50 + Math.sin(angle) * r, y: 50 - Math.cos(angle) * r });
       } else {
         const [uLat, uLng] = getUserLatLng(m.user);
         const dist = distanceMiles(center.lat, center.lng, uLat, uLng);
         if (dist > visibleRadius) continue;
         const angle = Math.atan2(uLng - center.lng, uLat - center.lat);
+        const angleDeg = ((angle * 180) / Math.PI + 360) % 360;
+        const scanDelay = (angleDeg / 360) * 5;
         const fraction = Math.min(dist / visibleRadius, 0.92);
         const r = fraction * 44;
         const hash = hashStr(m.user.id || "x");
@@ -107,6 +112,7 @@ export default function RadarScope({
           ...m,
           color,
           pulseDelay,
+          scanDelay,
           x: Math.max(8, Math.min(92, 50 + Math.sin(angle) * r + jx)),
           y: Math.max(8, Math.min(92, 50 - Math.cos(angle) * r + jy)),
         });
@@ -134,6 +140,19 @@ export default function RadarScope({
     }
     return raw;
   }, [markers, center, visibleRadius, getUserLatLng, distanceMiles]);
+
+  const particles = useMemo(() => {
+    return Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      x: 5 + Math.random() * 90,
+      y: 5 + Math.random() * 90,
+      size: 1 + Math.random() * 1.5,
+      duration: 12 + Math.random() * 18,
+      delay: Math.random() * 18,
+      dx: (Math.random() - 0.5) * 40,
+      dy: -20 - Math.random() * 40,
+    }));
+  }, []);
 
   const rings = [0.25, 0.5, 0.75, 1];
   const spokes = Array.from({ length: 8 }, (_, i) => i * 45);
@@ -184,20 +203,67 @@ export default function RadarScope({
       onTouchStart={onScopeTouchStart}
       onTouchEnd={onScopeTouchEnd}
       onWheel={onWheel}
-      className="absolute inset-0 z-0 flex items-center justify-center"
+      className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
       style={{
-        background: `radial-gradient(circle at center, ${PALETTE.bg} 0%, #000000 75%)`,
+        background: `radial-gradient(circle at center, #01060e 0%, #000000 80%)`,
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
         touchAction: "none",
       }}
     >
-      {/* Radar scope circle */}
-      <div className="relative w-full h-full max-w-[560px] max-h-[560px] aspect-square">
-        {/* Scope background */}
+      {/* Atmospheric ambient haze */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at center, rgba(0,80,160,0.04) 0%, transparent 60%)`,
+          animation: "nex-ambient-breathe 8s ease-in-out infinite",
+        }}
+      />
+
+      {/* Center glow */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Floating particles */}
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            background: "rgba(0,212,255,0.4)",
+            boxShadow: "0 0 4px rgba(0,212,255,0.3)",
+            "--dx": `${p.dx}px`,
+            "--dy": `${p.dy}px`,
+            animation: `nex-particle-drift ${p.duration}s ease-in-out ${p.delay}s infinite`,
+          }}
+        />
+      ))}
+
+      {/* Radar scope circle — 15% larger, shifted up */}
+      <div className="relative w-full h-full max-w-[640px] max-h-[640px] aspect-square" style={{ transform: "translateY(-3%)" }}>
+        {/* Scope background with glass depth */}
         <div
           className="absolute inset-0 rounded-full"
-          style={{ background: `radial-gradient(circle at center, rgba(2,6,14,0.8) 0%, #000000 100%)` }}
+          style={{
+            background: `radial-gradient(circle at center, rgba(2,8,18,0.9) 0%, #000000 100%)`,
+            boxShadow: `inset 0 0 60px rgba(0,212,255,0.03), inset 0 0 120px rgba(0,0,0,0.5)`,
+          }}
+        />
+
+        {/* Glass inner sheen */}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at 50% 30%, rgba(255,255,255,0.015) 0%, transparent 50%)`,
+          }}
         />
 
         {/* Concentric range rings */}
@@ -205,7 +271,10 @@ export default function RadarScope({
           <div
             key={i}
             className="absolute rounded-full"
-            style={{ inset: `${(1 - s) * 50}%`, border: `1px solid ${PALETTE.grid}` }}
+            style={{
+              inset: `${(1 - s) * 50}%`,
+              border: `1px solid ${i === rings.length - 1 ? PALETTE.gridBright : PALETTE.grid}`,
+            }}
           />
         ))}
 
@@ -223,30 +292,42 @@ export default function RadarScope({
                 x2={x2}
                 y2={y2}
                 stroke={PALETTE.grid}
-                strokeWidth="0.15"
-                opacity="0.8"
+                strokeWidth="0.12"
+                opacity="0.6"
               />
             );
           })}
         </svg>
 
-        {/* Sweep wedge — user-selected glowing color */}
+        {/* Grid glow trail — soft rotating glow on the grid */}
         <div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full pointer-events-none"
           style={{
-            background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 270deg, ${sweepColor}0D 310deg, ${sweepColor}33 340deg, ${sweepColor}66 356deg, ${sweepColor}FF 360deg, transparent 360deg)`,
-            animation: "radar-sweep 5s linear infinite",
+            background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 180deg, ${sweepColor}06 280deg, ${sweepColor}10 320deg, ${sweepColor}08 350deg, ${sweepColor}04 360deg, transparent 360deg)`,
+            animation: "nex-sweep-rotate 5s linear infinite",
+            maskImage: "radial-gradient(circle, white 48%, transparent 50%)",
+            WebkitMaskImage: "radial-gradient(circle, white 48%, transparent 50%)",
+          }}
+        />
+
+        {/* Sonar sweep — brighter leading edge, soft trailing fade */}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{
+            background: `conic-gradient(from 0deg, transparent 0deg, ${sweepColor}00 210deg, ${sweepColor}08 280deg, ${sweepColor}15 315deg, ${sweepColor}30 340deg, ${sweepColor}66 355deg, ${sweepColor}BB 359deg, ${sweepColor}FF 360deg, transparent 360deg)`,
+            animation: "nex-sweep-rotate 5s linear infinite",
             maskImage: "radial-gradient(circle, white 49%, transparent 50%)",
             WebkitMaskImage: "radial-gradient(circle, white 49%, transparent 50%)",
           }}
         />
 
-        {/* Center marker — cyan core */}
+        {/* Center marker — sharp cyan core with pulsing ring */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="relative flex items-center justify-center">
-            <div className="absolute w-4 h-4 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.3)" }} />
-            <div className="absolute w-4 h-4 rounded-full animate-ping" style={{ background: "rgba(0,212,255,0.15)", animationDuration: "3s" }} />
-            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.cyan, boxShadow: `0 0 8px ${PALETTE.cyan}, 0 0 16px ${PALETTE.cyan}` }} />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.25)", animation: "nex-center-pulse 2.5s ease-out infinite" }} />
+            <div className="absolute w-6 h-6 rounded-full border" style={{ borderColor: "rgba(0,212,255,0.25)", animation: "nex-center-pulse 2.5s ease-out 1.25s infinite" }} />
+            <div className="absolute w-4 h-4 rounded-full bg-cyan-400/15 blur-md" />
+            <div className="relative w-1.5 h-1.5 rounded-full" style={{ background: PALETTE.cyan, boxShadow: `0 0 6px ${PALETTE.cyan}, 0 0 14px ${PALETTE.cyan}, 0 0 24px ${PALETTE.cyan}40` }} />
           </div>
         </div>
 
@@ -260,40 +341,67 @@ export default function RadarScope({
             {blip.type === "cluster" ? (
               <button onClick={() => onClusterClick(blip.key)} className="active:scale-90 transition-transform">
                 <div className="relative w-8 h-8 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: PALETTE.blue, opacity: 0.12 }} />
-                  <div className="relative w-6 h-6 rounded-full border border-white/15 flex items-center justify-center text-white text-[10px] font-bold" style={{ background: `${PALETTE.blue}33`, boxShadow: `0 0 8px ${PALETTE.blue}66` }}>
+                  <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: PALETTE.blue, opacity: 0.1 }} />
+                  <div className="relative w-6 h-6 rounded-full border border-cyan-400/20 flex items-center justify-center text-white text-[10px] font-cyber font-bold" style={{ background: `${PALETTE.blue}22`, boxShadow: `0 0 8px ${PALETTE.blue}44` }}>
                     {blip.count}
                   </div>
                 </div>
               </button>
             ) : (
-              <Blip blip={blip} onUserClick={onUserClick} />
+              <Blip blip={blip} onUserClick={onUserClick} isBestMatch={blip.user.id === bestMatchId} />
             )}
           </div>
         ))}
       </div>
-
     </div>
   );
 }
 
-function Blip({ blip, onUserClick }) {
-  const user = blip.user;
-  const isAnonymous = user.visibility === "anonymous";
-  const color = blip.color || DEFAULT_BLIP_COLOR;
+function Blip({ blip, onUserClick, isBestMatch }) {
+  const color = isBestMatch ? PALETTE.green : (blip.color || DEFAULT_BLIP_COLOR);
 
   return (
-    <button onClick={() => onUserClick(user)} className="active:scale-90 transition-transform">
-      <div className="relative w-2.5 h-2.5 flex items-center justify-center">
-        {/* Glow halo */}
+    <button onClick={() => onUserClick(blip.user)} className="active:scale-90 transition-transform">
+      <div className="relative flex items-center justify-center">
+        {/* Best match pulsing ring */}
+        {isBestMatch && (
+          <div className="absolute w-5 h-5 rounded-full border border-green-400/30" style={{ animation: "nex-best-pulse 2s ease-in-out infinite" }} />
+        )}
+        {/* Scan glow — brightens when sweep passes */}
         <div
-          className="absolute inset-[-2px] rounded-full"
-          style={{ background: color, opacity: 0.15, filter: "blur(3px)", animation: `ai-dot-pulse 2.8s ease-in-out ${blip.pulseDelay}s infinite` }}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: isBestMatch ? "14px" : "10px",
+            height: isBestMatch ? "14px" : "10px",
+            background: color,
+            opacity: 0.12,
+            filter: `blur(${isBestMatch ? "4px" : "3px"})`,
+            animation: "nex-blip-scan 5s linear infinite",
+            animationDelay: `-${blip.scanDelay}s`,
+          }}
+        />
+        {/* Normal glow */}
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: isBestMatch ? "8px" : "6px",
+            height: isBestMatch ? "8px" : "6px",
+            background: color,
+            opacity: isBestMatch ? 0.3 : 0.15,
+            filter: "blur(2px)",
+          }}
         />
         {/* Core dot */}
         <div
-          className="relative w-1.5 h-1.5 rounded-full"
-          style={{ background: color, boxShadow: `0 0 6px ${color}, 0 0 3px ${color}` }}
+          className="relative rounded-full"
+          style={{
+            width: isBestMatch ? "6px" : "5px",
+            height: isBestMatch ? "6px" : "5px",
+            background: color,
+            boxShadow: isBestMatch
+              ? `0 0 8px ${color}, 0 0 16px ${color}, 0 0 4px ${color}`
+              : `0 0 5px ${color}, 0 0 2px ${color}`,
+          }}
         />
       </div>
     </button>
