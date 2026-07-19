@@ -181,9 +181,9 @@ export default function NeuralCircuitBackground() {
       const circuit = circuitRef.current;
       if (!circuit) { raf = requestAnimationFrame(render); return; }
 
-      const reveal = Math.min(1, smoothMag); // 0..1 overall brightness
-      // Base ambient (very dim) + reveal
-      const baseGlow = 0.015 + reveal * 0.35;
+      const reveal = Math.min(1, smoothMag * 1.8); // 0..1 overall brightness, amplified
+      // Base ambient (very dim) + reveal — potent
+      const baseGlow = 0.02 + reveal * 0.65;
 
       ctx.save();
       ctx.translate(parallaxX, parallaxY);
@@ -210,10 +210,10 @@ export default function NeuralCircuitBackground() {
         const dirDot = (ddx * s.smoothTiltX + ddy * s.smoothTiltY);
         const dirBoost = Math.max(0, dirDot / radius) * reveal;
 
-        const alpha = baseGlow * proximity * 0.5 + dirBoost * 0.6 + 0.012;
+        const alpha = baseGlow * proximity * 0.8 + dirBoost * 1.1 + 0.02;
         if (alpha < 0.02) continue;
 
-        ctx.strokeStyle = `rgba(70, 170, 255, ${alpha})`;
+        ctx.strokeStyle = `rgba(60, 180, 255, ${Math.min(0.95, alpha)})`;
         ctx.beginPath();
         ctx.moveTo(ax, ay);
         // L-shaped routing for circuit-board feel
@@ -235,23 +235,24 @@ export default function NeuralCircuitBackground() {
         const dirDot = (ddx * s.smoothTiltX + ddy * s.smoothTiltY);
         const dirBoost = Math.max(0, dirDot / radius) * reveal;
 
-        const nodeAlpha = (baseGlow * proximity * 1.4) + dirBoost * 0.8 + 0.02;
+        const nodeAlpha = (baseGlow * proximity * 2.2) + dirBoost * 1.4 + 0.04;
         if (nodeAlpha < 0.03) continue;
 
         const size = n.size * (1.2 + proximity * 1.8) * (0.8 + pulse * 0.4);
 
-        // glow halo
-        if (proximity > 0.3 && reveal > 0.1) {
-          const halo = ctx.createRadialGradient(nx, ny, 0, nx, ny, size * 6);
-          halo.addColorStop(0, `rgba(90, 200, 255, ${nodeAlpha * 0.5 * proximity})`);
-          halo.addColorStop(1, "rgba(90, 200, 255, 0)");
+        // glow halo — saturated electric blue
+        if (proximity > 0.25 && reveal > 0.08) {
+          const halo = ctx.createRadialGradient(nx, ny, 0, nx, ny, size * 8);
+          halo.addColorStop(0, `rgba(80, 200, 255, ${Math.min(0.8, nodeAlpha * 0.7 * proximity)})`);
+          halo.addColorStop(0.4, `rgba(50, 150, 255, ${nodeAlpha * 0.3 * proximity})`);
+          halo.addColorStop(1, "rgba(30, 100, 220, 0)");
           ctx.fillStyle = halo;
           ctx.beginPath();
-          ctx.arc(nx, ny, size * 6, 0, Math.PI * 2);
+          ctx.arc(nx, ny, size * 8, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        ctx.fillStyle = `rgba(150, 220, 255, ${Math.min(0.9, nodeAlpha)})`;
+        ctx.fillStyle = `rgba(170, 230, 255, ${Math.min(1, nodeAlpha)})`;
         ctx.beginPath();
         ctx.arc(nx, ny, size, 0, Math.PI * 2);
         ctx.fill();
@@ -265,10 +266,10 @@ export default function NeuralCircuitBackground() {
         const bx = mx;
         const by = my;
         const bg = ctx.createRadialGradient(bx, by, 0, bx, by, bloomR);
-        const bloomA = reveal * 0.12;
-        bg.addColorStop(0, `rgba(40, 130, 255, ${bloomA})`);
-        bg.addColorStop(0.5, `rgba(30, 100, 220, ${bloomA * 0.3})`);
-        bg.addColorStop(1, "rgba(20, 60, 180, 0)");
+        const bloomA = reveal * 0.26;
+        bg.addColorStop(0, `rgba(50, 150, 255, ${bloomA})`);
+        bg.addColorStop(0.4, `rgba(40, 120, 255, ${bloomA * 0.45})`);
+        bg.addColorStop(1, "rgba(20, 70, 200, 0)");
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
       }
@@ -360,9 +361,9 @@ function drawDust(ctx, w, h, t, mx, my, reveal) {
     const dy = py - my;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const near = Math.max(0, 1 - dist / 240);
-    const alpha = 0.03 + near * 0.35 * (0.4 + reveal);
+    const alpha = 0.04 + near * 0.5 * (0.4 + reveal);
     const twinkle = 0.6 + 0.4 * Math.sin(t * 3 + p.phase);
-    ctx.fillStyle = `rgba(140, 210, 255, ${alpha * twinkle})`;
+    ctx.fillStyle = `rgba(160, 220, 255, ${alpha * twinkle})`;
     ctx.beginPath();
     ctx.arc(px, py, p.r + near * 0.8, 0, Math.PI * 2);
     ctx.fill();
