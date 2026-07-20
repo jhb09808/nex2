@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Send, Image, Mic, Smile, Shield } from "lucide-react";
+import { ArrowLeft, Send, Image, Mic, Smile, Shield, Snowflake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import ChatWingman from "@/components/nex/ai/ChatWingman";
+import IcebreakerModal from "@/components/nex/IcebreakerModal";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import NotificationListener from "@/components/nex/NotificationListener";
 import moment from "moment";
@@ -19,9 +20,11 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [me, setMe] = useState(null);
+  const [myProfile, setMyProfile] = useState(null);
   const [otherUser, setOtherUser] = useState(null);
   const [sending, setSending] = useState(false);
   const [safetyOpen, setSafetyOpen] = useState(false);
+  const [showIcebreaker, setShowIcebreaker] = useState(false);
   const messagesEnd = useRef(null);
 
   useEffect(() => {
@@ -54,10 +57,17 @@ export default function Chat() {
     try {
       const user = await base44.auth.me();
       setMe(user);
+      const myProfiles = await base44.entities.UserProfile.filter({ created_by_id: user.id });
+      if (myProfiles[0]) setMyProfile(myProfiles[0]);
       const convo = await base44.entities.Conversation.get(conversationId);
       const otherId = convo.participants?.find((id) => id !== user.id);
       const msgs = await base44.entities.Message.filter({ conversation_id: conversationId }, "created_date", 100);
       setMessages(msgs);
+
+      // Auto-open icebreaker for new conversations with no messages yet
+      if (msgs.length === 0) {
+        setShowIcebreaker(true);
+      }
 
       if (otherId) {
         const profiles = await base44.entities.UserProfile.filter({ created_by_id: otherId });
@@ -152,6 +162,13 @@ export default function Chat() {
           <p className="text-white/30 text-[10px]">{otherUser?.is_online ? "Online" : "Away"}</p>
         </div>
         <button
+          onClick={() => setShowIcebreaker(true)}
+          className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
+          title="Icebreaker"
+        >
+          <Snowflake className="w-5 h-5 text-blue-400" />
+        </button>
+        <button
           onClick={() => setSafetyOpen(true)}
           className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0"
         >
@@ -160,6 +177,14 @@ export default function Chat() {
       </div>
 
       <BlockReportSheet user={otherUser} open={safetyOpen} onClose={() => setSafetyOpen(false)} onBlocked={() => navigate("/messages")} />
+
+      <IcebreakerModal
+        open={showIcebreaker}
+        onClose={() => setShowIcebreaker(false)}
+        myProfile={myProfile}
+        otherUser={otherUser}
+        onUseSuggestion={(text) => setNewMessage(text)}
+      />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
