@@ -435,18 +435,6 @@ export default function PasswordGate() {
                     className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
                   />
                 </div>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
-                  <input
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="ZIP code"
-                    inputMode="numeric"
-                    maxLength={5}
-                    className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
-                  />
-                </div>
                 <button
                   type="button"
                   onClick={() => setIsInternational(!isInternational)}
@@ -457,7 +445,7 @@ export default function PasswordGate() {
                   </div>
                   <span className="text-blue-200/60 text-sm">I live outside the US</span>
                 </button>
-                {isInternational && (
+                {isInternational ? (
                   <div className="space-y-2">
                     <div className="relative">
                       <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
@@ -467,10 +455,23 @@ export default function PasswordGate() {
                         onChange={(e) => setInternationalLocation(e.target.value)}
                         placeholder="e.g. Lahore, Pakistan"
                         autoFocus
-                        className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 focus:outline-none"
+                        className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
                       />
                     </div>
                     <p className="text-blue-200/30 text-xs pl-1">We'll notify you when we expand there 🌍</p>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
+                    <input
+                      type="text"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      placeholder="ZIP code"
+                      inputMode="numeric"
+                      maxLength={5}
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl cyber-input text-white placeholder:text-blue-200/30 text-sm focus:outline-none"
+                    />
                   </div>
                 )}
                 {error && <p className="text-red-400 text-sm text-center">{error}</p>}
