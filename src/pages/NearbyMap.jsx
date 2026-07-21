@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal, Loader2 } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -34,6 +34,7 @@ export default function NearbyMap() {
   const [capabilities, setCapabilities] = useState(null);
   const [paywallVariant, setPaywallVariant] = useState(null);
   const [requestSent, setRequestSent] = useState(false);
+  const [requestWaiting, setRequestWaiting] = useState(false);
   const [myProfile, setMyProfile] = useState(null);
   const [showRadarOnboarding, setShowRadarOnboarding] = useState(false);
   const [viewMode, setViewMode] = useState("best");
@@ -584,10 +585,31 @@ export default function NearbyMap() {
                     <button
                       onClick={async () => {
                         try {
-                          // Mock users — just show confirmation (no backend)
+                          // Mock users — simulate the other person deciding
                           if (selectedUser.isMock) {
+                            const bot = selectedUser;
+                            const myId = myProfile?.created_by_id;
                             setSelectedUser(null);
-                            setRequestSent(true);
+                            setRequestWaiting(true);
+                            // Create a real conversation so the chat works end-to-end
+                            let convo;
+                            try {
+                              convo = await base44.entities.Conversation.create({
+                                participants: [myId, bot.id].filter(Boolean),
+                                is_active: true,
+                              });
+                            } catch (e) {
+                              console.error(e);
+                            }
+                            // Simulate response delay (~2.5s)
+                            setTimeout(() => {
+                              setRequestWaiting(false);
+                              const accepted = Math.random() < 0.65;
+                              if (accepted && convo?.id) {
+                                navigate(`/chat/${convo.id}`, { state: { chatUser: bot } });
+                              }
+                              // If denied — silently close, no notification shown
+                            }, 2500);
                             return;
                           }
                           const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
@@ -635,6 +657,34 @@ export default function NearbyMap() {
         open={!!paywallVariant}
         onClose={() => setPaywallVariant(null)}
       />
+
+      {/* Waiting for Response Modal — shown while the other person "decides" */}
+      <AnimatePresence>
+        {requestWaiting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center px-6 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              className="cyber-frame cyber-corners relative rounded-2xl p-7 max-w-xs w-full text-center"
+            >
+              <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-400/30 flex items-center justify-center mx-auto mb-4">
+                <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+              </div>
+              <h2 className="font-cyber text-lg font-bold text-white neon-text mb-2">Waiting...</h2>
+              <p className="text-blue-200/60 text-sm leading-relaxed">
+                Your chat request was sent. Waiting for a response.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Request Sent Confirmation Modal */}
       <AnimatePresence>
