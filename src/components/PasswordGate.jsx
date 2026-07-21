@@ -424,6 +424,26 @@ export default function PasswordGate() {
               </div>
             ) : (
               <form onSubmit={handleWaitlist} className="space-y-3">
+                {/* Google sign-up */}
+                <button
+                  type="button"
+                  onClick={handleGoogle}
+                  className="w-full py-3.5 rounded-xl bg-transparent border border-blue-400/20 text-white font-cyber font-semibold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform hover:border-blue-400/40"
+                >
+                  <GoogleIcon className="w-4 h-4" />
+                  CONTINUE WITH GOOGLE
+                </button>
+
+                {/* Divider */}
+                <div className="relative py-1">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-blue-500/10" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase">
+                    <span className="bg-black px-3 text-blue-200/40 font-cyber tracking-wider">or join with email</span>
+                  </div>
+                </div>
+
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400/40" />
                   <input
