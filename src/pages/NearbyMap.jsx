@@ -381,43 +381,40 @@ export default function NearbyMap() {
         </div>
       )}
 
-      {/* Zoom control + sonar/list toggle — top-right, keeps radar clear */}
-      {!showRadarOnboarding && (
-        <div className="absolute top-6 right-4 z-20 safe-top flex flex-col items-end gap-2">
-          {/* Sonar / List toggle */}
-          <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
-            <button
-              onClick={() => setLayoutMode("sonar")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
-            >
-              <Radar className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setLayoutMode("list")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
+      {/* Zoom control + sonar/list toggle — bottom-right, compact, clear of radar */}
+      {!showRadarOnboarding && !selectedUser && !showFilters && (
+        <div className="absolute bottom-6 right-4 z-20 flex items-center gap-2">
           {layoutMode === "sonar" && (
-            <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
-              <button
-                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
-                className="w-9 h-9 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-              <div className="px-2 py-1 border-t border-b border-blue-500/10">
-                <span className="text-[10px] font-cyber text-blue-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
-              </div>
+            <div className="cyber-frame rounded-full p-0.5 flex items-center gap-0.5">
               <button
                 onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
-                className="w-9 h-9 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="px-1 text-[10px] font-cyber text-blue-300/50 tracking-wider min-w-[28px] text-center">{zoom.toFixed(1)}×</span>
+              <button
+                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
+              >
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
+          <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
+            <button
+              onClick={() => setLayoutMode("sonar")}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
+            >
+              <Radar className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setLayoutMode("list")}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
