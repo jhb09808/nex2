@@ -195,19 +195,10 @@ export default function NearbyMap() {
     saveRadius();
   };
 
-  // Merge mock bots around the user's ACTUAL location (regenerated when GPS updates)
-  const allProfiles = useMemo(() => {
-    if (!SHOW_MOCK_BOTS) return users;
-    const bots = generateMockProfiles(userLocation).map((b) => ({
-      ...b,
-      latitude: b.lat,
-      longitude: b.lng,
-      isMock: true,
-    }));
-    return [...users, ...bots];
-  }, [users, userLocation]);
-
   const getDisplayName = (user) => getUserDisplayName(user);
+
+  const tierCeiling = capabilities?.radius_miles_max;
+  const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 5;
 
   // Use stored latitude/longitude from the user's profile (saved when they open the app)
   const getUserLatLng = (user) => {
@@ -217,8 +208,17 @@ export default function NearbyMap() {
     return null;
   };
 
-  const tierCeiling = capabilities?.radius_miles_max;
-  const effectiveRadius = capabilities?.radius_miles ?? filters.distance ?? 5;
+  // Merge mock bots around the user's ACTUAL location, spread across the full radius
+  const allProfiles = useMemo(() => {
+    if (!SHOW_MOCK_BOTS) return users;
+    const bots = generateMockProfiles(userLocation, effectiveRadius).map((b) => ({
+      ...b,
+      latitude: b.lat,
+      longitude: b.lng,
+      isMock: true,
+    }));
+    return [...users, ...bots];
+  }, [users, userLocation, effectiveRadius]);
 
   // Interests affect ranking only — everyone within range is always visible
   const radiusFiltered = allProfiles.filter((u) => {
@@ -306,39 +306,39 @@ export default function NearbyMap() {
 
   return (
     <div className="relative overflow-hidden" style={{ height: "100vh" }}>
-      {/* Header + controls — hidden during radar onboarding */}
+      {/* Logo as faded background watermark — part of the background, not a floating box */}
       {!showRadarOnboarding && (
-        <>
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 safe-top">
-            <img
-              src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
-              alt="NEX2"
-              className="h-14 w-auto object-contain"
-            />
-          </div>
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-0 pointer-events-none safe-top">
+          <img
+            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
+            alt="NEX2"
+            className="h-20 w-auto object-contain opacity-[0.06]"
+          />
+        </div>
+      )}
 
-          {/* View Toggle — reduced glow, centered beneath title */}
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
-            <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
-              <button
-                onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
-                className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "best" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
-                }`}
-              >
-                <Sparkles className="w-3 h-3" /> Best Matches
-              </button>
-              <button
-                onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
-                className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === "all" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
-                }`}
-              >
-                <Users className="w-3 h-3" /> All Nearby
-              </button>
-            </div>
+      {/* View Toggle — centered at top */}
+      {!showRadarOnboarding && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 safe-top">
+          <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
+            <button
+              onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
+              className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === "best" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
+              }`}
+            >
+              <Sparkles className="w-3 h-3" /> Best Matches
+            </button>
+            <button
+              onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
+              className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === "all" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
+              }`}
+            >
+              <Users className="w-3 h-3" /> All Nearby
+            </button>
           </div>
-        </>
+        </div>
       )}
 
       {/* Chat Request Overlay — glass circle in radar center */}
@@ -363,8 +363,8 @@ export default function NearbyMap() {
         <RadarList users={displayUsers} onUserClick={(user) => setSelectedUser(user)} />
       )}
 
-      {/* Live status */}
-      {!showRadarOnboarding && !selectedUser && (
+      {/* Live status — sonar only */}
+      {!showRadarOnboarding && !selectedUser && layoutMode === "sonar" && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 text-center pointer-events-none space-y-1">
           <div className="flex items-center justify-center gap-1.5">
             <div className="relative w-1.5 h-1.5 rounded-full bg-green-400">
@@ -584,6 +584,12 @@ export default function NearbyMap() {
                     <button
                       onClick={async () => {
                         try {
+                          // Mock users — just show confirmation (no backend)
+                          if (selectedUser.isMock) {
+                            setSelectedUser(null);
+                            setRequestSent(true);
+                            return;
+                          }
                           const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
                           if (!enforceRes.data?.allowed) {
                             setPaywallVariant("chat_limit");
@@ -600,7 +606,6 @@ export default function NearbyMap() {
                           } else {
                             setSelectedUser(null);
                             setRequestSent(true);
-                            setTimeout(() => setRequestSent(false), 3000);
                           }
                         } catch (err) {
                           console.error(err);
@@ -631,19 +636,38 @@ export default function NearbyMap() {
         onClose={() => setPaywallVariant(null)}
       />
 
-      {/* Request Sent Confirmation */}
+      {/* Request Sent Confirmation Modal */}
       <AnimatePresence>
         {requestSent && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-24 left-1/2 -translate-x-1/2 z-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center px-6 bg-black/60 backdrop-blur-sm"
+            onClick={() => setRequestSent(false)}
           >
-            <div className="cyber-frame rounded-2xl px-5 py-3 flex items-center gap-2">
-              <Check className="w-5 h-5 text-green-400" />
-              <p className="text-white text-sm font-cyber font-medium neon-text">Chat request sent!</p>
-            </div>
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="cyber-frame cyber-corners relative rounded-2xl p-7 max-w-xs w-full text-center"
+            >
+              <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-400/30 flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-green-400" />
+              </div>
+              <h2 className="font-cyber text-lg font-bold text-white neon-text mb-2">Request Sent</h2>
+              <p className="text-blue-200/60 text-sm leading-relaxed mb-5">
+                We'll notify you when the user accepts your chat request.
+              </p>
+              <button
+                onClick={() => setRequestSent(false)}
+                className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider transition-transform"
+              >
+                GOT IT
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
