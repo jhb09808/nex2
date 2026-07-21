@@ -16,8 +16,11 @@ import RadarList from "@/components/nex/radar/RadarList";
 import ChatRequestOverlay from "@/components/nex/radar/ChatRequestOverlay";
 
 import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
+import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
+// Toggle mock bots on the radar for testing chat/notification flows
+const SHOW_MOCK_BOTS = true;
 
 export default function NearbyMap() {
   const navigate = useNavigate();
@@ -135,7 +138,19 @@ export default function NearbyMap() {
       }
 
       realUsers = realUsers.map((u) => ({ ...u, isMock: false }));
-      setUsers(realUsers);
+
+      // Merge mock bots so there's volume to test chat requests + notifications
+      let combined = realUsers;
+      if (SHOW_MOCK_BOTS) {
+        const bots = generateMockProfiles(userLocation).map((b) => ({
+          ...b,
+          latitude: b.lat,
+          longitude: b.lng,
+          isMock: true,
+        }));
+        combined = [...realUsers, ...bots];
+      }
+      setUsers(combined);
     } catch (err) {
       console.error(err);
     } finally {
