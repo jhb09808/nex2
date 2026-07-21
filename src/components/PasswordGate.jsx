@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Loader2, ArrowRight, ArrowLeft, Mail, CheckCircle2, MapPin, Globe, Check, Lock } from "lucide-react";
 import { appParams } from "@/lib/app-params";
 import GlobalCounters from "@/components/nex/GlobalCounters";
+import HowItWorks from "@/components/nex/HowItWorks";
 import CyberRadar from "@/components/nex/CyberRadar";
 import { base44 } from "@/api/base44Client";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -248,6 +249,8 @@ export default function PasswordGate() {
               <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/20 border border-blue-400/30 text-blue-300 font-cyber text-[9px] tracking-wider">NYC</span>
               {" "}AND EXPANDING CITY BY CITY.
             </p>
+
+            <HowItWorks />
 
             {/* Primary + secondary buttons */}
             <div className="space-y-2.5 pt-1">
