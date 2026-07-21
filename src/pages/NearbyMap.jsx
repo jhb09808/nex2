@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal } from "lucide-react";
@@ -138,19 +138,7 @@ export default function NearbyMap() {
       }
 
       realUsers = realUsers.map((u) => ({ ...u, isMock: false }));
-
-      // Merge mock bots so there's volume to test chat requests + notifications
-      let combined = realUsers;
-      if (SHOW_MOCK_BOTS) {
-        const bots = generateMockProfiles(userLocation).map((b) => ({
-          ...b,
-          latitude: b.lat,
-          longitude: b.lng,
-          isMock: true,
-        }));
-        combined = [...realUsers, ...bots];
-      }
-      setUsers(combined);
+      setUsers(realUsers);
     } catch (err) {
       console.error(err);
     } finally {
@@ -207,7 +195,17 @@ export default function NearbyMap() {
     saveRadius();
   };
 
-  const allProfiles = users;
+  // Merge mock bots around the user's ACTUAL location (regenerated when GPS updates)
+  const allProfiles = useMemo(() => {
+    if (!SHOW_MOCK_BOTS) return users;
+    const bots = generateMockProfiles(userLocation).map((b) => ({
+      ...b,
+      latitude: b.lat,
+      longitude: b.lng,
+      isMock: true,
+    }));
+    return [...users, ...bots];
+  }, [users, userLocation]);
 
   const getDisplayName = (user) => getUserDisplayName(user);
 
