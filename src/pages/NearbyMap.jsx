@@ -381,30 +381,11 @@ export default function NearbyMap() {
         </div>
       )}
 
-      {/* Unified zoom control + view toggle */}
+      {/* Zoom control + sonar/list toggle — top-right, keeps radar clear */}
       {!showRadarOnboarding && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3">
-          {layoutMode === "sonar" && (
-            <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
-              <button
-                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-              <div className="px-2 py-1.5 border-t border-b border-blue-500/10">
-                <span className="text-[10px] font-cyber text-blue-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
-              </div>
-              <button
-                onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+        <div className="absolute top-6 right-4 z-20 safe-top flex flex-col items-end gap-2">
           {/* Sonar / List toggle */}
-          <div className="cyber-frame rounded-full p-0.5 flex flex-col gap-0.5">
+          <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
             <button
               onClick={() => setLayoutMode("sonar")}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
@@ -418,6 +399,25 @@ export default function NearbyMap() {
               <List className="w-4 h-4" />
             </button>
           </div>
+          {layoutMode === "sonar" && (
+            <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
+              <button
+                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
+                className="w-9 h-9 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <div className="px-2 py-1 border-t border-b border-blue-500/10">
+                <span className="text-[10px] font-cyber text-blue-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
+              </div>
+              <button
+                onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
+                className="w-9 h-9 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
