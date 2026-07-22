@@ -408,46 +408,39 @@ function Blip({ blip, onUserClick, isBestMatch }) {
   return (
     <button onClick={() => onUserClick(blip.user)} className="active:scale-90 transition-transform">
       <div className="relative flex items-center justify-center">
-        {/* Best match pulsing ring */}
+        {/* Best match pulsing ring — always visible */}
         {isBestMatch && (
           <div className="absolute w-5 h-5 rounded-full border border-blue-300/30" style={{ animation: "nex-best-pulse 2s ease-in-out infinite" }} />
         )}
-        {/* Scan glow — brightens when sweep passes */}
+        {/* Scan-synced blip — dims between sweeps, flashes when beam passes */}
         <div
-          className="absolute rounded-full pointer-events-none"
+          className="relative flex items-center justify-center"
           style={{
-            width: isBestMatch ? "14px" : "10px",
-            height: isBestMatch ? "14px" : "10px",
-            background: color,
-            opacity: 0.12,
-            filter: `blur(${isBestMatch ? "4px" : "3px"})`,
             animation: "nex-blip-scan 5s linear infinite",
-            animationDelay: `-${blip.scanDelay}s`,
+            animationDelay: `${blip.scanDelay - 5}s`,
           }}
-        />
-        {/* Normal glow */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: isBestMatch ? "8px" : "6px",
-            height: isBestMatch ? "8px" : "6px",
-            background: color,
-            opacity: isBestMatch ? 0.3 : 0.15,
-            filter: "blur(2px)",
-          }}
-        />
-        {/* Core dot */}
-        <div
-          className="relative rounded-full"
-          style={{
-            width: isBestMatch ? "6px" : "5px",
-            height: isBestMatch ? "6px" : "5px",
-            background: color,
-            boxShadow: isBestMatch
-              ? `0 0 8px ${color}, 0 0 16px ${color}, 0 0 4px ${color}`
-              : `0 0 5px ${color}, 0 0 2px ${color}`,
-          }}
-        />
+        >
+          {/* Glow halo */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: isBestMatch ? "12px" : "9px",
+              height: isBestMatch ? "12px" : "9px",
+              background: color,
+              filter: `blur(${isBestMatch ? "3px" : "2.5px"})`,
+            }}
+          />
+          {/* Core dot */}
+          <div
+            className="relative rounded-full"
+            style={{
+              width: isBestMatch ? "6px" : "5px",
+              height: isBestMatch ? "6px" : "5px",
+              background: color,
+              boxShadow: `0 0 4px ${color}`,
+            }}
+          />
+        </div>
       </div>
     </button>
   );
