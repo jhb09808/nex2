@@ -18,132 +18,133 @@ function mulberry32(a) {
   };
 }
 
+const CYAN = "#00F2FF";
+const MAGENTA = "#A100FF";
+
 /**
- * Generates a unique "digital fingerprint" — a whorling ridge pattern
- * deterministic from the seed string. Same seed = same fingerprint, always.
- * Each user gets a 1-of-1 monochromatic fingerprint with organic ridge
- * wobble, spiral twist, and minutiae detail points.
+ * Generates a unique "cybernetic glassmorphism" avatar — a frosted glass
+ * crystal with cyan-to-magenta neon glow, internal refraction lines, and
+ * specular highlights. Deterministic from seed; same seed = same avatar.
  */
 export default function GenerativeAvatar({ seed = "default", className = "" }) {
-  const pattern = useMemo(() => {
+  const p = useMemo(() => {
     const hash = hashString(seed);
     const rng = mulberry32(hash);
-    const hueBase = Math.floor(rng() * 360);
 
-    // Dark background — subtle tint of the ridge hue
-    const bg = `hsl(${hueBase}, 20%, 5%)`;
-
-    // Whorl core — slightly off-center for organic feel
-    const centerX = 50 + (rng() - 0.5) * 6;
-    const centerY = 50 + (rng() - 0.5) * 6;
-
-    // Spiral twist parameters — how much ridges rotate as they expand
-    const twistAmount = 0.6 + rng() * 1.2;
-    const twistDir = rng() > 0.5 ? 1 : -1;
-
-    // Global ridge wobble
-    const wobbleAmp = 0.6 + rng() * 1.4;
-    const wobbleFreq = 3 + Math.floor(rng() * 5);
-
-    const numRidges = 11 + Math.floor(rng() * 5); // 11-15 ridges
-    const maxR = 45;
-    const minR = 3.5;
-
-    const ridges = [];
-
-    for (let i = 0; i < numRidges; i++) {
-      const t = i / (numRidges - 1);
-      const baseR = minR + t * (maxR - minR);
-
-      // Spiral twist — outer ridges rotate more (whorl effect)
-      const twist = twistDir * (twistAmount + t * 0.9) * t;
-
-      // Per-ridge organic variation
-      const ridgeWobble = wobbleAmp * (0.7 + rng() * 0.6);
-      const ridgeFreq = wobbleFreq + Math.floor(rng() * 3);
-      const ridgePhase = rng() * Math.PI * 2;
-
-      // Monochromatic — vary lightness across ridges
-      const lightness = 30 + t * 28 + rng() * 8;
-      const sat = 45 + rng() * 25;
-      const opacity = (0.35 + rng() * 0.3).toFixed(2);
-
-      const steps = 96;
-      const pts = [];
-      for (let j = 0; j <= steps; j++) {
-        const angle = (j / steps) * Math.PI * 2;
-        const twistedAngle = angle + twist;
-        const wobble = ridgeWobble * Math.sin(angle * ridgeFreq + ridgePhase);
-        const wobble2 = ridgeWobble * 0.35 * Math.sin(angle * ridgeFreq * 1.6 + ridgePhase * 2.1);
-        const r = baseR + wobble + wobble2;
-        const x = centerX + r * Math.cos(twistedAngle);
-        const y = centerY + r * Math.sin(twistedAngle);
-        pts.push(`${j === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`);
-      }
-      pts.push("Z");
-
-      ridges.push({
-        d: pts.join(" "),
-        stroke: `hsl(${hueBase}, ${sat}%, ${lightness}%)`,
-        opacity,
-        strokeWidth: "0.65",
-      });
-    }
-
-    // Minutiae — ridge endings / bifurcation dots (fingerprint detail)
-    const numMinutiae = 4 + Math.floor(rng() * 7);
-    const minutiae = [];
-    for (let i = 0; i < numMinutiae; i++) {
-      const angle = rng() * Math.PI * 2;
-      const r = 8 + rng() * 32;
-      minutiae.push({
-        cx: (centerX + r * Math.cos(angle)).toFixed(2),
-        cy: (centerY + r * Math.sin(angle)).toFixed(2),
-        r: (0.4 + rng() * 0.5).toFixed(2),
-      });
-    }
-
-    return { hash, bg, ridges, minutiae, hueBase };
+    return {
+      hash,
+      cyanX: 12 + rng() * 30,
+      cyanY: 10 + rng() * 30,
+      cyanR: 28 + rng() * 28,
+      cyanO: (0.2 + rng() * 0.35).toFixed(2),
+      magX: 55 + rng() * 32,
+      magY: 52 + rng() * 30,
+      magR: 28 + rng() * 28,
+      magO: (0.2 + rng() * 0.35).toFixed(2),
+      glassCx: 42 + rng() * 16,
+      glassCy: 42 + rng() * 16,
+      glassR: 16 + rng() * 12,
+      shape: Math.floor(rng() * 4),
+      refLines: Array.from({ length: 2 + Math.floor(rng() * 3) }, () => ({
+        x1: (rng() * 100).toFixed(1),
+        y1: (rng() * 100).toFixed(1),
+        x2: (rng() * 100).toFixed(1),
+        y2: (rng() * 100).toFixed(1),
+        o: (0.08 + rng() * 0.2).toFixed(2),
+      })),
+      spec1X: 36 + rng() * 10,
+      spec1Y: 30 + rng() * 10,
+      spec1R: (2.5 + rng() * 4).toFixed(1),
+      spec2X: 54 + rng() * 8,
+      spec2Y: 40 + rng() * 8,
+      spec2R: (1.2 + rng() * 2).toFixed(1),
+    };
   }, [seed]);
 
-  const cid = `fp-clip-${pattern.hash}`;
+  const gid = `cg-${p.hash}`;
+  const cid = `cg-clip-${p.hash}`;
+  const fid = `cg-blur-${p.hash}`;
+
+  const renderGlassShape = (keySuffix) => {
+    const { glassCx: cx, glassCy: cy, glassR: r, shape } = p;
+    const key = `shape-${keySuffix}`;
+    if (shape === 0) return <circle key={key} cx={cx} cy={cy} r={r} />;
+    if (shape === 1) {
+      const pts = [];
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+        pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+      }
+      return <path key={key} d={`M${pts.join("L")}Z`} />;
+    }
+    if (shape === 2) {
+      return <path key={key} d={`M${cx},${cy - r} L${cx + r},${cy} L${cx},${cy + r} L${cx - r},${cy}Z`} />;
+    }
+    return <rect key={key} x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={r * 0.25} />;
+  };
 
   return (
-    <svg
-      viewBox="0 0 100 100"
-      className={`w-full h-full block ${className}`}
-      preserveAspectRatio="xMidYMid slice"
-    >
+    <svg viewBox="0 0 100 100" className={`w-full h-full block ${className}`} preserveAspectRatio="xMidYMid slice">
       <defs>
         <clipPath id={cid}>
           <circle cx="50" cy="50" r="50" />
         </clipPath>
+        <radialGradient id={`${gid}-cyan`}>
+          <stop offset="0%" stopColor={CYAN} stopOpacity={p.cyanO} />
+          <stop offset="100%" stopColor={CYAN} stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${gid}-mag`}>
+          <stop offset="0%" stopColor={MAGENTA} stopOpacity={p.magO} />
+          <stop offset="100%" stopColor={MAGENTA} stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={`${gid}-border`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={CYAN} />
+          <stop offset="100%" stopColor={MAGENTA} />
+        </linearGradient>
+        <filter id={fid} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.5" />
+        </filter>
       </defs>
-      <rect width="100" height="100" fill={pattern.bg} />
+
+      <rect width="100" height="100" fill="#0B0D16" />
+
       <g clipPath={`url(#${cid})`}>
-        {pattern.ridges.map((ridge, i) => (
-          <path
-            key={i}
-            d={ridge.d}
-            fill="none"
-            stroke={ridge.stroke}
-            strokeWidth={ridge.strokeWidth}
-            opacity={ridge.opacity}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
+        {/* Neon glow orbs */}
+        <circle cx={p.cyanX} cy={p.cyanY} r={p.cyanR} fill={`url(#${gid}-cyan)`} />
+        <circle cx={p.magX} cy={p.magY} r={p.magR} fill={`url(#${gid}-mag)`} />
+
+        {/* Internal refraction lines — unique per user */}
+        {p.refLines.map((l, i) => (
+          <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="white" strokeWidth="0.3" opacity={l.o} />
         ))}
-        {pattern.minutiae.map((m, i) => (
-          <circle
-            key={i}
-            cx={m.cx}
-            cy={m.cy}
-            r={m.r}
-            fill={pattern.ridges[0].stroke}
-            opacity="0.55"
-          />
-        ))}
+
+        {/* Frosted glass glow — blurred */}
+        <g filter={`url(#${fid})`} fill={CYAN} opacity="0.12">
+          {renderGlassShape("glow")}
+        </g>
+
+        {/* Frosted glass fill — semi-transparent */}
+        <g fill="white" opacity="0.04">
+          {renderGlassShape("fill")}
+        </g>
+
+        {/* Glass border — neon gradient */}
+        <g fill="none" stroke={`url(#${gid}-border)`} strokeWidth="0.9" opacity="0.55">
+          {renderGlassShape("stroke")}
+        </g>
+
+        {/* Inner edge highlight */}
+        <g fill="none" stroke="white" strokeWidth="0.3" opacity="0.15">
+          {renderGlassShape("inner")}
+        </g>
+
+        {/* Specular highlights */}
+        <ellipse cx={p.spec1X} cy={p.spec1Y} rx={p.spec1R} ry={p.spec1R * 0.6} fill="white" opacity="0.18" filter={`url(#${fid})`} />
+        <ellipse cx={p.spec2X} cy={p.spec2Y} rx={p.spec2R} ry={p.spec2R * 0.6} fill="white" opacity="0.12" filter={`url(#${fid})`} />
       </g>
+
+      {/* Neon border ring */}
+      <circle cx="50" cy="50" r="49" fill="none" stroke={`url(#${gid}-border)`} strokeWidth="0.8" opacity="0.35" />
     </svg>
   );
 }
