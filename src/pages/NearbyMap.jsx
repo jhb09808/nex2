@@ -8,6 +8,7 @@ import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import InterestTag from "@/components/nex/InterestTag";
 import PaywallPrompt from "@/components/nex/PaywallPrompt";
+import Logo from "@/components/nex/Logo";
 
 import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
@@ -309,12 +310,8 @@ export default function NearbyMap() {
     <div className="relative overflow-hidden" style={{ height: "100vh" }}>
       {/* Logo as faded background watermark — part of the background, not a floating box */}
       {!showRadarOnboarding && (
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-0 pointer-events-none safe-top">
-          <img
-            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
-            alt="NEX2"
-            className="h-20 w-auto object-contain opacity-[0.06]"
-          />
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-0 pointer-events-none safe-top opacity-[0.06]">
+          <Logo size="lg" />
         </div>
       )}
 

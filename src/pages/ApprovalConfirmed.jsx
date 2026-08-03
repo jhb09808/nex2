@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight, Map, Loader2 } from "lucide-react";
 import CyberRadar from "@/components/nex/CyberRadar";
+import Logo from "@/components/nex/Logo";
 import { base44 } from "@/api/base44Client";
 
 export default function ApprovalConfirmed() {
@@ -44,11 +45,7 @@ export default function ApprovalConfirmed() {
     <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4 py-8 overflow-y-auto">
       <div className="w-full max-w-md cyber-frame cyber-corners relative rounded-2xl p-6 sm:p-8">
         <div className="flex items-center justify-between mb-6">
-          <img
-            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
-            alt="NEX2"
-            className="h-14 w-auto object-contain"
-          />
+          <Logo size="md" />
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 ai-dot" />
             <span className="text-[10px] font-cyber font-semibold text-green-400 tracking-widest">APPROVED</span>

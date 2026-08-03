@@ -5,6 +5,7 @@ import GlobalCounters from "@/components/nex/GlobalCounters";
 import CyberRadar from "@/components/nex/CyberRadar";
 import { base44 } from "@/api/base44Client";
 import GoogleIcon from "@/components/GoogleIcon";
+import Logo from "@/components/nex/Logo";
 
 const SESSION_KEY = "nex_access_granted";
 
@@ -165,11 +166,7 @@ export default function PasswordGate() {
 
   const CyberHeader = () => (
     <div className="flex items-center justify-between">
-      <img
-        src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/a1047e68c_29CEE08A-B9AB-4759-8C30-4B99BC19A018.png"
-        alt="NEX2"
-        className="h-14 w-auto object-contain"
-      />
+      <Logo size="md" />
       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30">
         <span className="w-1.5 h-1.5 rounded-full bg-green-400 ai-dot" />
         <span className="text-[10px] font-cyber font-semibold text-green-400 tracking-widest">EARLY ACCESS</span>
