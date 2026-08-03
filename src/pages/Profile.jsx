@@ -7,7 +7,7 @@ import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
-import InterestTag from "@/components/nex/InterestTag";
+import { getSubInterestName } from "@/components/nex/radar/interestCategories";
 import { getUserNumber } from "@/components/nex/userDisplay";
 import AchievementGrid from "@/components/nex/AchievementGrid";
 
@@ -90,7 +90,9 @@ export default function Profile() {
         {profile?.interests?.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2 mb-4">
             {profile.interests.map((interest) => (
-              <InterestTag key={interest} label={interest} size="sm" />
+              <span key={interest} className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300/80 border border-blue-500/10">
+                {getSubInterestName(interest)}
+              </span>
             ))}
           </div>
         )}

@@ -5,7 +5,7 @@ import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
-import InterestTag from "@/components/nex/InterestTag";
+import { getSubInterestName } from "@/components/nex/radar/interestCategories";
 import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import ShareButton from "@/components/nex/ShareButton";
@@ -104,7 +104,9 @@ export default function UserDetail() {
           </p>
           <div className="flex flex-wrap gap-2">
             {mutualInterests.map((i) => (
-              <InterestTag key={i} label={i} selected size="sm" iconOnly />
+              <span key={i} className="px-3 py-1 rounded-full text-xs font-medium neon-btn text-white">
+                {getSubInterestName(i)}
+              </span>
             ))}
           </div>
         </GlassCard>
@@ -115,7 +117,13 @@ export default function UserDetail() {
           <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">All Interests</p>
           <div className="flex flex-wrap gap-2">
             {user.interests.map((i) => (
-              <InterestTag key={i} label={i} size="sm" iconOnly selected={mutualInterests.includes(i)} />
+              <span key={i} className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                mutualInterests.includes(i)
+                  ? "neon-btn text-white"
+                  : "bg-blue-500/8 text-blue-300/80 border-blue-500/10"
+              }`}>
+                {getSubInterestName(i)}
+              </span>
             ))}
           </div>
         </GlassCard>

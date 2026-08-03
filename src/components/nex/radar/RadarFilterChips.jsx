@@ -1,5 +1,5 @@
 import React from "react";
-import { RADAR_INTERESTS } from "./constants";
+import { getSubInterestName } from "@/components/nex/radar/interestCategories";
 
 export default function RadarFilterChips({ activeFilters, onToggle, onClear }) {
   const allActive = activeFilters.length === 0;
@@ -14,20 +14,15 @@ export default function RadarFilterChips({ activeFilters, onToggle, onClear }) {
       >
         All
       </button>
-      {RADAR_INTERESTS.map((interest) => {
-        const isActive = activeFilters.includes(interest);
-        return (
-          <button
-            key={interest}
-            onClick={() => onToggle(interest)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
-              isActive ? "gradient-blue text-white glow-blue-sm" : "glass text-white/40"
-            }`}
-          >
-            {interest}
-          </button>
-        );
-      })}
+      {activeFilters.map((interest) => (
+        <button
+          key={interest}
+          onClick={() => onToggle(interest)}
+          className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95 gradient-blue text-white glow-blue-sm"
+        >
+          {getSubInterestName(interest)}
+        </button>
+      ))}
     </div>
   );
 }
