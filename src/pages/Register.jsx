@@ -42,6 +42,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      base44.analytics.track({ eventName: "signup_completed" });
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid verification code");
@@ -64,6 +65,7 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
+    base44.analytics.track({ eventName: "google_signup_click" });
     base44.auth.loginWithProvider("google", "/");
   };
 

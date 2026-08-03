@@ -89,6 +89,7 @@ export default function AreaCounters() {
       }
       const res = await base44.functions.invoke("joinWaitlist", payload);
       if (res.data?.success) {
+        base44.analytics.track({ eventName: "waitlist_joined", properties: { zip_code: zip.trim() || "international" } });
         setJoined(true);
       } else {
         setJoinError(res.data?.error || "Something went wrong");

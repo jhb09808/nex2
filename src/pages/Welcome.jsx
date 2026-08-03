@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import AreaCounters from "@/components/nex/AreaCounters";
 import GlobalCounters from "@/components/nex/GlobalCounters";
 import CyberRadar from "@/components/nex/CyberRadar";
 
 export default function Welcome() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    base44.analytics.track({ eventName: "landing_page_view" });
+  }, []);
 
   return (
     <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4 py-8 overflow-y-auto">
@@ -66,13 +71,19 @@ export default function Welcome() {
           className="w-full space-y-2.5 pt-1"
         >
           <button
-            onClick={() => navigate("/register")}
+            onClick={() => {
+              base44.analytics.track({ eventName: "get_started_click" });
+              navigate("/register");
+            }}
             className="w-full py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition-transform"
           >
             GET STARTED <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              base44.analytics.track({ eventName: "login_click" });
+              navigate("/login");
+            }}
             className="w-full py-3.5 rounded-xl bg-transparent border border-blue-400/20 text-white font-cyber font-semibold text-sm tracking-wider transition-transform hover:border-blue-400/40"
           >
             I ALREADY HAVE AN ACCOUNT →
