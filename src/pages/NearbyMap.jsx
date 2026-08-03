@@ -15,7 +15,7 @@ import RadarScope from "@/components/nex/radar/RadarScope";
 import RadarList from "@/components/nex/radar/RadarList";
 import ChatRequestOverlay from "@/components/nex/radar/ChatRequestOverlay";
 
-import { RADAR_INTERESTS } from "@/components/nex/radar/constants";
+import { calculateSharedInterests, getSharedInterestLabels, getSubInterestName, INTEREST_CATEGORIES } from "@/components/nex/radar/interestCategories";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
@@ -231,13 +231,13 @@ export default function NearbyMap() {
     return true;
   });
 
-  // Rank by shared interests + proximity (Best Matches)
+  // Rank by shared sub-interests + proximity (Best Matches)
   const ranked = radiusFiltered
     .map((u) => {
-      const shared = (u.interests || []).filter((i) => activeFilters.includes(i)).length;
+      const { score } = calculateSharedInterests(activeFilters, u.interests || []);
       const coords = getUserLatLng(u);
       const dist = coords ? distanceMiles(userLocation.lat, userLocation.lng, coords[0], coords[1]) : Infinity;
-      return { ...u, _shared: shared, _dist: dist, _score: shared * 10 - dist };
+      return { ...u, _shared: score, _dist: dist, _score: score - dist };
     })
     .sort((a, b) => b._score - a._score);
 
@@ -490,17 +490,17 @@ export default function NearbyMap() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto scrollbar-hide">
-                  {RADAR_INTERESTS.map((interest) => {
-                    const isActive = activeFilters.includes(interest);
+                  {(myProfile?.interests || []).map((interestId) => {
+                    const isActive = activeFilters.includes(interestId);
                     return (
                       <button
-                        key={interest}
-                        onClick={() => toggleFilter(interest)}
+                        key={interestId}
+                        onClick={() => toggleFilter(interestId)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 ${
                           isActive ? "neon-btn text-white" : "cyber-input text-white/40"
                         }`}
                       >
-                        {interest}
+                        {getSubInterestName(interestId)}
                       </button>
                     );
                   })}
@@ -536,15 +536,26 @@ export default function NearbyMap() {
               <div className="relative">
                 <p className="text-[10px] font-cyber text-blue-400/50 tracking-widest mb-2">NEARBY MATCH</p>
 
-                {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {selectedUser.interests.slice(0, 5).map((interest) => (
-                      <span key={interest} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/8 text-blue-300/80 border border-blue-500/10">
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                {selectedUser.visibility !== "anonymous" && (() => {
+                  const sharedLabels = getSharedInterestLabels(myProfile?.interests || [], selectedUser.interests || [], 3);
+                  const theirInterests = (selectedUser.interests || []).slice(0, 5).map((id) => getSubInterestName(id));
+                  return (
+                    <div className="mb-4">
+                      {sharedLabels.length > 0 && (
+                        <p className="text-blue-200/60 text-xs mb-2">
+                          You both like {sharedLabels.join(", ")}.
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {theirInterests.map((name) => (
+                          <span key={name} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/8 text-blue-300/80 border border-blue-500/10">
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {selectedUser.visibility === "anonymous" && (
                   <p className="text-white/30 text-xs mb-4">Anonymous user — interests hidden</p>
                 )}

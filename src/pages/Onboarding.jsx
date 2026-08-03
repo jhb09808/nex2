@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import InterestTag from "@/components/nex/InterestTag";
-import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
+import InterestPicker from "@/components/nex/radar/InterestPicker";
+import { MIN_INTEREST_SELECTIONS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
 const VISIBILITY_OPTIONS = [
   { value: "anonymous", icon: EyeOff, label: "Anonymous", desc: "Hide your identity completely" },
@@ -36,12 +36,8 @@ export default function Onboarding() {
     setUsernameError("");
   };
 
-  const toggleInterest = (interest) => {
-    setInterests((prev) => {
-      if (prev.includes(interest)) return prev.filter((i) => i !== interest);
-      if (prev.length >= MAX_INTEREST_SELECTIONS) return prev;
-      return [...prev, interest];
-    });
+  const toggleInterest = (newInterests) => {
+    setInterests(newInterests);
   };
 
   const handleComplete = async () => {
@@ -84,7 +80,7 @@ export default function Onboarding() {
 
   const canProceed = () => {
     if (step === 0) return username.length >= 3 && parseInt(age) >= 18;
-    if (step === 1) return interests.length >= 3 && interests.length <= MAX_INTEREST_SELECTIONS;
+    if (step === 1) return interests.length >= MIN_INTEREST_SELECTIONS;
     return true;
   };
 
@@ -138,22 +134,17 @@ export default function Onboarding() {
     </motion.div>,
 
     // Step 1: Interests
-    <motion.div key="interests" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-6">
+    <motion.div key="interests" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="space-y-4">
       <div>
         <h2 className="font-cyber text-xl font-bold tracking-wider text-white neon-text mb-1">PICK YOUR INTERESTS</h2>
-        <p className="text-blue-200/50 text-xs tracking-wide">Choose up to {MAX_INTEREST_SELECTIONS} that define you</p>
+        <p className="text-blue-200/50 text-xs tracking-wide">Choose what you're into</p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {RADAR_INTERESTS.map((interest) => (
-          <InterestTag
-            key={interest}
-            label={interest}
-            selected={interests.includes(interest)}
-            onClick={() => toggleInterest(interest)}
-          />
-        ))}
+      <div className="h-[55vh]">
+        <InterestPicker
+          selected={interests}
+          onChange={toggleInterest}
+        />
       </div>
-      <p className="text-blue-200/40 text-xs text-center font-cyber tracking-wider">{interests.length} OF {MAX_INTEREST_SELECTIONS} SELECTED</p>
     </motion.div>,
 
     // Step 2: Visibility

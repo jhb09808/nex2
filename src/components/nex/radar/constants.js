@@ -24,4 +24,4 @@ export const RADAR_INTERESTS = [
 ];
 
 export const MIN_INTEREST_SELECTIONS = 3;
-export const MAX_INTEREST_SELECTIONS = 3;
+export const MAX_INTEREST_SELECTIONS = 15;

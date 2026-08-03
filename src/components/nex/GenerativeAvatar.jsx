@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 
 function hashString(str) {
   let hash = 0;
@@ -30,19 +31,34 @@ const PLAN_SHAPES = {
 };
 
 // Refraction encoding: interest category → internal line pattern
-const INTEREST_PATTERNS = {
-  grid: ["Technology", "Business", "Crypto", "Startups", "Science", "Design"],
-  radial: ["Fitness", "Sports", "Hiking", "Yoga", "Cars"],
-  wave: ["Music", "Art", "Photography", "Movies", "Fashion", "Reading"],
-  scatter: ["Food", "Cooking", "Travel", "Nightlife", "Pets", "Creators", "Gaming"],
+const CATEGORY_PATTERNS = {
+  technology: "grid",
+  business: "grid",
+  education: "grid",
+  fitness: "radial",
+  sports: "radial",
+  outdoors: "radial",
+  "cars-motorsports": "radial",
+  wellness: "radial",
+  music: "wave",
+  art: "wave",
+  fashion: "wave",
+  "movies-tv": "wave",
+  nightlife: "scatter",
+  food: "scatter",
+  travel: "scatter",
+  "social-activities": "scatter",
+  pets: "scatter",
+  gaming: "scatter",
+  culture: "scatter",
+  "dating-relationships": "scatter",
 };
 
 function getPatternType(interests) {
   if (!interests?.length) return "scatter";
   const top = interests[0];
-  for (const [pattern, list] of Object.entries(INTEREST_PATTERNS)) {
-    if (list.includes(top)) return pattern;
-  }
+  const cat = getCategoryForSubInterest(top);
+  if (cat && CATEGORY_PATTERNS[cat.id]) return CATEGORY_PATTERNS[cat.id];
   return "scatter";
 }
 

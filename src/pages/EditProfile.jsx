@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import InterestTag from "@/components/nex/InterestTag";
-import { RADAR_INTERESTS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
+import InterestPicker from "@/components/nex/radar/InterestPicker";
+import { MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -56,12 +56,8 @@ export default function EditProfile() {
     }
   };
 
-  const toggleInterest = (interest) => {
-    setInterests((prev) => {
-      if (prev.includes(interest)) return prev.filter((i) => i !== interest);
-      if (prev.length >= MAX_INTEREST_SELECTIONS) return prev;
-      return [...prev, interest];
-    });
+  const toggleInterest = (newInterests) => {
+    setInterests(newInterests);
   };
 
   const isPremium = profile?.plan === "pro" || profile?.plan === "platinum";
@@ -115,18 +111,13 @@ export default function EditProfile() {
         </div>
 
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Interests (max {MAX_INTEREST_SELECTIONS})</label>
-          <div className="flex flex-wrap gap-2">
-            {RADAR_INTERESTS.map((interest) => (
-              <InterestTag
-                key={interest}
-                label={interest}
-                selected={interests.includes(interest)}
-                onClick={() => toggleInterest(interest)}
-              />
-            ))}
+          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Interests</label>
+          <div className="h-[50vh]">
+            <InterestPicker
+              selected={interests}
+              onChange={toggleInterest}
+            />
           </div>
-          <p className="text-white/30 text-xs mt-2">{interests.length} of {MAX_INTEREST_SELECTIONS} selected</p>
         </div>
       </div>
     </div>

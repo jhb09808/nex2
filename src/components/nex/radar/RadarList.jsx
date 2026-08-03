@@ -3,7 +3,7 @@ import { MapPin, EyeOff, Sparkles, MessageCircle } from "lucide-react";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
-import { getInterestIcon, getInterestColor } from "@/components/nex/radar/interestIcons";
+import { getSubInterestName, getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDisplay";
 
 export default function RadarList({ users, onUserClick }) {
@@ -57,20 +57,16 @@ export default function RadarList({ users, onUserClick }) {
                 )}
               </div>
               {user.interests?.length > 0 && (
-                <div className="flex gap-1.5 mt-1.5">
-                  {user.interests.slice(0, 5).map((interest) => {
-                    const Icon = getInterestIcon(interest);
-                    if (!Icon) return null;
-                    const color = getInterestColor(interest);
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {user.interests.slice(0, 5).map((interestId) => {
+                    const cat = getCategoryForSubInterest(interestId);
+                    if (!cat) return null;
+                    const Icon = cat.icon;
                     return (
-                      <Icon
-                        key={interest}
-                        className="w-4 h-4"
-                        style={{
-                          color: color,
-                          filter: `drop-shadow(0 0 4px ${color}AA) drop-shadow(0 0 8px ${color}55)`,
-                        }}
-                      />
+                      <span key={interestId} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/5">
+                        <Icon className="w-2.5 h-2.5 text-blue-300/60" />
+                        <span className="text-[9px] text-blue-200/50">{getSubInterestName(interestId)}</span>
+                      </span>
                     );
                   })}
                 </div>

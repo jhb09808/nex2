@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import { getRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
+import { getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 
 const PALETTE = {
   bg: "#000000",
@@ -13,31 +14,27 @@ const PALETTE = {
   cyan: "#3B82F6",
 };
 
-const INTEREST_COLORS = {
-  Technology: PALETTE.blue,
-  Fitness: PALETTE.orange,
-  Business: PALETTE.blue,
-  Cars: PALETTE.orange,
-  Nightlife: PALETTE.purple,
-  Photography: PALETTE.purple,
-  Travel: PALETTE.blue,
-  Food: PALETTE.orange,
-  Creators: PALETTE.purple,
-  Startups: PALETTE.blue,
-  Sports: PALETTE.green,
-  Music: PALETTE.purple,
-  Art: PALETTE.purple,
-  Gaming: PALETTE.green,
-  Fashion: PALETTE.orange,
-  Movies: PALETTE.purple,
-  Reading: PALETTE.green,
-  Hiking: PALETTE.green,
-  Yoga: PALETTE.green,
-  Cooking: PALETTE.orange,
-  Design: PALETTE.purple,
-  Crypto: PALETTE.blue,
-  Science: PALETTE.blue,
-  Pets: PALETTE.green,
+const CATEGORY_COLORS = {
+  food: PALETTE.orange,
+  fitness: PALETTE.orange,
+  music: PALETTE.purple,
+  nightlife: PALETTE.purple,
+  sports: PALETTE.green,
+  art: PALETTE.purple,
+  fashion: PALETTE.orange,
+  "movies-tv": PALETTE.purple,
+  gaming: PALETTE.green,
+  technology: PALETTE.blue,
+  business: PALETTE.blue,
+  travel: PALETTE.blue,
+  outdoors: PALETTE.green,
+  wellness: PALETTE.green,
+  education: PALETTE.blue,
+  culture: PALETTE.purple,
+  "social-activities": PALETTE.blue,
+  pets: PALETTE.green,
+  "cars-motorsports": PALETTE.orange,
+  "dating-relationships": PALETTE.purple,
 };
 
 const DEFAULT_BLIP_COLOR = PALETTE.blue;
@@ -47,7 +44,8 @@ const BLIP_PALETTE = RADAR_SWEEP_COLORS.map((c) => c.value);
 function getBlipColor(user) {
   const interests = user.interests || [];
   for (const interest of interests) {
-    if (INTEREST_COLORS[interest]) return INTEREST_COLORS[interest];
+    const cat = getCategoryForSubInterest(interest);
+    if (cat && CATEGORY_COLORS[cat.id]) return CATEGORY_COLORS[cat.id];
   }
   return DEFAULT_BLIP_COLOR;
 }
