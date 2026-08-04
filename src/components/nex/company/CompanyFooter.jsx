@@ -31,7 +31,7 @@ export default function CompanyFooter() {
 
         <div className="mt-12 pt-6 border-t border-white/5 text-center">
           <p className="text-xs text-white/30 font-cyber uppercase tracking-wider">
-            © {new Date().getFullYear()} NEX2. All rights reserved.
+            © {new Date().getFullYear()} NEX2, INC. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>
