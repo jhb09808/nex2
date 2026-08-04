@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Briefcase } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import InterestPicker from "@/components/nex/radar/InterestPicker";
+import LookingForProvidesPicker from "@/components/nex/opportunity/LookingForProvidesPicker";
 import { MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
 export default function EditProfile() {
@@ -12,6 +13,11 @@ export default function EditProfile() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState([]);
+  const [lookingFor, setLookingFor] = useState([]);
+  const [provides, setProvides] = useState([]);
+  const [accountType, setAccountType] = useState("individual");
+  const [companyName, setCompanyName] = useState("");
+  const [industry, setIndustry] = useState("");
   const [saving, setSaving] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const { toast } = useToast();
@@ -29,6 +35,11 @@ export default function EditProfile() {
       setUsername(p.username || "");
       setBio(p.bio || "");
       setInterests(p.interests || []);
+      setLookingFor(p.looking_for || []);
+      setProvides(p.provides || []);
+      setAccountType(p.account_type || "individual");
+      setCompanyName(p.company_name || "");
+      setIndustry(p.industry || "");
     }
   };
 
@@ -45,7 +56,7 @@ export default function EditProfile() {
         }
       }
       setUsernameError("");
-      const updates = { username, bio, interests };
+      const updates = { username, bio, interests, looking_for: lookingFor, provides, account_type: accountType, company_name: companyName, industry };
       await base44.entities.UserProfile.update(profile.id, updates);
       toast({ title: "Profile saved" });
       navigate("/profile");
@@ -118,6 +129,62 @@ export default function EditProfile() {
               onChange={toggleInterest}
             />
           </div>
+        </div>
+
+        {/* Account Type */}
+        <div>
+          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Account Type</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setAccountType("individual")}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all ${accountType === "individual" ? "neon-btn text-white" : "glass text-white/40"}`}
+            >
+              Individual
+            </button>
+            <button
+              onClick={() => setAccountType("business")}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${accountType === "business" ? "neon-btn text-white" : "glass text-white/40"}`}
+            >
+              <Briefcase size={12} /> Business
+            </button>
+          </div>
+        </div>
+
+        {/* Business fields (shown when business) */}
+        {accountType === "business" && (
+          <div className="space-y-4 p-4 rounded-xl glass border border-white/5">
+            <div>
+              <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Company Name</label>
+              <input
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Company name"
+                className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Industry</label>
+              <input
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                placeholder="e.g. Construction, Technology, Finance"
+                className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Looking For / I Provide */}
+        <div>
+          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Opportunity Mode — Looking For & I Provide</label>
+          <LookingForProvidesPicker
+            lookingFor={lookingFor}
+            provides={provides}
+            onChange={({ looking_for, provides }) => {
+              setLookingFor(looking_for);
+              setProvides(provides);
+            }}
+          />
         </div>
       </div>
     </div>

@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, RefreshCw, Shield, Lock } from "lucide-react";
+import { SlidersHorizontal, RefreshCw, Shield, Lock, Plus } from "lucide-react";
 import { calculateOpportunityMatch } from "./matchScoring";
 import { DEMO_PROVIDERS, DEMO_REQUESTS } from "./demoOpportunities";
 import OpportunityCard from "./OpportunityCard";
 import MatchDetailsModal from "./MatchDetailsModal";
 import ConnectionRequestModal from "./ConnectionRequestModal";
+import OpportunityRequestModal from "./OpportunityRequestModal";
 
 const FILTERS = [
   { id: "verified_only", label: "Verified Only" },
@@ -21,6 +22,7 @@ export default function OpportunityDiscovery({ profile, isPlatinum }) {
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [connectionTarget, setConnectionTarget] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Use the first demo request as the "current user's request" for matching
   const currentRequest = DEMO_REQUESTS[0];
@@ -77,6 +79,14 @@ export default function OpportunityDiscovery({ profile, isPlatinum }) {
 
   return (
     <div className="space-y-4">
+      {/* Post Opportunity button */}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        className="w-full py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2"
+      >
+        <Plus size={16} /> Post an Opportunity
+      </button>
+
       {/* Current opportunity banner */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -193,6 +203,13 @@ export default function OpportunityDiscovery({ profile, isPlatinum }) {
           matchResult={connectionTarget.matchResult}
           request={currentRequest}
           onClose={() => setConnectionTarget(null)}
+        />
+      )}
+
+      {showCreateModal && (
+        <OpportunityRequestModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => setRefreshKey((k) => k + 1)}
         />
       )}
     </div>

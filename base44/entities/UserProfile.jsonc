@@ -210,6 +210,76 @@
           "default": true
         }
       }
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "business"
+      ],
+      "default": "individual"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "business_bio": {
+      "type": "string"
+    },
+    "looking_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provides": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "min_deal_size": {
+      "type": "number"
+    },
+    "max_deal_size": {
+      "type": "number"
+    },
+    "project_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "markets_served": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "service_area": {
+      "type": "string",
+      "enum": [
+        "local",
+        "national",
+        "global"
+      ],
+      "default": "national"
+    },
+    "currently_accepting": {
+      "type": "boolean",
+      "default": true
+    },
+    "response_rate": {
+      "type": "number"
+    },
+    "avg_response_time": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string",
+      "format": "uri"
     }
   },
   "required": [
