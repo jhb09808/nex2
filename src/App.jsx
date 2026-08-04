@@ -19,6 +19,8 @@ import ApprovalConfirmed from '@/pages/ApprovalConfirmed';
 // App pages
 import Welcome from '@/pages/Welcome';
 import Company from '@/pages/Company';
+import PrivacyPolicy from '@/pages/legal/PrivacyPolicy';
+import TermsOfService from '@/pages/legal/TermsOfService';
 import Onboarding from '@/pages/Onboarding';
 import Home from '@/pages/Home';
 import NearbyMap from '@/pages/NearbyMap';
@@ -59,6 +61,8 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/company" element={<Company />} />
+      <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+      <Route path="/legal/terms" element={<TermsOfService />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -92,9 +96,10 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  const isPublicCompanyPage = window.location.pathname === '/company';
+  const isPublicPath = window.location.pathname === '/company' ||
+    window.location.pathname.startsWith('/legal/');
 
-  if (!hasAccess() && !isPublicCompanyPage) {
+  if (!hasAccess() && !isPublicPath) {
     return <PasswordGate />;
   }
 

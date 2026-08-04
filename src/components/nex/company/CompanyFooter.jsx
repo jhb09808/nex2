@@ -24,8 +24,8 @@ export default function CompanyFooter() {
             <Link to="/company" className="hover:text-white transition-colors">Company</Link>
             <a href="/company#careers" className="hover:text-white transition-colors">Careers</a>
             <a href="/company#contact" className="hover:text-white transition-colors">Contact</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/legal/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/legal/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>
         </div>
 
