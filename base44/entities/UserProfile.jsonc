@@ -228,6 +228,17 @@
     "business_bio": {
       "type": "string"
     },
+    "i_am": {
+      "type": "string",
+      "description": "Primary role/title (e.g. Software Engineer, Investor)"
+    },
+    "available_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Engagement types the user is open to"
+    },
     "looking_for": {
       "type": "array",
       "items": {
@@ -280,6 +291,69 @@
     "website": {
       "type": "string",
       "format": "uri"
+    },
+    "hiring_mode_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "hiring_open_positions": {
+      "type": "string"
+    },
+    "hiring_employment_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "part_time",
+        "internship",
+        "commission",
+        "contract"
+      ]
+    },
+    "hiring_work_mode": {
+      "type": "string",
+      "enum": [
+        "remote",
+        "hybrid",
+        "on_site"
+      ]
+    },
+    "hiring_desired_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hiring_compensation_min": {
+      "type": "number"
+    },
+    "hiring_compensation_max": {
+      "type": "number"
+    },
+    "hiring_immediate_start": {
+      "type": "boolean",
+      "default": false
+    },
+    "funding_mode_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "funding_amount_requested": {
+      "type": "number"
+    },
+    "funding_purpose": {
+      "type": "string"
+    },
+    "funding_preferred_range_min": {
+      "type": "number"
+    },
+    "funding_preferred_range_max": {
+      "type": "number"
+    },
+    "funding_timeline": {
+      "type": "string"
+    },
+    "funding_project_description": {
+      "type": "string"
     }
   },
   "required": [

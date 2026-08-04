@@ -7,6 +7,8 @@ import OpportunityCard from "./OpportunityCard";
 import MatchDetailsModal from "./MatchDetailsModal";
 import ConnectionRequestModal from "./ConnectionRequestModal";
 import OpportunityRequestModal from "./OpportunityRequestModal";
+import AIOpportunityAssistant from "./AIOpportunityAssistant";
+import OpportunitySections from "./OpportunitySections";
 
 const FILTERS = [
   { id: "verified_only", label: "Verified Only" },
@@ -79,6 +81,12 @@ export default function OpportunityDiscovery({ profile, isPlatinum }) {
 
   return (
     <div className="space-y-4">
+      {/* AI Opportunity Assistant */}
+      <AIOpportunityAssistant
+        profile={profile}
+        onJumpToOpportunity={() => {}}
+      />
+
       {/* Post Opportunity button */}
       <button
         onClick={() => setShowCreateModal(true)}
@@ -161,6 +169,14 @@ export default function OpportunityDiscovery({ profile, isPlatinum }) {
           ))
         )}
       </div>
+
+      {/* Opportunity Category Sections */}
+      <OpportunitySections
+        profile={profile}
+        isPlatinum={isPlatinum}
+        onViewDetails={handleViewDetails}
+        onRequestConnection={handleRequestConnection}
+      />
 
       {/* Load more / refresh */}
       {matches.length > 0 && (

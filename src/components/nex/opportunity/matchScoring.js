@@ -2,7 +2,7 @@
 // Compares what a user is looking for against what providers offer.
 // Score represents compatibility only — never approval, eligibility, or financial advice.
 
-import { NEED_TO_PROVIDER_MAP, getProvidesLabel, getLookingForLabel } from "./opportunityCategories";
+import { NEED_TO_PROVIDER_MAP, getProvidesLabel, getLookingForLabel, getIAmLabel } from "./opportunityCategories";
 
 /**
  * Calculate opportunity match score between a seeker's request and a provider.
@@ -23,29 +23,29 @@ export function calculateOpportunityMatch(request, provider) {
   if (matchingServices.length > 0) {
     score += 40;
     details.needServiceMatch = true;
-    reasons.push(`Provides ${getProvidesLabel(NEED_TO_PROVIDER_MAP[matchingServices[0]]?.[0] || provider.provides[0])}`);
+    const matchedProvId = NEED_TO_PROVIDER_MAP[matchingServices[0]]?.[0] || provider.provides?.[0];
+    reasons.push(`Provides ${getProvidesLabel(matchedProvId)}`);
   } else {
-    // Partial: same broad category
     score += 5;
   }
 
-  // 2. Amount compatibility (up to 25 pts)
+  // 2. Amount compatibility (up to 20 pts)
   if (request.requested_amount && provider.max_deal_size) {
     const minDeal = provider.min_deal_size || 0;
     const maxDeal = provider.max_deal_size;
     if (request.requested_amount >= minDeal && request.requested_amount <= maxDeal) {
-      score += 25;
+      score += 20;
       details.amountMatch = true;
       reasons.push(`Funds projects up to $${formatCurrency(maxDeal)}`);
     } else if (request.requested_amount <= maxDeal * 1.2) {
-      score += 15;
+      score += 12;
       details.amountCloseMatch = true;
     }
   } else {
-    score += 8; // unknown amounts, neutral
+    score += 6;
   }
 
-  // 3. Geographic compatibility (up to 20 pts)
+  // 3. Geographic compatibility (up to 15 pts)
   const geoCompatibility = checkGeographicCompatibility(request, provider);
   score += geoCompatibility.points;
   if (geoCompatibility.match) {
@@ -53,43 +53,84 @@ export function calculateOpportunityMatch(request, provider) {
     reasons.push(geoCompatibility.reason);
   }
 
-  // 4. Project type match (up to 10 pts)
+  // 4. Project type match (up to 8 pts)
   if (request.project_type && provider.project_types?.includes(request.project_type)) {
-    score += 10;
+    score += 8;
     details.projectTypeMatch = true;
     reasons.push("Matching project type");
   }
 
-  // 5. Timeline compatibility (up to 5 pts)
+  // 5. Timeline + availability (up to 7 pts)
   if (request.timeline && provider.currently_accepting) {
-    score += 5;
+    score += 7;
     details.timelineMatch = true;
-    reasons.push("Currently accepting opportunities");
+    reasons.push("Currently accepting new opportunities");
+  } else if (provider.currently_accepting) {
+    score += 4;
   }
 
-  // 6. Verification bonus (up to 5 pts, does not inflate relevance unfairly)
+  // 6. Industry match (up to 5 pts)
+  if (request.industry && provider.industry) {
+    const reqIndustry = request.industry.toLowerCase();
+    const provIndustry = provider.industry.toLowerCase();
+    if (reqIndustry === provIndustry) {
+      score += 5;
+      details.industryMatch = true;
+      reasons.push("Same industry");
+    } else if (provIndustry.includes(reqIndustry) || reqIndustry.includes(provIndustry)) {
+      score += 3;
+    }
+  }
+
+  // 7. Verification bonus (up to 3 pts)
   if (provider.is_verified) {
     score += 3;
     details.verified = true;
     reasons.push("Verified business profile");
   }
 
-  // 7. Profile completeness (up to 5 pts)
+  // 8. Profile completeness (up to 2 pts)
   const completeness = calculateProfileCompleteness(provider);
-  score += Math.round(completeness * 5);
+  score += Math.round(completeness * 2);
 
-  // 8. Availability
+  // 9. Availability penalty
   if (provider.currently_accepting === false) {
-    score -= 10;
+    score -= 8;
+  }
+
+  // 10. Hiring mode bonus — if provider is hiring and seeker needs employment
+  if (provider.hiring_mode_enabled && (request.looking_for || []).some((n) =>
+    ["employees", "interns", "sales_representatives", "software_developers", "ai_developers"].includes(n)
+  )) {
+    score += 5;
+    details.hiringMatch = true;
+    reasons.push("Hiring now");
   }
 
   // Clamp
   score = Math.max(0, Math.min(99, Math.round(score)));
 
-  // Ensure top reasons are unique and max 3
-  reasons = [...new Set(reasons)].slice(0, 3);
+  // Ensure top reasons are unique and max 4
+  reasons = [...new Set(reasons)].slice(0, 4);
 
   return { score, reasons, details };
+}
+
+/**
+ * Calculate a profile-to-profile opportunity score (for the Discovery feed).
+ * Uses the user's looking_for vs the provider's provides, plus all weighted signals.
+ */
+export function calculateProfileOpportunityScore(seekerProfile, provider) {
+  const syntheticRequest = {
+    looking_for: seekerProfile.looking_for || [],
+    requested_amount: seekerProfile.funding_mode_enabled ? seekerProfile.funding_amount_requested : null,
+    industry: seekerProfile.industry,
+    project_type: null,
+    geographic_scope: seekerProfile.service_area || "national",
+    location: seekerProfile.zip_code || "",
+    timeline: seekerProfile.funding_timeline,
+  };
+  return calculateOpportunityMatch(syntheticRequest, provider);
 }
 
 function checkGeographicCompatibility(request, provider) {
@@ -98,26 +139,23 @@ function checkGeographicCompatibility(request, provider) {
   const reqLocation = request.location || "";
   const provMarkets = provider.markets_served || [];
 
-  // If both global
   if (reqGeo === "global" && provGeo === "global") {
-    return { points: 20, match: true, reason: "Available globally" };
+    return { points: 15, match: true, reason: "Available globally" };
   }
 
-  // If provider serves the request location
   if (reqLocation && provMarkets.some((m) => m.toLowerCase().includes(reqLocation.toLowerCase().split(",")[0].trim().toLowerCase()))) {
-    return { points: 20, match: true, reason: `Works with ${reqLocation.split(",")[0].trim()}-based clients` };
+    return { points: 15, match: true, reason: `Works with ${reqLocation.split(",")[0].trim()}-based clients` };
   }
 
-  // National match
   if (reqGeo === "national" && (provGeo === "national" || provGeo === "global")) {
-    return { points: 15, match: true, reason: "Available nationally" };
+    return { points: 12, match: true, reason: "Available nationally" };
   }
 
   if (reqGeo === "global" && provGeo === "national") {
-    return { points: 10, match: true, reason: "Available nationally" };
+    return { points: 8, match: true, reason: "Available nationally" };
   }
 
-  return { points: 5, match: false, reason: "" };
+  return { points: 4, match: false, reason: "" };
 }
 
 function calculateProfileCompleteness(provider) {
@@ -129,11 +167,9 @@ function calculateProfileCompleteness(provider) {
   return filled / fields.length;
 }
 
-function formatCurrency(n) {
+export function formatCurrency(n) {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(0)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
   return String(n);
 }
-
-export { formatCurrency };
