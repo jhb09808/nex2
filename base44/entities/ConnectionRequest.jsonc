@@ -1,0 +1,128 @@
+{
+  "name": "ConnectionRequest",
+  "type": "object",
+  "properties": {
+    "recipient_id": {
+      "type": "string"
+    },
+    "recipient_name": {
+      "type": "string"
+    },
+    "opportunity_request_id": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "discuss_funding",
+        "explore_partnership",
+        "request_services",
+        "offer_services",
+        "discuss_investment",
+        "explore_opportunity",
+        "general_networking"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "more_info_requested",
+        "saved_for_later"
+      ],
+      "default": "pending"
+    },
+    "conversation_id": {
+      "type": "string"
+    },
+    "qualification_answers": {
+      "type": "object",
+      "properties": {
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "pipeline_status": {
+      "type": "string",
+      "enum": [
+        "new_match",
+        "connection_requested",
+        "connected",
+        "qualification_started",
+        "documents_requested",
+        "meeting_scheduled",
+        "under_review",
+        "approved",
+        "declined",
+        "completed"
+      ],
+      "default": "new_match"
+    }
+  },
+  "required": [
+    "recipient_id",
+    "purpose"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

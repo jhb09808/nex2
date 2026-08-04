@@ -1,0 +1,100 @@
+{
+  "name": "OpportunityRequest",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "looking_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requested_amount": {
+      "type": "number"
+    },
+    "project_type": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "geographic_scope": {
+      "type": "string",
+      "enum": [
+        "local",
+        "national",
+        "global",
+        "invite_only"
+      ],
+      "default": "national"
+    },
+    "timeline": {
+      "type": "string"
+    },
+    "additional_details": {
+      "type": "string"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "local",
+        "national",
+        "global",
+        "invite_only"
+      ],
+      "default": "national"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "matched",
+        "expired"
+      ],
+      "default": "open"
+    },
+    "is_remote_ok": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title",
+    "industry",
+    "looking_for"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

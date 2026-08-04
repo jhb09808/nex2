@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Briefcase, Users } from "lucide-react";
+import { Briefcase, Users, Zap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import BriefingStrip from "@/components/nex/home/BriefingStrip";
@@ -9,6 +9,7 @@ import TopMatch from "@/components/nex/home/TopMatch";
 import MissionStrip from "@/components/nex/home/MissionStrip";
 import OpportunityFeed from "@/components/nex/ai/OpportunityFeed";
 import GlobalCounters from "@/components/nex/GlobalCounters";
+import OpportunityDiscovery from "@/components/nex/opportunity/OpportunityDiscovery";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Home() {
   const [nearbyUsers, setNearbyUsers] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [discoveryTab, setDiscoveryTab] = useState("people");
 
   useEffect(() => { loadData(); }, []);
 
@@ -90,27 +92,65 @@ export default function Home() {
           <GlobalCounters />
         </motion.div>
 
-        {/* Briefing Strip */}
+        {/* Discovery Mode Tabs */}
         <motion.div variants={fadeUp}>
-          <BriefingStrip nearbyUsers={nearbyUsers} events={events} />
+          <div className="flex p-1 rounded-xl bg-white/[0.03] border border-white/5">
+            <button
+              onClick={() => setDiscoveryTab("people")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-cyber font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 ${
+                discoveryTab === "people" ? "neon-btn text-white" : "text-white/40"
+              }`}
+            >
+              <Users size={14} /> People You Should Meet
+            </button>
+            <button
+              onClick={() => setDiscoveryTab("opportunities")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-cyber font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 ${
+                discoveryTab === "opportunities" ? "neon-btn text-white" : "text-white/40"
+              }`}
+            >
+              <Zap size={14} /> Opportunities For You
+            </button>
+          </div>
         </motion.div>
 
-        {/* Top Match */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Users}>Who You Should Meet</SectionHeader>
-          <TopMatch nearbyUsers={nearbyUsers} myInterests={profile?.interests} profile={profile} />
-        </motion.div>
+        {/* People You Should Meet Tab */}
+        {discoveryTab === "people" && (
+          <>
+            {/* Briefing Strip */}
+            <motion.div variants={fadeUp}>
+              <BriefingStrip nearbyUsers={nearbyUsers} events={events} />
+            </motion.div>
 
-        {/* Today's Mission — slim strip */}
-        <motion.div variants={fadeUp}>
-          <MissionStrip />
-        </motion.div>
+            {/* Top Match */}
+            <motion.div variants={fadeUp}>
+              <SectionHeader icon={Users}>Who You Should Meet</SectionHeader>
+              <TopMatch nearbyUsers={nearbyUsers} myInterests={profile?.interests} profile={profile} />
+            </motion.div>
 
-        {/* AI Opportunity Feed */}
-        <motion.div variants={fadeUp}>
-          <SectionHeader icon={Briefcase}>Opportunities</SectionHeader>
-          <OpportunityFeed myInterests={profile?.interests} />
-        </motion.div>
+            {/* Today's Mission — slim strip */}
+            <motion.div variants={fadeUp}>
+              <MissionStrip />
+            </motion.div>
+
+            {/* AI Opportunity Feed */}
+            <motion.div variants={fadeUp}>
+              <SectionHeader icon={Briefcase}>Opportunities</SectionHeader>
+              <OpportunityFeed myInterests={profile?.interests} />
+            </motion.div>
+          </>
+        )}
+
+        {/* Opportunities For You Tab */}
+        {discoveryTab === "opportunities" && (
+          <motion.div variants={fadeUp}>
+            <SectionHeader icon={Zap}>Opportunity Mode</SectionHeader>
+            <OpportunityDiscovery
+              profile={profile}
+              isPlatinum={profile?.plan === "platinum"}
+            />
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );
