@@ -18,6 +18,7 @@ import ApprovalConfirmed from '@/pages/ApprovalConfirmed';
 
 // App pages
 import Welcome from '@/pages/Welcome';
+import Company from '@/pages/Company';
 import Onboarding from '@/pages/Onboarding';
 import Home from '@/pages/Home';
 import NearbyMap from '@/pages/NearbyMap';
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/welcome" element={<Welcome />} />
+      <Route path="/company" element={<Company />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
