@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Building2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import AreaCounters from "@/components/nex/AreaCounters";
 import GlobalCounters from "@/components/nex/GlobalCounters";
@@ -85,6 +86,12 @@ export default function Welcome() {
           >
             I ALREADY HAVE AN ACCOUNT →
           </button>
+          <Link
+            to="/company"
+            className="w-full py-3 rounded-xl bg-white/[0.03] border border-white/5 text-blue-300/70 font-cyber font-medium text-xs tracking-wider transition-all hover:border-blue-400/20 hover:text-blue-300 flex items-center justify-center gap-1.5"
+          >
+            <Building2 className="w-3.5 h-3.5" /> LEARN ABOUT NEX2 →
+          </Link>
         </motion.div>
 
         <div className="flex items-center justify-center pt-3 border-t border-blue-500/10">
