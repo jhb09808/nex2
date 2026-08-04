@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Loader2, ArrowRight, ArrowLeft, Mail, CheckCircle2, MapPin, Globe, Check, Lock, Building2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { appParams } from "@/lib/app-params";
 import GlobalCounters from "@/components/nex/GlobalCounters";
 import CyberRadar from "@/components/nex/CyberRadar";
@@ -261,12 +260,12 @@ export default function PasswordGate() {
               >
                 I ALREADY HAVE AN ACCOUNT →
               </button>
-              <Link
-                to="/company"
+              <a
+                href="/company"
                 className="w-full py-3 rounded-xl bg-white/[0.03] border border-white/5 text-blue-300/70 font-cyber font-medium text-xs tracking-wider transition-all hover:border-blue-400/20 hover:text-blue-300 flex items-center justify-center gap-1.5"
               >
                 <Building2 className="w-3.5 h-3.5" /> LEARN ABOUT NEX2 →
-              </Link>
+              </a>
             </div>
 
             {/* Footer */}
