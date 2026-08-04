@@ -92,7 +92,9 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  if (!hasAccess()) {
+  const isPublicCompanyPage = window.location.pathname === '/company';
+
+  if (!hasAccess() && !isPublicCompanyPage) {
     return <PasswordGate />;
   }
 
