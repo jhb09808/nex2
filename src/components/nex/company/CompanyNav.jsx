@@ -45,7 +45,7 @@ export default function CompanyNav() {
               </a>
             ))}
             <Link
-              to="/"
+              to="/welcome"
               className="text-sm font-cyber font-medium uppercase tracking-wider px-6 py-2.5 rounded-full neon-btn text-white"
             >
               Join Waitlist
@@ -81,7 +81,7 @@ export default function CompanyNav() {
                 </a>
               ))}
               <Link
-                to="/"
+                to="/welcome"
                 className="text-sm font-cyber font-medium uppercase tracking-wider px-5 py-2.5 rounded-full neon-btn text-white text-center"
               >
                 Join Waitlist

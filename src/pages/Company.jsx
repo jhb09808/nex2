@@ -161,7 +161,7 @@ export default function Company() {
               className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Link
-                to="/"
+                to="/welcome"
                 className="group inline-flex items-center gap-2 px-8 py-4 rounded-full neon-btn font-cyber font-medium text-sm uppercase tracking-wider text-white"
               >
                 Join the Waitlist
