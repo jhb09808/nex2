@@ -133,7 +133,7 @@ Be specific to their role, industry, and stated needs. Everyone has something to
               <p className="text-[11px] text-white/70 leading-snug">{insight.offer_summary}</p>
             </div>
             <div className="bg-violet-500/5 border border-violet-500/10 rounded-xl p-2.5">
-              <p className="text-[9px] font-cyber uppercase tracking-wider text-violet-300/50 mb-1">I Need</p>
+              <p className="text-[9px] font-cyber uppercase tracking-wider text-violet-300/50 mb-1">I Want</p>
               <p className="text-[11px] text-white/70 leading-snug">{insight.need_summary}</p>
             </div>
           </div>

@@ -5,13 +5,13 @@ import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, S
 import ShareButton from "@/components/nex/ShareButton";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
-import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import { getSubInterestName } from "@/components/nex/radar/interestCategories";
 import { getUserNumber } from "@/components/nex/userDisplay";
 import AchievementGrid from "@/components/nex/AchievementGrid";
 import InterestBanner from "@/components/nex/InterestBanner";
 import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
+import GlassCard from "@/components/nex/GlassCard";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ export default function Profile() {
       </div>
 
       {/* Profile Card */}
-      <GlassCard strong className="flex flex-col items-center text-center !pt-8 !pb-6">
+      <div className="cyber-frame cyber-corners relative rounded-2xl p-6 flex flex-col items-center text-center">
         <div className="relative mb-4">
           <UserAvatar name={profile?.username} size="xl" isOnline={true} plan={profile?.plan} />
         </div>
@@ -112,7 +112,7 @@ export default function Profile() {
             <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
           </div>
         </div>
-      </GlassCard>
+      </div>
 
       {/* Opportunities */}
       <ProfileOpportunitySection profile={profile} isOwnProfile={true} />
