@@ -11,7 +11,6 @@ import { getUserNumber } from "@/components/nex/userDisplay";
 import AchievementGrid from "@/components/nex/AchievementGrid";
 import InterestBanner from "@/components/nex/InterestBanner";
 import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
-import GlassCard from "@/components/nex/GlassCard";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -121,23 +120,35 @@ export default function Profile() {
       <AchievementGrid connectionCount={connectionCount} profile={profile} />
 
       {/* Menu */}
-      <div className="space-y-1">
+      <div className="space-y-2">
         {[
-          { label: "Edit Profile", icon: Edit3, path: "/edit-profile" },
-          { label: "Premium Plans", icon: Crown, path: "/premium" },
-          { label: "Settings", icon: Settings, path: "/settings" },
+          { label: "Edit Profile", icon: Edit3, path: "/edit-profile", accent: "text-cyan-300" },
+          { label: "Premium Plans", icon: Crown, path: "/premium", accent: "text-amber-300" },
+          { label: "Settings", icon: Settings, path: "/settings", accent: "text-blue-300" },
         ].map((item) => (
-          <GlassCard key={item.label} className="flex items-center gap-3 !p-3.5" onClick={() => navigate(item.path)}>
-            <item.icon className="w-5 h-5 text-white/40" />
-            <span className="text-white/70 text-sm font-medium flex-1">{item.label}</span>
-            <ChevronRight className="w-4 h-4 text-white/20" />
-          </GlassCard>
+          <button
+            key={item.label}
+            onClick={() => navigate(item.path)}
+            className="cyber-frame group w-full flex items-center gap-3 p-4 rounded-xl active:scale-[0.98] transition-transform"
+          >
+            <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/5 flex items-center justify-center group-hover:border-cyan-500/20 transition-colors">
+              <item.icon className={`w-4 h-4 ${item.accent}`} />
+            </div>
+            <span className="text-white/80 text-sm font-cyber font-medium tracking-wide flex-1 text-left">{item.label}</span>
+            <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-cyan-300/50 group-hover:translate-x-0.5 transition-all" />
+          </button>
         ))}
 
-        <GlassCard className="flex items-center gap-3 !p-3.5" onClick={handleLogout}>
-          <LogOut className="w-5 h-5 text-red-400/60" />
-          <span className="text-red-400/60 text-sm font-medium flex-1">Log Out</span>
-        </GlassCard>
+        <button
+          onClick={handleLogout}
+          className="cyber-frame group w-full flex items-center gap-3 p-4 rounded-xl active:scale-[0.98] transition-transform border-red-500/10"
+        >
+          <div className="w-9 h-9 rounded-lg bg-red-500/[0.06] border border-red-500/10 flex items-center justify-center">
+            <LogOut className="w-4 h-4 text-red-400/70" />
+          </div>
+          <span className="text-red-400/70 text-sm font-cyber font-medium tracking-wide flex-1 text-left">Log Out</span>
+          <ChevronRight className="w-4 h-4 text-red-400/20 group-hover:text-red-400/40 group-hover:translate-x-0.5 transition-all" />
+        </button>
       </div>
     </div>
   );
