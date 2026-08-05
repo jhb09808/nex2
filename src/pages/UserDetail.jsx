@@ -10,6 +10,8 @@ import WaveButton from "@/components/nex/safety/WaveButton";
 import BlockReportSheet from "@/components/nex/safety/BlockReportSheet";
 import ShareButton from "@/components/nex/ShareButton";
 import AchievementGrid from "@/components/nex/AchievementGrid";
+import InterestBanner from "@/components/nex/InterestBanner";
+import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
 import { getUserDisplayName, getUserNumber } from "@/components/nex/userDisplay";
 
 export default function UserDetail() {
@@ -137,21 +139,13 @@ export default function UserDetail() {
           </motion.div>
         )}
 
-        {/* All interests */}
+        {/* All interests — horizontal scrolling banner */}
         {user.interests?.length > 0 && (
           <motion.div variants={fadeUp} className="cyber-frame rounded-2xl p-4">
-            <p className="text-xs font-cyber font-semibold text-white/40 uppercase tracking-wider mb-3">All Interests</p>
-            <div className="flex flex-wrap gap-2">
-              {user.interests.map((i) => (
-                <span key={i} className={`px-3 py-1 rounded-full text-xs font-cyber font-medium border ${
-                  mutualInterests.includes(i)
-                    ? "neon-btn text-white border-transparent"
-                    : "bg-cyan-500/5 text-cyan-300/70 border-cyan-500/15"
-                }`}>
-                  {getSubInterestName(i)}
-                </span>
-              ))}
-            </div>
+            <p className="text-xs font-cyber font-semibold text-white/40 uppercase tracking-wider mb-3">
+              {user.interests.length} Interests
+            </p>
+            <InterestBanner interests={user.interests} highlight={mutualInterests} />
           </motion.div>
         )}
 
@@ -168,6 +162,11 @@ export default function UserDetail() {
             <p className="text-xl font-cyber font-bold holo-text">{user.badges?.length || 0}</p>
             <p className="text-white/30 text-[10px] font-cyber uppercase tracking-wider mt-1">Badges</p>
           </div>
+        </motion.div>
+
+        {/* Opportunities */}
+        <motion.div variants={fadeUp}>
+          <ProfileOpportunitySection profile={user} isOwnProfile={false} />
         </motion.div>
 
         {/* Achievements */}

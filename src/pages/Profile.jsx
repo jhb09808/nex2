@@ -10,6 +10,8 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import { getSubInterestName } from "@/components/nex/radar/interestCategories";
 import { getUserNumber } from "@/components/nex/userDisplay";
 import AchievementGrid from "@/components/nex/AchievementGrid";
+import InterestBanner from "@/components/nex/InterestBanner";
+import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -88,12 +90,8 @@ export default function Profile() {
         {profile?.bio && <p className="text-white/40 text-sm max-w-xs mb-3">{profile.bio}</p>}
 
         {profile?.interests?.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {profile.interests.map((interest) => (
-              <span key={interest} className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300/80 border border-blue-500/10">
-                {getSubInterestName(interest)}
-              </span>
-            ))}
+          <div className="w-full mb-4">
+            <InterestBanner interests={profile.interests} />
           </div>
         )}
 
@@ -115,6 +113,9 @@ export default function Profile() {
           </div>
         </div>
       </GlassCard>
+
+      {/* Opportunities */}
+      <ProfileOpportunitySection profile={profile} isOwnProfile={true} />
 
       {/* Achievements */}
       <AchievementGrid connectionCount={connectionCount} profile={profile} />
