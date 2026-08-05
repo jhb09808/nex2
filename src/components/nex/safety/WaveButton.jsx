@@ -37,12 +37,12 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
       <button
         onClick={handleWave}
         disabled={status === "sending" || status === "sent" || status === "matched"}
-        className={`flex-1 py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform ${
+        className={`flex-1 py-3 rounded-xl font-cyber font-medium text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all ${
           status === "matched"
-            ? "bg-green-500/20 text-green-400"
+            ? "bg-green-500/15 border border-green-400/30 text-green-300"
             : status === "sent"
-              ? "glass text-white/40"
-              : "gradient-blue text-white"
+              ? "cyber-frame text-white/40"
+              : "neon-btn text-white"
         }`}
       >
         {status === "sending" ? (
@@ -68,12 +68,12 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
         onClick={handleWave}
         disabled={status === "sending" || status === "sent" || status === "matched"}
         whileTap={{ scale: 0.98 }}
-        className={`w-full py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-colors ${
+        className={`w-full py-4 rounded-2xl font-cyber font-bold tracking-wider flex items-center justify-center gap-2 transition-all ${
           status === "matched"
-            ? "bg-green-500/20 text-green-400"
+            ? "bg-green-500/15 border border-green-400/30 text-green-300"
             : status === "sent"
-              ? "glass text-white/40"
-              : "gradient-blue text-white"
+              ? "cyber-frame text-white/40"
+              : "neon-btn text-white"
         }`}
       >
         {status === "sending" ? (
@@ -88,13 +88,13 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
           "Request sent — waiting for response"
         ) : (
           <>
-            <MessageCircle className="w-5 h-5" /> Request to chat
+            <MessageCircle className="w-5 h-5" /> REQUEST TO CHAT
           </>
         )}
       </motion.button>
-      {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+      {error && <p className="text-red-400 text-xs text-center font-cyber">{error}</p>}
       {status === "idle" && (
-        <p className="text-white/20 text-xs text-center">
+        <p className="text-cyan-300/30 text-[10px] text-center font-cyber tracking-wider">
           Both people must accept before a chat opens. No unsolicited messages.
         </p>
       )}
