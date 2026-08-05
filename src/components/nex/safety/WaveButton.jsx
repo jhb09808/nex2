@@ -13,6 +13,32 @@ export default function WaveButton({ targetUser, onMutualMatch, compact = false 
     setStatus("sending");
     setError("");
     try {
+      // Mock bot — no real auth user behind it, simulate the flow locally
+      if (targetUser.isMock) {
+        const me = await base44.auth.me();
+        const myProfiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+        const myId = myProfiles[0]?.created_by_id || me.id;
+        let convo;
+        try {
+          convo = await base44.entities.Conversation.create({
+            participants: [myId, targetUser.id].filter(Boolean),
+            is_active: true,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+        setTimeout(() => {
+          const accepted = Math.random() < 0.65;
+          if (accepted && convo?.id) {
+            setStatus("matched");
+            if (onMutualMatch) onMutualMatch(convo.id);
+          } else {
+            setStatus("sent");
+          }
+        }, 1500);
+        return;
+      }
+
       const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
       const data = res.data;
 
