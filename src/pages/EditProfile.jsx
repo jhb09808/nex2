@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Briefcase, ToggleLeft, ToggleRight } from "lucide-react";
+import { ArrowLeft, Check, Briefcase, ToggleLeft, ToggleRight, ChevronDown, Settings } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import InterestPicker from "@/components/nex/radar/InterestPicker";
@@ -36,6 +36,7 @@ export default function EditProfile() {
   const [fundingProjectDescription, setFundingProjectDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [usernameError, setUsernameError] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -179,49 +180,6 @@ export default function EditProfile() {
           </div>
         </div>
 
-        {/* Account Type */}
-        <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Account Type</label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setAccountType("individual")}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all ${accountType === "individual" ? "neon-btn text-white" : "glass text-white/40"}`}
-            >
-              Individual
-            </button>
-            <button
-              onClick={() => setAccountType("business")}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${accountType === "business" ? "neon-btn text-white" : "glass text-white/40"}`}
-            >
-              <Briefcase size={12} /> Business
-            </button>
-          </div>
-        </div>
-
-        {/* Business fields (shown when business) */}
-        {accountType === "business" && (
-          <div className="space-y-4 p-4 rounded-xl glass border border-white/5">
-            <div>
-              <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Company Name</label>
-              <input
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Company name"
-                className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Industry</label>
-              <input
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                placeholder="e.g. Construction, Technology, Finance"
-                className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
-              />
-            </div>
-          </div>
-        )}
-
         {/* I AM */}
         <div>
           <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">I Am</label>
@@ -237,28 +195,9 @@ export default function EditProfile() {
           </select>
         </div>
 
-        {/* AVAILABLE FOR */}
-        <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Available For</label>
-          <div className="flex flex-wrap gap-2">
-            {AVAILABLE_FOR_OPTIONS.map((opt) => {
-              const selected = availableFor.includes(opt.id);
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => setAvailableFor((prev) => selected ? prev.filter((x) => x !== opt.id) : [...prev, opt.id])}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${selected ? "bg-blue-500/20 border border-blue-400/40 text-blue-300" : "bg-white/[0.03] border border-white/5 text-white/40"}`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Looking For / I Provide */}
         <div>
-          <label className="text-xs font-cyber font-medium text-white/40 uppercase tracking-wider mb-3 block">Opportunity Mode — Looking For & I Provide</label>
+          <label className="text-xs font-cyber font-medium text-white/40 uppercase tracking-wider mb-3 block">Looking For & I Provide</label>
           <OpportunityTypeBar
             lookingFor={lookingFor}
             provides={provides}
@@ -268,6 +207,81 @@ export default function EditProfile() {
             }}
           />
         </div>
+
+        {/* Advanced section */}
+        <div>
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl glass text-white/60 text-sm font-medium transition-all hover:text-white"
+          >
+            <span className="flex items-center gap-2">
+              <Settings className="w-4 h-4" /> Advanced
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </button>
+          {showAdvanced && (
+            <div className="mt-3 space-y-4">
+              {/* Account Type */}
+              <div>
+                <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Account Type</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setAccountType("individual")}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all ${accountType === "individual" ? "neon-btn text-white" : "glass text-white/40"}`}
+                  >
+                    Individual
+                  </button>
+                  <button
+                    onClick={() => setAccountType("business")}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${accountType === "business" ? "neon-btn text-white" : "glass text-white/40"}`}
+                  >
+                    <Briefcase size={12} /> Business
+                  </button>
+                </div>
+              </div>
+
+              {/* Business fields (shown when business) */}
+              {accountType === "business" && (
+                <div className="space-y-4 p-4 rounded-xl glass border border-white/5">
+                  <div>
+                    <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Company Name</label>
+                    <input
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Company name"
+                      className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Industry</label>
+                    <input
+                      value={industry}
+                      onChange={(e) => setIndustry(e.target.value)}
+                      placeholder="e.g. Construction, Technology, Finance"
+                      className="w-full px-4 py-3.5 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* AVAILABLE FOR */}
+              <div>
+                <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2 block">Available For</label>
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_FOR_OPTIONS.map((opt) => {
+                    const selected = availableFor.includes(opt.id);
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => setAvailableFor((prev) => selected ? prev.filter((x) => x !== opt.id) : [...prev, opt.id])}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${selected ? "bg-blue-500/20 border border-blue-400/40 text-blue-300" : "bg-white/[0.03] border border-white/5 text-white/40"}`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
         {/* Hiring Mode */}
         <div className="rounded-xl glass border border-white/5 p-4 space-y-4">
@@ -355,6 +369,9 @@ export default function EditProfile() {
                 <label className="text-[10px] font-cyber uppercase tracking-wider text-white/40 mb-1.5 block">Project Description</label>
                 <textarea value={fundingProjectDescription} onChange={(e) => setFundingProjectDescription(e.target.value)} rows={2} placeholder="Describe your project..." className="w-full px-3 py-2.5 rounded-lg bg-black/40 border border-white/10 text-sm text-white/80 placeholder:text-white/20 focus:border-blue-400/40 focus:outline-none resize-none" />
               </div>
+            </div>
+          )}
+        </div>
             </div>
           )}
         </div>
