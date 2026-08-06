@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Sparkles, Briefcase, TrendingUp, Handshake, Loader2, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Briefcase, TrendingUp, Handshake, Loader2, ArrowRight, ChevronDown, DollarSign, Users, Building2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { getIAmLabel, getLookingForLabel, getProvidesLabel, AVAILABLE_FOR_OPTIONS } from "@/components/nex/opportunity/opportunityCategories";
 
@@ -16,7 +16,8 @@ export default function ProfileOpportunitySection({ profile, isOwnProfile = fals
   const generateInsight = async () => {
     setLoading(true);
     try {
-      const profileData = {
+      // Send only general profile data to LLM — funding/hiring specifics are shown only on demand
+      const generalData = {
         username: profile.username,
         i_am: profile.i_am,
         available_for: profile.available_for || [],
@@ -24,31 +25,28 @@ export default function ProfileOpportunitySection({ profile, isOwnProfile = fals
         provides: profile.provides || [],
         industry: profile.industry,
         company_name: profile.company_name,
-        hiring_mode_enabled: profile.hiring_mode_enabled,
-        hiring_open_positions: profile.hiring_open_positions,
-        funding_mode_enabled: profile.funding_mode_enabled,
-        funding_purpose: profile.funding_purpose,
-        funding_amount_requested: profile.funding_amount_requested,
         interests: profile.interests || [],
       };
 
       const res = await base44.integrations.Core.InvokeLLM({
         prompt: `You are an AI opportunity matcher for NEX2, a proximity-based professional network.
-Analyze this user profile and generate a concise, actionable opportunity insight.
+Analyze this user profile and generate a concise, GENERAL opportunity insight.
 
 Profile:
-${JSON.stringify(profileData, null, 2)}
+${JSON.stringify(generalData, null, 2)}
+
+IMPORTANT: Keep the insight broad and general. Do NOT focus on funding, investment amounts, or financial specifics. Focus on what this person does, what they offer, and what they're open to. Funding and hiring details are revealed separately on demand.
 
 Generate a JSON response with:
 1. "offer_summary": One punchy sentence (max 15 words) describing what this person offers to others nearby.
 2. "need_summary": One punchy sentence (max 15 words) describing what this person is looking for.
 3. "top_opportunities": Array of exactly 3 opportunity objects, each with:
    - "title": Short title (max 5 words)
-   - "description": One sentence (max 20 words) describing a specific opportunity this person presents to others nearby.
+   - "description": One sentence (max 20 words) describing a general opportunity this person presents to others nearby.
    - "icon": One of these exact values: "briefcase", "trending", "handshake"
 4. "connection_pitch": One compelling sentence (max 25 words) explaining why someone nearby should connect with this person.
 
-Be specific to their role, industry, and stated needs. Everyone has something to offer and everyone needs a service. Be encouraging and specific, not generic.`,
+Be specific to their role and industry, but stay general — no funding amounts or financial details. Everyone has something to offer. Be encouraging and specific, not generic.`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -107,6 +105,71 @@ Be specific to their role, industry, and stated needs. Everyone has something to
     .map((id) => AVAILABLE_FOR_OPTIONS.find((o) => o.id === id)?.label)
     .filter(Boolean);
 
+  // Build industry-specific detail blocks (only shown on demand)
+  const industryDetails = [];
+
+  if (profile?.hiring_mode_enabled) {
+    industryDetails.push({
+      id: "hiring",
+      icon: Users,
+      label: "Hiring",
+      accent: "text-emerald-300",
+      bg: "bg-emerald-500/5 border-emerald-500/10",
+      rows: [
+        profile.hiring_open_positions && { label: "Open Positions", value: profile.hiring_open_positions },
+        profile.hiring_employment_type && { label: "Employment Type", value: profile.hiring_employment_type.replace(/_/g, " ") },
+        profile.hiring_work_mode && { label: "Work Mode", value: profile.hiring_work_mode.replace(/_/g, " ") },
+        profile.hiring_desired_skills?.length > 0 && { label: "Desired Skills", value: profile.hiring_desired_skills.join(", ") },
+        (profile.hiring_compensation_min || profile.hiring_compensation_max) && {
+          label: "Compensation",
+          value: [profile.hiring_compensation_min, profile.hiring_compensation_max]
+            .filter(Boolean).map((v) => `$${v.toLocaleString()}`).join(" – "),
+        },
+        profile.hiring_immediate_start && { label: "Start", value: "Immediate" },
+      ].filter(Boolean),
+    });
+  }
+
+  if (profile?.funding_mode_enabled) {
+    industryDetails.push({
+      id: "funding",
+      icon: DollarSign,
+      label: "Funding",
+      accent: "text-amber-300",
+      bg: "bg-amber-500/5 border-amber-500/10",
+      rows: [
+        profile.funding_purpose && { label: "Purpose", value: profile.funding_purpose },
+        profile.funding_amount_requested && { label: "Amount Requested", value: `$${profile.funding_amount_requested.toLocaleString()}` },
+        (profile.funding_preferred_range_min || profile.funding_preferred_range_max) && {
+          label: "Preferred Range",
+          value: [profile.funding_preferred_range_min, profile.funding_preferred_range_max]
+            .filter(Boolean).map((v) => `$${v.toLocaleString()}`).join(" – "),
+        },
+        profile.funding_timeline && { label: "Timeline", value: profile.funding_timeline },
+        profile.funding_project_description && { label: "Project", value: profile.funding_project_description },
+      ].filter(Boolean),
+    });
+  }
+
+  if (profile?.company_name || profile?.business_bio || profile?.website) {
+    industryDetails.push({
+      id: "business",
+      icon: Building2,
+      label: "Business",
+      accent: "text-blue-300",
+      bg: "bg-blue-500/5 border-blue-500/10",
+      rows: [
+        profile.company_name && { label: "Company", value: profile.company_name },
+        profile.industry && { label: "Industry", value: profile.industry },
+        profile.business_bio && { label: "About", value: profile.business_bio },
+        profile.website && { label: "Website", value: profile.website },
+        profile.service_area && { label: "Service Area", value: profile.service_area },
+        profile.project_types?.length > 0 && { label: "Project Types", value: profile.project_types.join(", ") },
+        profile.markets_served?.length > 0 && { label: "Markets Served", value: profile.markets_served.join(", ") },
+      ].filter(Boolean),
+    });
+  }
+
   return (
     <div className="cyber-frame cyber-corners relative rounded-2xl p-4 space-y-4">
       {/* Header */}
@@ -138,30 +201,6 @@ Be specific to their role, industry, and stated needs. Everyone has something to
             </div>
           </div>
 
-          {/* Top opportunities */}
-          <div className="space-y-2">
-            {(insight.top_opportunities || []).map((opp, idx) => {
-              const Icon = ICONS[opp.icon] || Briefcase;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.08 }}
-                  className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 rounded-xl p-2.5"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/5 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-cyan-300" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-cyber font-semibold text-white/80">{opp.title}</p>
-                    <p className="text-[10px] text-white/40 leading-snug mt-0.5">{opp.description}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
           {/* Connection pitch */}
           <div className="bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-400/15 rounded-xl p-3">
             <div className="flex items-start gap-2">
@@ -180,8 +219,62 @@ Be specific to their role, industry, and stated needs. Everyone has something to
               ))}
             </div>
           )}
+
+          {/* Industry-specific details — collapsed by default */}
+          {industryDetails.length > 0 && (
+            <IndustryDetailsDropdown details={industryDetails} />
+          )}
         </>
       ) : null}
+    </div>
+  );
+}
+
+function IndustryDetailsDropdown({ details }) {
+  const [openId, setOpenId] = useState(null);
+
+  return (
+    <div className="space-y-1.5 pt-1 border-t border-white/5">
+      <p className="text-[9px] font-cyber uppercase tracking-wider text-white/30 pt-2">
+        Industry Details
+      </p>
+      {details.map((detail) => {
+        const isOpen = openId === detail.id;
+        const Icon = detail.icon;
+        return (
+          <div key={detail.id} className={`rounded-xl border ${isOpen ? detail.bg : "border-white/5 bg-white/[0.02]"} overflow-hidden transition-colors`}>
+            <button
+              onClick={() => setOpenId(isOpen ? null : detail.id)}
+              className="w-full flex items-center gap-2.5 p-2.5 active:scale-[0.99] transition-transform"
+            >
+              <Icon className={`w-3.5 h-3.5 ${detail.accent} flex-shrink-0`} />
+              <span className="text-[11px] font-cyber font-semibold text-white/70 flex-1 text-left">{detail.label}</span>
+              <span className="text-[9px] text-white/30 font-cyber">{detail.rows.length} {detail.rows.length === 1 ? "detail" : "details"}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-white/30 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            <AnimatePresence>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-2.5 pb-2.5 space-y-1.5">
+                    {detail.rows.map((row, i) => (
+                      <div key={i} className="flex flex-col gap-0.5 py-1 px-2 bg-black/20 rounded-lg">
+                        <p className="text-[9px] font-cyber uppercase tracking-wider text-white/30">{row.label}</p>
+                        <p className="text-[11px] text-white/70 leading-snug">{row.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
