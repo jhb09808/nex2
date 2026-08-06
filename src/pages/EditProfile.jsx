@@ -4,7 +4,7 @@ import { ArrowLeft, Check, Briefcase, ToggleLeft, ToggleRight } from "lucide-rea
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import InterestPicker from "@/components/nex/radar/InterestPicker";
-import LookingForProvidesPicker from "@/components/nex/opportunity/LookingForProvidesPicker";
+import OpportunityTypeBar from "@/components/nex/opportunity/OpportunityTypeBar";
 import { I_AM_OPTIONS, AVAILABLE_FOR_OPTIONS, HIRING_EMPLOYMENT_TYPES, HIRING_WORK_MODES } from "@/components/nex/opportunity/opportunityCategories";
 import { MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 
@@ -258,8 +258,8 @@ export default function EditProfile() {
 
         {/* Looking For / I Provide */}
         <div>
-          <label className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3 block">Opportunity Mode — Looking For & I Provide</label>
-          <LookingForProvidesPicker
+          <label className="text-xs font-cyber font-medium text-white/40 uppercase tracking-wider mb-3 block">Opportunity Mode — Looking For & I Provide</label>
+          <OpportunityTypeBar
             lookingFor={lookingFor}
             provides={provides}
             onChange={({ looking_for, provides }) => {
