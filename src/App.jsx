@@ -116,6 +116,7 @@ const AuthenticatedApp = () => {
 
 function App() {
   const isPublicPath = window.location.pathname === '/company' ||
+    window.location.pathname === '/welcome' ||
     window.location.pathname.startsWith('/legal/');
 
   if (!hasAccess() && !isPublicPath) {
