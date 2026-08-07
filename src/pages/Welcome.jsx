@@ -19,17 +19,24 @@ export default function Welcome() {
       .catch(() => {});
   }, []);
 
-  const checkZip = () => {
+  const checkZip = async () => {
     const z = zip.trim();
     if (!/^\d{5}$/.test(z)) {
       setZipMsg("Enter a 5-digit ZIP code.");
       return;
     }
-    setZipMsg(
-      NYC_ZIPS.includes(z.slice(0, 3))
-        ? `✓ In range — ${counts.active_count} members are live near you.`
-        : "Not live here yet — you'll join the waitlist."
-    );
+    setZipMsg("Checking…");
+    try {
+      const res = await base44.functions.invoke("getAreaCounts", { zip_code: z });
+      const data = res.data;
+      if (data.waitlist_count > 0) {
+        setZipMsg(`${data.waitlist_count} ${data.waitlist_count === 1 ? "person is" : "people are"} on the waitlist in your area.`);
+      } else {
+        setZipMsg("No one's on the waitlist here yet — you'd be the first.");
+      }
+    } catch (e) {
+      setZipMsg("Couldn't check that ZIP — try again.");
+    }
   };
 
   return (
