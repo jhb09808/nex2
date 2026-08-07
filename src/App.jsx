@@ -78,6 +78,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Welcome />} />
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/company" element={<Company />} />
       <Route path="/legal/privacy" element={<PrivacyPolicy />} />
@@ -98,7 +99,6 @@ const AuthenticatedApp = () => {
         <Route path="/admin" element={<AdminPanel />} />
 
         <Route element={<AppLayout />}>
-          <Route path="/" element={<NearbyMap />} />
           <Route path="/discover" element={<Home />} />
           <Route path="/platinum-lounge" element={<PlatinumFeed />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
@@ -115,7 +115,8 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  const isPublicPath = window.location.pathname === '/company' ||
+  const isPublicPath = window.location.pathname === '/' ||
+    window.location.pathname === '/company' ||
     window.location.pathname === '/welcome' ||
     window.location.pathname.startsWith('/legal/');
 
