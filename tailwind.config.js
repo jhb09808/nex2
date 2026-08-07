@@ -66,7 +66,9 @@ module.exports = {
   			body: ['var(--font-body)'],
   			display: ['var(--font-display)'],
   			mono: ['var(--font-mono)'],
-  			cyber: ['var(--font-cyber)']
+  			cyber: ['var(--font-cyber)'],
+  			chakra: ['var(--font-chakra)'],
+  			jetbrains: ['var(--font-jetbrains)']
   		},
   		keyframes: {
   			'accordion-down': {
