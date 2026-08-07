@@ -94,6 +94,27 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+
+      // Check waitlist approval — block users who are on the waitlist but not yet approved.
+      // Users not on the waitlist at all (status: "not_found") are allowed through
+      // (they predate the waitlist system or are platform-admin accounts).
+      try {
+        const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email: currentUser.email });
+        if (!approvalRes.data.approved && approvalRes.data.status !== "not_found") {
+          await base44.auth.logout();
+          setAuthError({
+            type: "waitlist_pending",
+            message: "Your waitlist application is still pending approval."
+          });
+          setIsLoadingAuth(false);
+          setAuthChecked(true);
+          return;
+        }
+      } catch (approvalErr) {
+        console.error("Waitlist approval check failed:", approvalErr);
+        // If the check itself errors, allow the user through to avoid false blocks.
+      }
+
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);

@@ -51,6 +51,25 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
+    } else if (authError.type === 'waitlist_pending') {
+      return (
+        <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4">
+          <div className="max-w-md text-center space-y-4">
+            <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">
+              AWAITING APPROVAL
+            </h1>
+            <p className="text-blue-200/60 text-sm">
+              {authError.message || "Your waitlist application is still pending approval. You'll be notified once you're approved."}
+            </p>
+            <button
+              onClick={() => { window.location.href = '/welcome'; }}
+              className="px-6 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider"
+            >
+              BACK TO HOME
+            </button>
+          </div>
+        </div>
+      );
     } else if (authError.type === 'auth_required') {
       navigateToLogin();
       return null;
