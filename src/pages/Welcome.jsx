@@ -66,7 +66,7 @@ export default function Welcome() {
         {/* Background image with gradient overlay */}
         <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 440, zIndex: 0, maskImage: "linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0) 100%)" }}>
           <img
-            src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&q=80"
+            src="https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/d99e1f642_Screenshot2026-08-06at24647PM.png"
             alt=""
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
           />

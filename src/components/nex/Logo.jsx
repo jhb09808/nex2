@@ -1,6 +1,6 @@
 import React from "react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/75ca55b1a_nex2logofinaltransparent.png";
+const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
 
 export default function Logo({ size = "md", className = "" }) {
   const sizes = {
