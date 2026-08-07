@@ -16,8 +16,14 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
+      // loginViaEmailPassword resolves a returnTo query param (falling back to "/")
+      // for its post-login hard redirect — set it before calling so we land on /discover
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has("returnTo")) {
+        url.searchParams.set("returnTo", "/discover");
+        window.history.replaceState({}, "", url.toString());
+      }
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/discover";
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
