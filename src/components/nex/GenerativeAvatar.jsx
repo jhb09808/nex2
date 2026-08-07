@@ -19,18 +19,25 @@ function mulberry32(a) {
   };
 }
 
-const CYAN = "#00F2FF";
-const MAGENTA = "#A100FF";
+// Holographic color palettes — seed selects one
+const PALETTES = [
+  { primary: "#00F2FF", secondary: "#A100FF", accent: "#22D3EE" }, // cyan/magenta
+  { primary: "#3B82F6", secondary: "#A855F7", accent: "#60A5FA" }, // blue/violet
+  { primary: "#10B981", secondary: "#06B6D4", accent: "#34D399" }, // emerald/cyan
+  { primary: "#F59E0B", secondary: "#EF4444", accent: "#FBBF24" }, // amber/red
+  { primary: "#EC4899", secondary: "#8B5CF6", accent: "#F472B6" }, // pink/violet
+  { primary: "#14B8A6", secondary: "#6366F1", accent: "#2DD4BF" }, // teal/indigo
+];
 
-// Shape encoding: plan → glass geometry
+// Shape encoding: plan → clip geometry for the hologram container
 const PLAN_SHAPES = {
-  free: 0, // circle
-  plus: 1, // hexagon
-  pro: 2, // diamond
-  platinum: 3, // rounded square
+  free: 0,       // circle
+  plus: 1,       // hexagon
+  pro: 2,         // diamond
+  platinum: 3,   // rounded square
 };
 
-// Refraction encoding: interest category → internal line pattern
+// Refraction encoding: interest category → internal particle pattern
 const CATEGORY_PATTERNS = {
   technology: "grid",
   business: "grid",
@@ -63,9 +70,12 @@ function getPatternType(interests) {
 }
 
 /**
- * Cybernetic glassmorphism avatar — data-encoded:
- * - plan → glass shape (circle/hexagon/diamond/square)
- * - top interest → internal refraction pattern (grid/radial/wave/scatter)
+ * DNA Hologram — 1-of-1 generative PFP
+ * A double helix with glowing nucleotide nodes, holographic gradients,
+ * and particle depth. Data-encoded:
+ * - seed → helix twist, palette, node positions, phase
+ * - plan → container shape (circle/hexagon/diamond/square)
+ * - top interest → internal particle pattern (grid/radial/wave/scatter)
  * - isVerified → boosted neon glow intensity
  * Deterministic from seed; same seed = same avatar.
  */
@@ -73,181 +83,340 @@ export default function GenerativeAvatar({ seed = "default", plan, interests, is
   const p = useMemo(() => {
     const hash = hashString(seed);
     const rng = mulberry32(hash);
+    const palette = PALETTES[hash % PALETTES.length];
 
     const shape = PLAN_SHAPES[plan] ?? Math.floor(rng() * 4);
     const patternType = getPatternType(interests);
-    const glowBoost = isVerified ? 1.5 : 1;
+    const glowBoost = isVerified ? 1.6 : 1;
+
+    // Helix parameters
+    const helixCenterX = 50;
+    const helixTopY = 12;
+    const helixBottomY = 88;
+    const helixHeight = helixBottomY - helixTopY;
+    const helixAmplitude = 16 + rng() * 8; // horizontal spread
+    const helixTwists = 2 + Math.floor(rng() * 2); // 2-3 full twists
+    const helixPhase = rng() * Math.PI * 2;
+    const rungCount = 7 + Math.floor(rng() * 4); // 7-10 rungs
+    const nodeRadius = (1.8 + rng() * 1.2).toFixed(1);
+
+    // Background orbs
+    const orb1X = 10 + rng() * 25;
+    const orb1Y = 8 + rng() * 25;
+    const orb1R = 25 + rng() * 20;
+    const orb2X = 55 + rng() * 30;
+    const orb2Y = 50 + rng() * 30;
+    const orb2R = 25 + rng() * 20;
+
+    // Particle field
+    const particles = [];
+    const pRng = mulberry32(hash + 7777);
+    for (let i = 0; i < 18; i++) {
+      particles.push({
+        x: 5 + pRng() * 90,
+        y: 5 + pRng() * 90,
+        r: (0.3 + pRng() * 0.8).toFixed(1),
+        o: (0.08 + pRng() * 0.2).toFixed(2),
+      });
+    }
+
+    // Scan line positions
+    const scanLines = [];
+    for (let i = 0; i < 4; i++) {
+      scanLines.push(15 + i * 22 + rng() * 6);
+    }
 
     return {
       hash,
+      palette,
       shape,
       patternType,
       glowBoost,
-      cyanX: 12 + rng() * 30,
-      cyanY: 10 + rng() * 30,
-      cyanR: 28 + rng() * 28,
-      cyanO: ((0.2 + rng() * 0.35) * glowBoost).toFixed(2),
-      magX: 55 + rng() * 32,
-      magY: 52 + rng() * 30,
-      magR: 28 + rng() * 28,
-      magO: ((0.2 + rng() * 0.35) * glowBoost).toFixed(2),
-      glassCx: 42 + rng() * 16,
-      glassCy: 42 + rng() * 16,
-      glassR: 16 + rng() * 12,
-      spec1X: 36 + rng() * 10,
-      spec1Y: 30 + rng() * 10,
-      spec1R: (2.5 + rng() * 4).toFixed(1),
-      spec2X: 54 + rng() * 8,
-      spec2Y: 40 + rng() * 8,
-      spec2R: (1.2 + rng() * 2).toFixed(1),
+      helixCenterX,
+      helixTopY,
+      helixBottomY,
+      helixHeight,
+      helixAmplitude,
+      helixTwists,
+      helixPhase,
+      rungCount,
+      nodeRadius,
+      orb1X, orb1Y, orb1R,
+      orb2X, orb2Y, orb2R,
+      particles,
+      scanLines,
+      specX: 35 + rng() * 15,
+      specY: 20 + rng() * 15,
+      specR: (8 + rng() * 6).toFixed(1),
     };
   }, [seed, plan, interests, isVerified]);
 
-  const gid = `cg-${p.hash}`;
-  const cid = `cg-clip-${p.hash}`;
-  const fid = `cg-blur-${p.hash}`;
+  // Generate helix strand points
+  const helix = useMemo(() => {
+    const { helixCenterX: cx, helixTopY: topY, helixHeight: h, helixAmplitude: amp, helixTwists: twists, helixPhase: phase, rungCount } = p;
+    const steps = 60;
+    const strandA = [];
+    const strandB = [];
+    const rungs = [];
 
-  const renderGlassShape = (keySuffix) => {
-    const { glassCx: cx, glassCy: cy, glassR: r, shape } = p;
-    const key = `shape-${keySuffix}`;
-    if (shape === 0) return <circle key={key} cx={cx} cy={cy} r={r} />;
-    if (shape === 1) {
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const y = topY + t * h;
+      const angle = phase + t * Math.PI * 2 * twists;
+      const xA = cx + Math.cos(angle) * amp;
+      const xB = cx + Math.cos(angle + Math.PI) * amp;
+      const depthA = Math.sin(angle); // -1 to 1, for z-ordering
+      const depthB = Math.sin(angle + Math.PI);
+      strandA.push({ x: xA, y, depth: depthA, t });
+      strandB.push({ x: xB, y, depth: depthB, t });
+    }
+
+    // Rungs connect strandA and strandB at intervals
+    for (let i = 0; i < rungCount; i++) {
+      const t = (i + 0.5) / rungCount;
+      const idx = Math.round(t * steps);
+      const a = strandA[idx];
+      const b = strandB[idx];
+      rungs.push({ a, b, t });
+    }
+
+    return { strandA, strandB, rungs };
+  }, [p]);
+
+  // Generate internal pattern within the helix
+  const internalPattern = useMemo(() => {
+    const { helixCenterX: cx, helixTopY: topY, helixHeight: h, helixAmplitude: amp, patternType, hash } = p;
+    const cy = topY + h / 2;
+    const elements = [];
+
+    if (patternType === "grid") {
+      for (let i = -2; i <= 2; i++) {
+        const off = i * amp * 0.4;
+        elements.push({ type: "line", x1: cx - amp, y1: cy + off, x2: cx + amp, y2: cy + off, o: 0.1 });
+        elements.push({ type: "line", x1: cx + off, y1: cy - amp, x2: cx + off, y2: cy + amp, o: 0.1 });
+      }
+    } else if (patternType === "radial") {
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        elements.push({ type: "line", x1: cx, y1: cy, x2: cx + amp * Math.cos(a), y2: cy + amp * Math.sin(a), o: 0.1 });
+      }
+    } else if (patternType === "wave") {
+      for (let i = 0; i < 3; i++) {
+        const off = (i - 1) * amp * 0.4;
+        const pts = [];
+        for (let j = 0; j <= 16; j++) {
+          const t = j / 16;
+          const x = cx - amp + t * amp * 2;
+          const y = cy + off + Math.sin(t * Math.PI * 3) * amp * 0.2;
+          pts.push(`${j === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`);
+        }
+        elements.push({ type: "path", d: pts.join(" "), o: 0.12 });
+      }
+    } else {
+      const rng2 = mulberry32(hash + 99);
+      for (let i = 0; i < 8; i++) {
+        const a1 = rng2() * Math.PI * 2;
+        const rr = amp * (0.2 + rng2() * 0.7);
+        const x = cx + rr * Math.cos(a1);
+        const y = cy + rr * Math.sin(a1);
+        elements.push({ type: "dot", x, y, r: (0.5 + rng2() * 1).toFixed(1), o: 0.15 });
+      }
+    }
+    return elements;
+  }, [p]);
+
+  const gid = `dna-${p.hash}`;
+  const cid = `dna-clip-${p.hash}`;
+  const fid = `dna-blur-${p.hash}`;
+
+  // Strand path strings
+  const strandAPath = helix.strandA.map((pt, i) => `${i === 0 ? "M" : "L"}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
+  const strandBPath = helix.strandB.map((pt, i) => `${i === 0 ? "M" : "L"}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
+
+  // Render clip shape based on plan
+  const renderClipShape = () => {
+    if (p.shape === 0) return <circle cx="50" cy="50" r="50" />;
+    if (p.shape === 1) {
       const pts = [];
       for (let i = 0; i < 6; i++) {
         const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
-        pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+        pts.push(`${(50 + 50 * Math.cos(a)).toFixed(1)},${(50 + 50 * Math.sin(a)).toFixed(1)}`);
       }
-      return <path key={key} d={`M${pts.join("L")}Z`} />;
+      return <path d={`M${pts.join("L")}Z`} />;
     }
-    if (shape === 2) {
-      return <path key={key} d={`M${cx},${cy - r} L${cx + r},${cy} L${cx},${cy + r} L${cx - r},${cy}Z`} />;
+    if (p.shape === 2) {
+      return <path d="M50,0 L100,50 L50,100 L0,50 Z" />;
     }
-    return <rect key={key} x={cx - r} y={cy - r} width={r * 2} height={r * 2} rx={r * 0.25} />;
+    return <rect x="0" y="0" width="100" height="100" rx="18" />;
   };
 
-  // Refraction lines — encoded by top interest
-  const refractionLines = useMemo(() => {
-    const { glassCx: cx, glassCy: cy, glassR: r, patternType } = p;
-    const lines = [];
-
-    if (patternType === "grid") {
-      // Straight intersecting lines
-      for (let i = -2; i <= 2; i++) {
-        const off = i * r * 0.35;
-        lines.push({ x1: cx - r, y1: cy + off, x2: cx + r, y2: cy + off, o: 0.15 });
-        lines.push({ x1: cx + off, y1: cy - r, x2: cx + off, y2: cy + r, o: 0.15 });
-      }
-    } else if (patternType === "radial") {
-      // Lines radiating from center
-      for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2;
-        lines.push({
-          x1: cx, y1: cy,
-          x2: cx + r * Math.cos(a), y2: cy + r * Math.sin(a),
-          o: 0.12,
-        });
-      }
-    } else if (patternType === "wave") {
-      // Curved wavy lines
-      for (let i = 0; i < 3; i++) {
-        const off = (i - 1) * r * 0.4;
-        const pts = [];
-        for (let j = 0; j <= 20; j++) {
-          const t = j / 20;
-          const x = cx - r + t * r * 2;
-          const y = cy + off + Math.sin(t * Math.PI * 3) * r * 0.2;
-          pts.push(`${j === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`);
-        }
-        lines.push({ d: pts.join(" "), o: 0.15 });
-      }
-    } else {
-      // Scatter — short random segments
-      const rng2 = mulberry32(p.hash + 99);
-      for (let i = 0; i < 6; i++) {
-        const a1 = rng2() * Math.PI * 2;
-        const a2 = a1 + 0.3 + rng2() * 0.5;
-        const rr = r * (0.3 + rng2() * 0.6);
-        lines.push({
-          x1: cx + rr * Math.cos(a1), y1: cy + rr * Math.sin(a1),
-          x2: cx + rr * Math.cos(a2), y2: cy + rr * Math.sin(a2),
-          o: 0.12,
-        });
-      }
-    }
-    return lines;
-  }, [p]);
+  const { primary, secondary, accent } = p.palette;
 
   return (
     <svg viewBox="0 0 100 100" className={`w-full h-full block ${className}`} preserveAspectRatio="xMidYMid slice">
       <defs>
-        <clipPath id={cid}>
-          <circle cx="50" cy="50" r="50" />
-        </clipPath>
-        <radialGradient id={`${gid}-cyan`}>
-          <stop offset="0%" stopColor={CYAN} stopOpacity={p.cyanO} />
-          <stop offset="100%" stopColor={CYAN} stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id={`${gid}-mag`}>
-          <stop offset="0%" stopColor={MAGENTA} stopOpacity={p.magO} />
-          <stop offset="100%" stopColor={MAGENTA} stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id={`${gid}-border`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={CYAN} />
-          <stop offset="100%" stopColor={MAGENTA} />
+        <clipPath id={cid}>{renderClipShape()}</clipPath>
+
+        {/* Strand gradients — vertical holographic */}
+        <linearGradient id={`${gid}-strandA`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={primary} stopOpacity="0.9" />
+          <stop offset="50%" stopColor={accent} stopOpacity="1" />
+          <stop offset="100%" stopColor={secondary} stopOpacity="0.9" />
         </linearGradient>
-        <clipPath id={`${cid}-glass`}>
-          {renderGlassShape("clip")}
-        </clipPath>
+        <linearGradient id={`${gid}-strandB`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={secondary} stopOpacity="0.9" />
+          <stop offset="50%" stopColor={accent} stopOpacity="1" />
+          <stop offset="100%" stopColor={primary} stopOpacity="0.9" />
+        </linearGradient>
+
+        {/* Rung gradient */}
+        <linearGradient id={`${gid}-rung`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={primary} stopOpacity="0.5" />
+          <stop offset="50%" stopColor={accent} stopOpacity="0.8" />
+          <stop offset="100%" stopColor={secondary} stopOpacity="0.5" />
+        </linearGradient>
+
+        {/* Border gradient */}
+        <linearGradient id={`${gid}-border`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={primary} />
+          <stop offset="100%" stopColor={secondary} />
+        </linearGradient>
+
+        {/* Background radial orbs */}
+        <radialGradient id={`${gid}-orb1`}>
+          <stop offset="0%" stopColor={primary} stopOpacity={0.3 * p.glowBoost} />
+          <stop offset="100%" stopColor={primary} stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${gid}-orb2`}>
+          <stop offset="0%" stopColor={secondary} stopOpacity={0.25 * p.glowBoost} />
+          <stop offset="100%" stopColor={secondary} stopOpacity="0" />
+        </radialGradient>
+
+        {/* Node glow */}
+        <radialGradient id={`${gid}-node`}>
+          <stop offset="0%" stopColor={accent} stopOpacity="1" />
+          <stop offset="60%" stopColor={accent} stopOpacity="0.4" />
+          <stop offset="100%" stopColor={accent} stopOpacity="0" />
+        </radialGradient>
+
         <filter id={fid} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="1.5" />
+          <feGaussianBlur stdDeviation="1.2" />
+        </filter>
+        <filter id={`${fid}-strong`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" />
         </filter>
       </defs>
 
-      <rect width="100" height="100" fill="#0B0D16" />
+      {/* Background */}
+      <rect width="100" height="100" fill="#050810" />
 
       <g clipPath={`url(#${cid})`}>
-        {/* Neon glow orbs */}
-        <circle cx={p.cyanX} cy={p.cyanY} r={p.cyanR} fill={`url(#${gid}-cyan)`} />
-        <circle cx={p.magX} cy={p.magY} r={p.magR} fill={`url(#${gid}-mag)`} />
+        {/* Holographic background orbs */}
+        <circle cx={p.orb1X} cy={p.orb1Y} r={p.orb1R} fill={`url(#${gid}-orb1)`} />
+        <circle cx={p.orb2X} cy={p.orb2Y} r={p.orb2R} fill={`url(#${gid}-orb2)`} />
 
-        {/* Frosted glass glow — blurred */}
-        <g filter={`url(#${fid})`} fill={CYAN} opacity="0.12">
-          {renderGlassShape("glow")}
+        {/* Particle field */}
+        {p.particles.map((pt, i) => (
+          <circle key={`p-${i}`} cx={pt.x} cy={pt.y} r={pt.r} fill={accent} opacity={pt.o} />
+        ))}
+
+        {/* Scan lines */}
+        {p.scanLines.map((y, i) => (
+          <line key={`s-${i}`} x1="0" y1={y} x2="100" y2={y} stroke={primary} strokeWidth="0.15" opacity="0.06" />
+        ))}
+
+        {/* Internal pattern (behind helix) */}
+        <g opacity="0.6">
+          {internalPattern.map((el, i) => {
+            if (el.type === "line") return <line key={`ip-${i}`} x1={el.x1} y1={el.y1} x2={el.x2} y2={el.y2} stroke={accent} strokeWidth="0.2" opacity={el.o} />;
+            if (el.type === "path") return <path key={`ip-${i}`} d={el.d} fill="none" stroke={accent} strokeWidth="0.2" opacity={el.o} />;
+            return <circle key={`ip-${i}`} cx={el.x} cy={el.y} r={el.r} fill={accent} opacity={el.o} />;
+          })}
         </g>
 
-        {/* Frosted glass fill */}
-        <g fill="white" opacity="0.04">
-          {renderGlassShape("fill")}
-        </g>
+        {/* DNA Helix — back nodes (depth < 0) rendered first */}
+        {helix.rungs.map((rung, i) => {
+          const aBack = rung.a.depth < 0;
+          const bBack = rung.b.depth < 0;
+          return (
+            <g key={`rung-back-${i}`}>
+              {aBack && (
+                <circle cx={rung.a.x} cy={rung.a.y} r={p.nodeRadius * 2.5} fill={`url(#${gid}-node)`} opacity="0.4" />
+              )}
+              {bBack && (
+                <circle cx={rung.b.x} cy={rung.b.y} r={p.nodeRadius * 2.5} fill={`url(#${gid}-node)`} opacity="0.4" />
+              )}
+            </g>
+          );
+        })}
 
-        {/* Refraction lines — clipped to glass shape */}
-        <g clipPath={`url(#${gid}-glass)`} stroke="white" strokeWidth="0.3">
-          {refractionLines.map((l, i) =>
-            l.d ? (
-              <path key={i} d={l.d} fill="none" opacity={l.o} />
-            ) : (
-              <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} opacity={l.o} />
-            )
-          )}
-        </g>
+        {/* Rungs (connecting bars) — back ones first */}
+        {helix.rungs.map((rung, i) => {
+          const isBack = rung.a.depth < 0 && rung.b.depth < 0;
+          return (
+            <line
+              key={`rung-${i}`}
+              x1={rung.a.x} y1={rung.a.y}
+              x2={rung.b.x} y2={rung.b.y}
+              stroke={`url(#${gid}-rung)`}
+              strokeWidth="0.6"
+              opacity={isBack ? 0.25 : 0.5}
+            />
+          );
+        })}
 
-        {/* Glass border — neon gradient */}
-        <g fill="none" stroke={`url(#${gid}-border)`} strokeWidth="0.9" opacity={0.55 * p.glowBoost}>
-          {renderGlassShape("stroke")}
-        </g>
+        {/* Strand B (rendered first if behind) */}
+        <path d={strandBPath} fill="none" stroke={`url(#${gid}-strandB)`} strokeWidth="1.2" opacity="0.7" filter={`url(#${fid})`} />
+        <path d={strandBPath} fill="none" stroke={`url(#${gid}-strandB)`} strokeWidth="0.8" opacity="0.9" />
 
-        {/* Inner edge highlight */}
-        <g fill="none" stroke="white" strokeWidth="0.3" opacity="0.15">
-          {renderGlassShape("inner")}
-        </g>
+        {/* Strand A */}
+        <path d={strandAPath} fill="none" stroke={`url(#${gid}-strandA)`} strokeWidth="1.2" opacity="0.7" filter={`url(#${fid})`} />
+        <path d={strandAPath} fill="none" stroke={`url(#${gid}-strandA)`} strokeWidth="0.8" opacity="0.95" />
 
-        {/* Specular highlights */}
-        <ellipse cx={p.spec1X} cy={p.spec1Y} rx={p.spec1R} ry={p.spec1R * 0.6} fill="white" opacity="0.18" filter={`url(#${fid})`} />
-        <ellipse cx={p.spec2X} cy={p.spec2Y} rx={p.spec2R} ry={p.spec2R * 0.6} fill="white" opacity="0.12" filter={`url(#${fid})`} />
+        {/* Front nodes (depth >= 0) rendered last */}
+        {helix.rungs.map((rung, i) => {
+          const aFront = rung.a.depth >= 0;
+          const bFront = rung.b.depth >= 0;
+          return (
+            <g key={`node-front-${i}`}>
+              {aFront && (
+                <>
+                  <circle cx={rung.a.x} cy={rung.a.y} r={p.nodeRadius * 3} fill={`url(#${gid}-node)`} opacity="0.5" />
+                  <circle cx={rung.a.x} cy={rung.a.y} r={p.nodeRadius} fill={accent} opacity="0.95" />
+                  <circle cx={rung.a.x} cy={rung.a.y} r={p.nodeRadius * 0.5} fill="white" opacity="0.8" />
+                </>
+              )}
+              {bFront && (
+                <>
+                  <circle cx={rung.b.x} cy={rung.b.y} r={p.nodeRadius * 3} fill={`url(#${gid}-node)`} opacity="0.5" />
+                  <circle cx={rung.b.x} cy={rung.b.y} r={p.nodeRadius} fill={primary} opacity="0.95" />
+                  <circle cx={rung.b.x} cy={rung.b.y} r={p.nodeRadius * 0.5} fill="white" opacity="0.8" />
+                </>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Specular highlight */}
+        <ellipse cx={p.specX} cy={p.specY} rx={p.specR} ry={p.specR * 0.5} fill="white" opacity="0.06" filter={`url(#${fid}-strong)`} />
       </g>
 
-      {/* Neon border ring */}
-      <circle cx="50" cy="50" r="49" fill="none" stroke={`url(#${gid}-border)`} strokeWidth="0.8" opacity={0.35 * p.glowBoost} />
+      {/* Neon border ring — shape-aware */}
+      <g fill="none" stroke={`url(#${gid}-border)`} strokeWidth="0.8" opacity={0.4 * p.glowBoost}>
+        {p.shape === 0 && <circle cx="50" cy="50" r="49" />}
+        {p.shape === 1 && (
+          <path d={(() => {
+            const pts = [];
+            for (let i = 0; i < 6; i++) {
+              const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+              pts.push(`${(50 + 49 * Math.cos(a)).toFixed(1)},${(50 + 49 * Math.sin(a)).toFixed(1)}`);
+            }
+            return `M${pts.join("L")}Z`;
+          })()} />
+        )}
+        {p.shape === 2 && <path d="M50,1 L99,50 L50,99 L1,50 Z" />}
+        {p.shape === 3 && <rect x="0.5" y="0.5" width="99" height="99" rx="18" />}
+      </g>
     </svg>
   );
 }
