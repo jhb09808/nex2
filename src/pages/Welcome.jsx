@@ -12,7 +12,7 @@ export default function Welcome() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
   const [zipMsg, setZipMsg] = useState("");
-  const [counts, setCounts] = useState({ active_members: 0, waitlist_count: 0 });
+  const [counts, setCounts] = useState({ active_count: 0, waitlist_count: 0 });
 
   useEffect(() => {
     base44.analytics.track({ eventName: "landing_page_view" });
@@ -21,17 +21,8 @@ export default function Welcome() {
 
   const loadCounts = async () => {
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: "Return the current active member and waitlist counts",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            active_members: { type: "number" },
-            waitlist_count: { type: "number" },
-          },
-        },
-      });
-      if (res) setCounts(res);
+      const res = await base44.functions.invoke("getGlobalCounts", {});
+      if (res && res.data) setCounts(res.data);
     } catch (e) {
       // fallback
     }
@@ -131,7 +122,7 @@ export default function Welcome() {
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#7fc8ff", opacity: 0.7 }} />
               </div>
             </div>
-            <div style={{ marginTop: 8, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 27, lineHeight: 1, textShadow: "0 0 14px rgba(90,180,255,0.5)" }}>{counts.active_members}</div>
+            <div style={{ marginTop: 8, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 27, lineHeight: 1, textShadow: "0 0 14px rgba(90,180,255,0.5)" }}>{counts.active_count}</div>
             <div style={{ marginTop: 5, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9, letterSpacing: "0.17em", textTransform: "uppercase", color: "#a6cbec" }}>Active members</div>
           </div>
           <div style={{ flex: 1, position: "relative", padding: "12px 0 11px", textAlign: "center", background: "linear-gradient(160deg, rgba(120,70,180,0.34), rgba(9,28,58,0.55))", border: "1px solid rgba(180,140,255,0.45)", boxShadow: "0 0 18px rgba(120,80,220,0.22)", clipPath: "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)" }}>
