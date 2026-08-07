@@ -4,7 +4,7 @@ import { Radar, Compass, MessageCircle, Bell, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 const tabs = [
-  { path: "/", icon: Radar, label: "Radar" },
+  { path: "/map", icon: Radar, label: "Radar" },
   { path: "/discover", icon: Compass, label: "Discover" },
   { path: "/messages", icon: MessageCircle, label: "Messages" },
   { path: "/notifications", icon: Bell, label: "Alerts" },

@@ -5,7 +5,7 @@ import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, 
 import { base44 } from "@/api/base44Client";
 
 const baseNavItems = [
-  { path: "/", icon: Radar, label: "Radar" },
+  { path: "/map", icon: Radar, label: "Radar" },
   { path: "/discover", icon: Compass, label: "Discover" },
   { path: "/messages", icon: MessageCircle, label: "Messages" },
   { path: "/notifications", icon: Bell, label: "Alerts" },
@@ -39,7 +39,7 @@ export default function NavMenu() {
     }
   };
 
-  const isMapRoute = location.pathname === "/" || location.pathname === "/map";
+  const isMapRoute = location.pathname === "/map";
   const navItems = isPlatinum
     ? [
         ...baseNavItems.slice(0, 2),
