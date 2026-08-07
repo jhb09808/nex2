@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, Sliders, Trophy } from "lucide-react";
+import { Menu, Radar, Compass, MessageCircle, Bell, User, Settings, X, Diamond, Sliders, Trophy, LogOut } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const baseNavItems = [
@@ -138,6 +138,17 @@ export default function NavMenu() {
                   </motion.div>
                 );
               })}
+              <div className="h-px bg-white/5 my-1" />
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  base44.auth.logout("/welcome?logged_out=1");
+                }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:bg-red-500/5 w-full transition-colors"
+              >
+                <LogOut className="w-4 h-4" strokeWidth={1.5} />
+                <span className="text-sm font-medium">Sign Out</span>
+              </button>
             </motion.div>
           </>
         )}

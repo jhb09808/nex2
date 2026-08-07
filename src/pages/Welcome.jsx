@@ -12,8 +12,15 @@ export default function Welcome() {
   const [zip, setZip] = useState("");
   const [zipMsg, setZipMsg] = useState("");
   const [counts, setCounts] = useState({ active_count: 36, waitlist_count: 34 });
+  const [loggedOut, setLoggedOut] = useState(false);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("logged_out") === "1") {
+      setLoggedOut(true);
+      window.history.replaceState({}, "", "/");
+      setTimeout(() => setLoggedOut(false), 5000);
+    }
     base44.functions.invoke("getGlobalCounts", {})
       .then((res) => setCounts(res.data))
       .catch(() => {});
@@ -63,6 +70,12 @@ export default function Welcome() {
           background: "radial-gradient(120% 78% at 50% 16%, #0d2a58 0%, #061428 46%, #020710 100%)",
         }}
       >
+        {loggedOut && (
+          <div style={{ position: "relative", zIndex: 2, marginBottom: 12, padding: "10px 16px", background: "rgba(16, 80, 50, 0.35)", border: "1px solid rgba(80, 220, 140, 0.4)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, backdropFilter: "blur(12px)" }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0", flex: "none" }} />
+            <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 12, color: "#bff5d6", letterSpacing: "0.04em" }}>You've been logged out.</span>
+          </div>
+        )}
         {/* Background image with gradient overlay */}
         <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 440, zIndex: 0, maskImage: "linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(180deg, #000 0%, #000 58%, rgba(0,0,0,0) 100%)" }}>
           <img
