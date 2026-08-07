@@ -20,11 +20,33 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
+      // 1. Check waitlist approval FIRST — no account creation without it
+      const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email });
+      if (!approvalRes.data.approved) {
+        const status = approvalRes.data.status;
+        if (status === "not_found") {
+          setError("You're not on the waitlist yet. Join the waitlist to get early access.");
+        } else if (status === "waitlisted" || status === "pending") {
+          setError("Your waitlist application is still pending approval. Check back soon!");
+        } else {
+          setError("Your account hasn't been approved yet. Please wait for approval.");
+        }
+        return;
+      }
+      // If already has an account, redirect to login instead of creating a duplicate
+      if (approvalRes.data.has_account) {
+        setError("An account already exists for this email. Please log in instead.");
+        return;
+      }
+
+      // 2. Then check device rate limit
       const limitRes = await base44.functions.invoke("checkRegistrationLimit", {});
       if (!limitRes.data.allowed) {
         setError(limitRes.data.error || "Too many accounts from this device. Try again later.");
         return;
       }
+
+      // 3. Only now create the account
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
@@ -64,9 +86,31 @@ export default function Register() {
     }
   };
 
-  const handleGoogle = () => {
-    base44.analytics.track({ eventName: "google_signup_click" });
-    base44.auth.loginWithProvider("google", "/");
+  const handleGoogle = async () => {
+    setError("");
+    if (!email.trim()) {
+      setError("Enter your email first so we can check your waitlist approval.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email });
+      if (!approvalRes.data.approved) {
+        const status = approvalRes.data.status;
+        if (status === "not_found") {
+          setError("You're not on the waitlist yet. Join the waitlist to get early access.");
+        } else {
+          setError("Your account hasn't been approved yet. Please wait for approval.");
+        }
+        return;
+      }
+      base44.analytics.track({ eventName: "google_signup_click" });
+      base44.auth.loginWithProvider("google", "/");
+    } catch (err) {
+      setError(err.message || "Approval check failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (showOtp) {
