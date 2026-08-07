@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Building2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
 
@@ -11,20 +10,7 @@ export default function Welcome() {
   const navigate = useNavigate();
   const [zip, setZip] = useState("");
   const [zipMsg, setZipMsg] = useState("");
-  const [counts, setCounts] = useState({ active_count: 0, waitlist_count: 0 });
-
-  useEffect(() => {
-    loadCounts();
-  }, []);
-
-  const loadCounts = async () => {
-    try {
-      const res = await base44.functions.invoke("getGlobalCounts", {});
-      if (res && res.data) setCounts(res.data);
-    } catch (e) {
-      // fallback
-    }
-  };
+  const counts = { active_count: 34, waitlist_count: 29 };
 
   const checkZip = () => {
     const z = zip.trim();
