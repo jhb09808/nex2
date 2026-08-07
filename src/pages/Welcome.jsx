@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Building2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
@@ -15,7 +14,6 @@ export default function Welcome() {
   const [counts, setCounts] = useState({ active_count: 0, waitlist_count: 0 });
 
   useEffect(() => {
-    base44.analytics.track({ eventName: "landing_page_view" });
     loadCounts();
   }, []);
 
@@ -36,7 +34,7 @@ export default function Welcome() {
     }
     setZipMsg(
       NYC_ZIPS.includes(z.slice(0, 3))
-        ? `✓ In range — ${counts.active_members} members are live near you.`
+        ? `✓ In range — ${counts.active_count} members are live near you.`
         : "Not live here yet — you'll join the waitlist."
     );
   };
@@ -167,7 +165,7 @@ export default function Welcome() {
 
         {/* CTA buttons */}
         <button
-          onClick={() => { base44.analytics.track({ eventName: "get_started_click" }); navigate("/register"); }}
+          onClick={() => navigate("/register")}
           style={{ position: "relative", zIndex: 1, overflow: "hidden", width: "100%", height: 58, marginTop: 12, border: "1.5px solid transparent", borderRadius: 2, background: "linear-gradient(180deg, #0a1c3e, #071228) padding-box, linear-gradient(100deg, #3b6bff, #9b4dff 48%, #2fd4d4) border-box", color: "#fff", fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 15.5, letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer", transition: "box-shadow 0.25s ease, transform 0.25s ease, filter 0.25s ease", boxShadow: "0 0 22px rgba(80,110,255,0.45), inset 0 0 22px rgba(70,120,255,0.28)", clipPath: "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)" }}
         >
           <span aria-hidden="true" style={{ position: "absolute", top: -1, left: "50%", width: 70, height: 2, marginLeft: -35, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(190,220,255,0.95), rgba(255,255,255,0))", filter: "blur(0.5px)" }} />
@@ -176,7 +174,7 @@ export default function Welcome() {
         </button>
 
         <button
-          onClick={() => { base44.analytics.track({ eventName: "login_click" }); navigate("/login"); }}
+          onClick={() => navigate("/login")}
           style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: 44, marginTop: 10, background: "rgba(10,30,60,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(120,190,255,0.32)", color: "#bcd9f5", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 11.5, letterSpacing: "0.17em", textTransform: "uppercase", cursor: "pointer", clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)" }}
         >
           I already have an account ›
