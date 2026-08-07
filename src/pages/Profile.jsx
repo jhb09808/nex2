@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2, Handshake } from "lucide-react";
+import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2 } from "lucide-react";
 import ShareButton from "@/components/nex/ShareButton";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
@@ -96,15 +96,12 @@ export default function Profile() {
 
         <div className="grid grid-cols-3 gap-2 w-full">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Handshake className="w-3.5 h-3.5 text-blue-400" />
-              <p className="text-xl font-bold gradient-text">{connectionCount}</p>
-            </div>
-            <p className="text-white/30 text-[10px] mt-0.5">Connections</p>
+            <p className="text-xl font-bold gradient-text">{profile?.interests?.length || 0}</p>
+            <p className="text-white/30 text-[10px] mt-0.5">Interests</p>
           </div>
           <div className="text-center border-x border-white/5">
-            <p className="text-xl font-bold gradient-text">0</p>
-            <p className="text-white/30 text-[10px] mt-0.5">Chats</p>
+            <p className="text-xl font-bold gradient-text">{(profile?.looking_for || []).length + (profile?.provides || []).length}</p>
+            <p className="text-white/30 text-[10px] mt-0.5">Focus Areas</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-bold gradient-text">{profile?.badges?.length || 0}</p>

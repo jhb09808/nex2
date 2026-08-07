@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Briefcase, TrendingUp, Handshake, Loader2, ArrowRight, ChevronDown, DollarSign, Users, Building2 } from "lucide-react";
+import { Sparkles, Briefcase, TrendingUp, Handshake, Loader2, ArrowRight, ChevronDown, Building2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { getIAmLabel, getLookingForLabel, getProvidesLabel, AVAILABLE_FOR_OPTIONS } from "@/components/nex/opportunity/opportunityCategories";
 
@@ -107,49 +107,6 @@ Be specific to their role and industry, but stay general — no funding amounts 
 
   // Build industry-specific detail blocks (only shown on demand)
   const industryDetails = [];
-
-  if (profile?.hiring_mode_enabled) {
-    industryDetails.push({
-      id: "hiring",
-      icon: Users,
-      label: "Hiring",
-      accent: "text-emerald-300",
-      bg: "bg-emerald-500/5 border-emerald-500/10",
-      rows: [
-        profile.hiring_open_positions && { label: "Open Positions", value: profile.hiring_open_positions },
-        profile.hiring_employment_type && { label: "Employment Type", value: profile.hiring_employment_type.replace(/_/g, " ") },
-        profile.hiring_work_mode && { label: "Work Mode", value: profile.hiring_work_mode.replace(/_/g, " ") },
-        profile.hiring_desired_skills?.length > 0 && { label: "Desired Skills", value: profile.hiring_desired_skills.join(", ") },
-        (profile.hiring_compensation_min || profile.hiring_compensation_max) && {
-          label: "Compensation",
-          value: [profile.hiring_compensation_min, profile.hiring_compensation_max]
-            .filter(Boolean).map((v) => `$${v.toLocaleString()}`).join(" – "),
-        },
-        profile.hiring_immediate_start && { label: "Start", value: "Immediate" },
-      ].filter(Boolean),
-    });
-  }
-
-  if (profile?.funding_mode_enabled) {
-    industryDetails.push({
-      id: "funding",
-      icon: DollarSign,
-      label: "Funding",
-      accent: "text-amber-300",
-      bg: "bg-amber-500/5 border-amber-500/10",
-      rows: [
-        profile.funding_purpose && { label: "Purpose", value: profile.funding_purpose },
-        profile.funding_amount_requested && { label: "Amount Requested", value: `$${profile.funding_amount_requested.toLocaleString()}` },
-        (profile.funding_preferred_range_min || profile.funding_preferred_range_max) && {
-          label: "Preferred Range",
-          value: [profile.funding_preferred_range_min, profile.funding_preferred_range_max]
-            .filter(Boolean).map((v) => `$${v.toLocaleString()}`).join(" – "),
-        },
-        profile.funding_timeline && { label: "Timeline", value: profile.funding_timeline },
-        profile.funding_project_description && { label: "Project", value: profile.funding_project_description },
-      ].filter(Boolean),
-    });
-  }
 
   if (profile?.company_name || profile?.business_bio || profile?.website) {
     industryDetails.push({

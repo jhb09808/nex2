@@ -62,6 +62,25 @@
     "is_remote_ok": {
       "type": "boolean",
       "default": true
+    },
+    "is_collaborative": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when multiple users co-created this opportunity"
+    },
+    "co_creator_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "UserProfile IDs of co-creators (in addition to the original author)"
+    },
+    "co_creator_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Display names of co-creators for quick reference"
     }
   },
   "required": [

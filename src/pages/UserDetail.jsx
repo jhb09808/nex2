@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Shield, Handshake } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -108,10 +108,9 @@ export default function UserDetail() {
             <VerifiedBadges isVerified={user.is_verified} isOg={user.is_og} size="lg" />
           </div>
           <p className="text-cyan-300/40 text-xs font-cyber tracking-widest mb-2">#{getUserNumber(user)}</p>
-          {user?.connections_count != null && (
+          {user?.interests?.length > 0 && (
             <div className="flex items-center gap-1.5 text-cyan-300/50 text-sm font-cyber">
-              <Handshake className="w-4 h-4" />
-              <span className="tracking-wide">{user.connections_count} {user.connections_count === 1 ? "CONNECTION" : "CONNECTIONS"}</span>
+              <span className="tracking-wide">{user.interests.length} INTERESTS</span>
             </div>
           )}
         </motion.div>
@@ -152,15 +151,12 @@ export default function UserDetail() {
         {/* Stats */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
           <div className="cyber-frame rounded-2xl p-4 text-center">
-            <div className="flex items-center justify-center gap-1.5">
-              <Handshake className="w-4 h-4 text-cyan-400" />
-              <p className="text-xl font-cyber font-bold holo-text">{user.connections_count || 0}</p>
-            </div>
-            <p className="text-white/30 text-[10px] font-cyber uppercase tracking-wider mt-1">Connections</p>
+            <p className="text-xl font-cyber font-bold holo-text">{user.interests?.length || 0}</p>
+            <p className="text-white/30 text-[10px] font-cyber uppercase tracking-wider mt-1">Interests</p>
           </div>
           <div className="cyber-frame rounded-2xl p-4 text-center">
-            <p className="text-xl font-cyber font-bold holo-text">{user.badges?.length || 0}</p>
-            <p className="text-white/30 text-[10px] font-cyber uppercase tracking-wider mt-1">Badges</p>
+            <p className="text-xl font-cyber font-bold holo-text">{mutualInterests.length}</p>
+            <p className="text-white/30 text-[10px] font-cyber uppercase tracking-wider mt-1">Shared With You</p>
           </div>
         </motion.div>
 
