@@ -28,8 +28,8 @@ export default function Welcome() {
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
+        position: "relative",
+        minHeight: "100vh",
         overflow: "auto",
         display: "flex",
         justifyContent: "center",
