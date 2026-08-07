@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
 const BLIPS = [
-  { name: "Maya", interest: "climbing", distance: "0.4mi", x: -88, y: -70, delay: "0s", floatDelay: "0s" },
-  { name: "Devon", interest: "chess", distance: "0.9mi", x: 84, y: -20, delay: "1.1s", floatDelay: "0.5s" },
-  { name: "Sam", interest: "film", distance: "1.2mi", x: -74, y: 26, delay: "2.2s", floatDelay: "1s" },
-  { name: "Priya", interest: "running", distance: "1.6mi", x: 80, y: 70, delay: "3.3s", floatDelay: "1.5s" },
+  { name: "Maya", interest: "climbing", distance: "0.4mi", x: -88, y: -70, delay: "0s", floatDelay: "0s", color: "#4dffb0" },
+  { name: "Devon", interest: "chess", distance: "0.9mi", x: 84, y: -20, delay: "1.1s", floatDelay: "0.5s", color: "#ffb454" },
+  { name: "Sam", interest: "film", distance: "1.2mi", x: -74, y: 26, delay: "2.2s", floatDelay: "1s", color: "#a98cff" },
+  { name: "Priya", interest: "running", distance: "1.6mi", x: 80, y: 70, delay: "3.3s", floatDelay: "1.5s", color: "#ff8fb0" },
 ];
 
 export default function LandingRadar() {
@@ -77,9 +77,9 @@ export default function LandingRadar() {
           <div style={{ animation: `nxreveal 4.5s linear ${blip.delay} infinite` }}>
             <div style={{ position: "relative", animation: `nxfloat 6s ease-in-out ${blip.floatDelay} infinite` }}>
               <div style={{ position: "absolute", left: "50%", top: "100%", width: 1, height: 20, marginLeft: -0.5, background: "linear-gradient(180deg, rgba(150,220,255,0.85), rgba(150,220,255,0))" }} />
-              <div style={{ position: "absolute", left: "50%", top: "calc(100% + 20px)", width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, borderRadius: "50%", background: "#bfe6ff", boxShadow: "0 0 12px 3px rgba(120,200,255,0.8)" }} />
+              <div style={{ position: "absolute", left: "50%", top: "calc(100% + 20px)", width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, borderRadius: "50%", background: blip.color, boxShadow: `0 0 12px 3px ${blip.color}` }} />
               <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 10px", border: "1px solid rgba(150,220,255,0.5)", background: "rgba(10,32,66,0.72)", backdropFilter: "blur(10px)", boxShadow: "0 0 18px rgba(70,150,255,0.35)", clipPath: "polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px)", whiteSpace: "nowrap" }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: blip.color, boxShadow: `0 0 8px ${blip.color}` }} />
                 <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 11, letterSpacing: "0.04em", color: "#e6f4ff" }}>{blip.name}</span>
                 <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8fd0ff" }}>{blip.interest}</span>
                 <span style={{ fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 9.5, color: "#7fa9d4" }}>{blip.distance}</span>
