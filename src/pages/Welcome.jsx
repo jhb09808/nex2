@@ -4,11 +4,13 @@ import { Building2 } from "lucide-react";
 import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 
 const NYC_ZIPS = ["100", "101", "102", "103", "104", "110", "111", "112", "113", "114", "116"];
 
 export default function Welcome() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [zip, setZip] = useState("");
   const [zipMsg, setZipMsg] = useState("");
   const [counts, setCounts] = useState({ active_count: 36, waitlist_count: 34 });
@@ -25,6 +27,15 @@ export default function Welcome() {
       .then((res) => setCounts(res.data))
       .catch(() => {});
   }, []);
+
+  // After Google OAuth the platform redirects back to "/" — if the user is
+  // already authenticated, send them to the discover feed instead of the
+  // landing page.
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/discover", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const checkZip = async () => {
     const z = zip.trim();
