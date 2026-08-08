@@ -43,6 +43,15 @@
         "type": "string"
       }
     },
+    "radar_gender_filter": {
+      "type": "string",
+      "enum": [
+        "all",
+        "male",
+        "female"
+      ],
+      "default": "all"
+    },
     "radar_onboarding_complete": {
       "type": "boolean",
       "default": false

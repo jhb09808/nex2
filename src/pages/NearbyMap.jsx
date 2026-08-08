@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal, Loader2 } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, SlidersHorizontal, Loader2, UserCircle } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -128,6 +128,12 @@ export default function NearbyMap() {
           !u.is_banned && !u.is_suspended && !u.invisible_mode &&
           !String(u.created_by_id).startsWith("service_")
       );
+
+      // Gender filter — users can choose to see only male, female, or all
+      const genderFilter = myP?.radar_gender_filter || "all";
+      if (genderFilter !== "all") {
+        realUsers = realUsers.filter((u) => u.gender === genderFilter);
+      }
 
       // Platinum exclusivity: platinum users only see other platinum users
       if (myPlan === "platinum") {
@@ -476,6 +482,111 @@ export default function NearbyMap() {
                   <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${filters.onlineOnly ? "left-[22px]" : "left-0.5"}`} />
                 </button>
               </label>
+
+              <div>
+                <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider mb-2 block">Show Me</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: "all", label: "Everyone", icon: Users },
+                    { value: "female", label: "Women", icon: UserCircle },
+                    { value: "male", label: "Men", icon: UserCircle },
+                  ].map((opt) => {
+                    const active = (myProfile?.radar_gender_filter || "all") === opt.value;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={async () => {
+                          if (!myProfile) return;
+                          const newVal = opt.value;
+                          setMyProfile({ ...myProfile, radar_gender_filter: newVal });
+                          try {
+                            await base44.entities.UserProfile.update(myProfile.id, { radar_gender_filter: newVal });
+                            loadUsers();
+                          } catch (e) {
+                            console.error(e);
+                          }
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium transition-all active:scale-95 ${
+                          active ? "neon-btn text-white" : "cyber-input text-white/40"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" /> {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider mb-2 block">Show Me</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: "all", label: "Everyone", icon: Users },
+                    { value: "female", label: "Women", icon: UserCircle },
+                    { value: "male", label: "Men", icon: UserCircle },
+                  ].map((opt) => {
+                    const active = (myProfile?.radar_gender_filter || "all") === opt.value;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={async () => {
+                          if (!myProfile) return;
+                          const newVal = opt.value;
+                          setMyProfile({ ...myProfile, radar_gender_filter: newVal });
+                          try {
+                            await base44.entities.UserProfile.update(myProfile.id, { radar_gender_filter: newVal });
+                            loadUsers();
+                          } catch (e) {
+                            console.error(e);
+                          }
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium transition-all active:scale-95 ${
+                          active ? "neon-btn text-white" : "cyber-input text-white/40"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" /> {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider mb-2 block">Show Me</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: "all", label: "Everyone", icon: Users },
+                    { value: "female", label: "Women", icon: UserCircle },
+                    { value: "male", label: "Men", icon: UserCircle },
+                  ].map((opt) => {
+                    const active = (myProfile?.radar_gender_filter || "all") === opt.value;
+                    const Icon = opt.icon;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={async () => {
+                          if (!myProfile) return;
+                          const newVal = opt.value;
+                          setMyProfile({ ...myProfile, radar_gender_filter: newVal });
+                          try {
+                            await base44.entities.UserProfile.update(myProfile.id, { radar_gender_filter: newVal });
+                            loadUsers();
+                          } catch (e) {
+                            console.error(e);
+                          }
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium transition-all active:scale-95 ${
+                          active ? "neon-btn text-white" : "cyber-input text-white/40"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" /> {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
