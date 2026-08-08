@@ -89,7 +89,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/approved" element={<ApprovalConfirmed />} />
 
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/welcome" replace />} />}>
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/chat/:conversationId" element={<Chat />} />
         <Route path="/user/:userId" element={<UserDetail />} />
