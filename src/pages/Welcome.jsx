@@ -33,7 +33,7 @@ export default function Welcome() {
   // landing page.
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/discover", { replace: true });
+      navigate("/map", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

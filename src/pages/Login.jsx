@@ -20,7 +20,7 @@ export default function Login() {
       // for its post-login hard redirect — set it before calling so we land on /discover
       const url = new URL(window.location.href);
       if (!url.searchParams.has("returnTo")) {
-        url.searchParams.set("returnTo", "/discover");
+        url.searchParams.set("returnTo", "/map");
         window.history.replaceState({}, "", url.toString());
       }
       await base44.auth.loginViaEmailPassword(email, password);
@@ -32,7 +32,7 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/discover");
+    base44.auth.loginWithProvider("google", "/map");
   };
 
   return (
