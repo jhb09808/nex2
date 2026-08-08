@@ -65,7 +65,7 @@ export default function Register() {
         base44.auth.setToken(result.access_token);
       }
       base44.analytics.track({ eventName: "signup_completed" });
-      window.location.href = "/";
+      window.location.href = "/map";
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {

@@ -18,7 +18,7 @@ export default function ApprovalConfirmed() {
       setAuthed(isAuthed);
       if (isAuthed) {
         // Already logged in — send straight to the radar.
-        window.location.href = "/";
+        window.location.href = "/map";
       }
     });
   }, [hasAccount]);
@@ -26,7 +26,7 @@ export default function ApprovalConfirmed() {
   const handleCta = () => {
     if (hasAccount) {
       // If logged in go to radar, otherwise log in first.
-      navigate(authed ? "/" : "/login");
+      navigate(authed ? "/map" : "/login");
     } else {
       navigate("/register");
     }

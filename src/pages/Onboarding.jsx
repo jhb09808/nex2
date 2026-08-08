@@ -70,7 +70,7 @@ export default function Onboarding() {
         adult_verified_at: new Date().toISOString(),
         verification_method: "self_attested",
       });
-      navigate("/");
+      navigate("/map");
     } catch (err) {
       console.error(err);
     } finally {
