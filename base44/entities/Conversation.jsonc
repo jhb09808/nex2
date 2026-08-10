@@ -18,6 +18,58 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "contact_exchange_requested_by": {
+      "type": "string",
+      "description": "User ID of the person who requested the contact exchange"
+    },
+    "contact_exchange_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "none"
+    },
+    "requester_contact_method": {
+      "type": "string",
+      "enum": [
+        "phone",
+        "instagram",
+        "other"
+      ]
+    },
+    "requester_contact_value": {
+      "type": "string"
+    },
+    "responder_contact_method": {
+      "type": "string",
+      "enum": [
+        "phone",
+        "instagram",
+        "other"
+      ]
+    },
+    "responder_contact_value": {
+      "type": "string"
+    },
+    "connection_made": {
+      "type": "boolean",
+      "default": false
+    },
+    "connection_made_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_by": {
+      "type": "string",
+      "description": "User ID of the person who ended the connection"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

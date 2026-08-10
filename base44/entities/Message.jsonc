@@ -16,7 +16,8 @@
       "enum": [
         "text",
         "image",
-        "voice"
+        "voice",
+        "system"
       ],
       "default": "text"
     },
