@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import VerifyEmailPanel from "@/components/nex/auth/VerifyEmailPanel";
 
 const BG_IMAGE = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/6b451b6af_login_bg.png";
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
@@ -16,6 +17,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsVerify, setNeedsVerify] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +31,10 @@ export default function Login() {
       }
       await base44.auth.loginViaEmailPassword(email, password);
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      const msg = err.message || "Invalid email or password";
+      setError(msg);
+      // Unverified account → surface the code entry right here instead of a dead end.
+      if (/verif/i.test(msg)) setNeedsVerify(true);
     } finally {
       setLoading(false);
     }
@@ -115,8 +120,15 @@ export default function Login() {
             </div>
           )}
 
+          {needsVerify && (
+            <VerifyEmailPanel
+              email={email}
+              onCancel={() => { setNeedsVerify(false); setError(""); }}
+            />
+          )}
+
           {/* Email */}
-          <div style={{ marginTop: 26 }}>
+          <div style={{ marginTop: 26, display: needsVerify ? "none" : "block" }}>
             <label htmlFor="email" style={{ display: "block", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8fb9e2" }}>Email</label>
             <div style={{ display: "flex", alignItems: "center", gap: 11, height: 52, marginTop: 9, padding: "0 14px", background: "rgba(8,26,54,.72)", border: "1px solid rgba(105,190,255,.4)", clipPath: CLIP_INPUT }}>
               <svg width="17" height="13" viewBox="0 0 18 14" fill="none" aria-hidden="true">
@@ -137,6 +149,8 @@ export default function Login() {
             </div>
           </div>
 
+          {!needsVerify && (
+          <>
           {/* Password */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
@@ -244,6 +258,8 @@ export default function Login() {
               Create an account
             </Link>
           </div>
+          </>
+          )}
         </form>
 
         {/* Footer */}
