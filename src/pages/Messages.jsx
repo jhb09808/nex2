@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, Edit3, Hand, Check, X, Loader2, ChevronRight } from "lucide-react";
+import { Search, Edit3, Hand, Check, X, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
+import ThreadRow from "@/components/nex/messages/ThreadRow";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 
@@ -112,8 +113,10 @@ export default function Messages() {
       {/* Header */}
       <div className="flex items-end justify-between mb-5 pr-12 flex-none">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Messages</h1>
-          <p className="text-white/30 text-xs mt-0.5">
+          <h1 style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 700, fontStyle: "italic", fontSize: 27, lineHeight: 1, letterSpacing: "0.02em", textTransform: "uppercase", textShadow: "0 0 18px rgba(90,180,255,.5)", color: "#fff" }}>
+            Messages
+          </h1>
+          <p style={{ margin: "7px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7fa9d4" }}>
             {conversations.length > 0
               ? `${conversations.length} conversation${conversations.length !== 1 ? "s" : ""}`
               : "Your connections live here"}
@@ -194,19 +197,22 @@ export default function Messages() {
       )}
 
       {/* Search */}
-      <div className="glass rounded-xl flex items-center gap-3 px-3.5 py-3 mb-4 flex-none border border-white/5 focus-within:border-blue-500/30 focus-within:ring-1 focus-within:ring-blue-500/20 transition-colors">
-        <Search className="w-5 h-5 text-white/30" />
+      <div
+        className="flex-none"
+        style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 14, height: 48, padding: "0 14px", background: "rgba(8,26,54,.7)", border: "1px solid rgba(105,190,255,.28)", clipPath: "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)" }}
+      >
+        <Search className="w-4 h-4" style={{ color: "#6fb8ff", flex: "none" }} />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search conversations"
-          className="bg-transparent text-white text-sm flex-1 outline-none placeholder:text-white/30"
+          style={{ flex: 1, minWidth: 0, background: "transparent", border: 0, outline: "none", color: "#dceeff", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 14.5 }}
         />
       </div>
 
       {/* Conversation List */}
       {filteredConversations.length > 0 ? (
-        <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pb-24">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-24" style={{ display: "flex", flexDirection: "column", gap: 9 }}>
           {filteredConversations.map((convo, i) => {
             const other = getOtherParticipant(convo);
             return (
@@ -215,26 +221,14 @@ export default function Messages() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
+                style={{ flex: "none" }}
               >
-                <GlassCard
-                  className="flex items-center gap-3 !p-3 active:scale-[0.99] transition-transform"
+                <ThreadRow
+                  convo={convo}
+                  other={other}
+                  unread={!!other?.is_online}
                   onClick={() => navigate(`/chat/${convo.id}`)}
-                >
-                  <UserAvatar name={getUserDisplayName(other)} size="md" isOnline={other?.is_online} plan={other?.plan} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <p className="text-white font-semibold text-sm truncate">{getUserDisplayName(other)}</p>
-                      <span className="text-white/30 text-[10px] flex-none">
-                        {convo.last_message_at ? moment(convo.last_message_at).fromNow() : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {convo.connection_made && <span className="text-[11px] flex-none">🤝</span>}
-                      <p className="text-white/40 text-xs truncate">{convo.last_message || "Start a conversation"}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-white/15 flex-none" />
-                </GlassCard>
+                />
               </motion.div>
             );
           })}

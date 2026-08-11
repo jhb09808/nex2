@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Image, Mic, Smile, Shield, Snowflake } from "lucide-react";
+import { ArrowLeft, Send, Image, Mic, Shield, Snowflake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import IcebreakerModal from "@/components/nex/IcebreakerModal";
@@ -10,11 +10,25 @@ import NotificationListener from "@/components/nex/NotificationListener";
 import MessageCounter from "@/components/nex/chat/MessageCounter";
 import PostChatPanel from "@/components/nex/chat/PostChatPanel";
 import ContactExchangeSheet from "@/components/nex/chat/ContactExchangeSheet";
+import MessageBubble from "@/components/nex/chat/MessageBubble";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const MAX_MESSAGES = 20;
+
+const ICON_BTN = {
+  flex: "none",
+  width: 40,
+  height: 40,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: "1px solid rgba(105,190,255,.26)",
+  borderRadius: "50%",
+  background: "rgba(8,26,54,.66)",
+  cursor: "pointer",
+};
 
 const dayLabel = (d) => {
   const m = moment(d);
@@ -262,41 +276,37 @@ export default function Chat() {
   const showPostChatPanel = limitReached || conversationEnded;
 
   return (
-    <div className="flex flex-col h-full bg-[hsl(0,0%,4%)] max-w-lg mx-auto">
+    <div
+      className="flex flex-col h-full mx-auto"
+      style={{ maxWidth: 440, width: "100%", background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
+    >
       <NotificationListener />
       {/* Header */}
-      <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top flex-none border-b border-white/5">
-        <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+      <div
+        className="safe-top flex-none"
+        style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 11, padding: "0 14px 12px", borderBottom: "1px solid rgba(105,190,255,.16)" }}
+      >
+        <button onClick={() => navigate("/messages")} style={ICON_BTN} aria-label="Back">
+          <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
         </button>
-        <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} />
+        <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} interests={otherUser?.interests} />
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm truncate">{getUserDisplayName(otherUser)}</p>
-          <div className="flex items-center gap-1.5">
-            {!conversation?.connection_made && (
-              <span className={`w-1.5 h-1.5 rounded-full flex-none ${otherUser?.is_online ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" : "bg-white/25"}`} />
-            )}
-            <p className="text-white/40 text-[10px] truncate">
-              {conversation?.connection_made
-                ? "🤝 Connected in real life"
-                : otherUser?.is_online
-                ? "Online"
-                : "Away"}
-            </p>
-          </div>
+          <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 16, lineHeight: 1, letterSpacing: "0.02em", color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {getUserDisplayName(otherUser)}
+          </p>
+          <p style={{ margin: "5px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.18em", textTransform: "uppercase", color: conversation?.connection_made ? "#7fc8ff" : otherUser?.is_online ? "#4dffb0" : "#7fa9d4" }}>
+            {conversation?.connection_made ? "Connected in real life" : otherUser?.is_online ? "Online" : "Away"}
+          </p>
         </div>
         <button
           onClick={() => setShowIcebreaker(true)}
-          className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
+          style={{ ...ICON_BTN, border: "1px solid rgba(120,190,255,.4)", background: "rgba(20,58,112,.6)" }}
           title="Icebreaker"
         >
-          <Snowflake className="w-5 h-5 text-blue-400" />
+          <Snowflake className="w-4 h-4" style={{ color: "#7fc8ff" }} />
         </button>
-        <button
-          onClick={() => setSafetyOpen(true)}
-          className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0"
-        >
-          <Shield className="w-5 h-5 text-white/40" />
+        <button onClick={() => setSafetyOpen(true)} style={ICON_BTN} aria-label="Safety options">
+          <Shield className="w-4 h-4" style={{ color: "#bfe2ff" }} />
         </button>
       </div>
 
@@ -311,7 +321,10 @@ export default function Chat() {
       />
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1">
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{ position: "relative", zIndex: 1, padding: "18px 16px 10px", display: "flex", flexDirection: "column", gap: 16 }}
+      >
         {messages.map((msg, i) => {
           const isMe = msg.sender_id === me?.id;
           const isSystem = msg.type === "system";
@@ -321,10 +334,8 @@ export default function Chat() {
             !prev || !moment(msg.created_date).isSame(moment(prev.created_date), "day");
 
           const daySeparator = showDay ? (
-            <div className="flex justify-center py-2">
-              <span className="text-white/30 text-[10px] font-cyber tracking-widest uppercase px-3 py-1 rounded-full glass">
-                {dayLabel(msg.created_date)}
-              </span>
+            <div style={{ textAlign: "center", fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 9, lineHeight: 1, letterSpacing: "0.22em", textTransform: "uppercase", color: "#5f89b2" }}>
+              {dayLabel(msg.created_date)}
             </div>
           ) : null;
 
@@ -332,10 +343,8 @@ export default function Chat() {
             return (
               <React.Fragment key={msg.id}>
                 {daySeparator}
-                <div className="flex justify-center py-1">
-                  <span className="text-white/30 text-[11px] font-cyber tracking-wider px-3 py-1 rounded-full glass">
-                    {msg.content}
-                  </span>
+                <div style={{ textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 11, letterSpacing: "0.12em", color: "#7fa9d4" }}>
+                  {msg.content}
                 </div>
               </React.Fragment>
             );
@@ -346,43 +355,16 @@ export default function Chat() {
             next.type === "system" ||
             next.sender_id !== msg.sender_id ||
             !moment(next.created_date).isSame(moment(msg.created_date), "day");
-          const isFirstOfGroup =
-            !prev ||
-            prev.type === "system" ||
-            prev.sender_id !== msg.sender_id ||
-            showDay;
 
           return (
             <React.Fragment key={msg.id}>
               {daySeparator}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex items-end gap-1.5 ${isMe ? "justify-end" : "justify-start"} ${isFirstOfGroup ? "mt-2" : "mt-0.5"}`}
-              >
-                {!isMe && (
-                  otherUser && isLastOfGroup ? (
-                    <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} className="flex-shrink-0" />
-                  ) : (
-                    <div className="w-8 flex-shrink-0" />
-                  )
-                )}
-                <div
-                  className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl shadow-sm ${
-                    isMe
-                      ? `gradient-blue text-white glow-blue-sm ${isLastOfGroup ? "rounded-br-sm" : ""}`
-                      : `glass text-white/90 border border-white/5 ${isLastOfGroup ? "rounded-bl-sm" : ""}`
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed break-words">{msg.content}</p>
-                  <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : ""}`}>
-                    <span className={`text-[10px] ${isMe ? "text-white/50" : "text-white/30"}`}>
-                      {moment(msg.created_date).format("h:mm A")}
-                    </span>
-                    {isMe && msg.is_read && <span className="text-[10px] text-white/50">✓✓</span>}
-                  </div>
-                </div>
-              </motion.div>
+              <MessageBubble
+                message={msg}
+                isMe={isMe}
+                otherUser={otherUser}
+                showAvatar={isLastOfGroup}
+              />
             </React.Fragment>
           );
         })}
@@ -413,37 +395,34 @@ export default function Chat() {
           />
         </div>
       ) : (
-        <div className="glass-strong px-4 py-3 safe-bottom">
+        <div className="safe-bottom flex-none" style={{ position: "relative", zIndex: 3, padding: "12px 14px 0", borderTop: "1px solid rgba(105,190,255,.16)" }}>
           <MessageCounter sentCount={sentCount} max={MAX_MESSAGES} />
-          <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0">
-              <Image className="w-5 h-5 text-white/40" />
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <button style={{ ...ICON_BTN, width: 44, height: 44 }} aria-label="Send image">
+              <Image className="w-4 h-4" style={{ color: "#bfe2ff" }} />
             </button>
-            <div className="flex-1 glass rounded-xl flex items-center px-3 py-2 border border-white/5 focus-within:border-blue-500/30 focus-within:ring-1 focus-within:ring-blue-500/20 transition-colors">
+            <div
+              style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, height: 48, padding: "0 14px", background: "rgba(8,26,54,.72)", border: "1px solid rgba(105,190,255,.3)", clipPath: "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)" }}
+            >
               <input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Message..."
-                className="bg-transparent text-white text-sm flex-1 outline-none placeholder:text-white/30"
+                placeholder="Message…"
+                style={{ flex: 1, minWidth: 0, background: "transparent", border: 0, outline: "none", color: "#dceeff", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 14.5 }}
               />
-              <button className="ml-2">
-                <Smile className="w-5 h-5 text-white/20" />
-              </button>
-            </div>
-            {newMessage.trim() ? (
               <button
                 onClick={handleSend}
-                disabled={sending}
-                className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform glow-blue-sm"
+                disabled={sending || !newMessage.trim()}
+                aria-label="Send"
+                style={{ flex: "none", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", border: 0, borderRadius: "50%", background: newMessage.trim() ? "linear-gradient(160deg, #2a72e8, #1b4fc4)" : "rgba(105,190,255,.14)", color: newMessage.trim() ? "#fff" : "#6f9dc8", cursor: newMessage.trim() ? "pointer" : "default" }}
               >
-                <Send className="w-4 h-4 text-white" />
+                <Send className="w-3.5 h-3.5" />
               </button>
-            ) : (
-              <button className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0">
-                <Mic className="w-5 h-5 text-white/40" />
-              </button>
-            )}
+            </div>
+            <button style={{ ...ICON_BTN, width: 44, height: 44 }} aria-label="Voice message">
+              <Mic className="w-4 h-4" style={{ color: "#bfe2ff" }} />
+            </button>
           </div>
         </div>
       )}
