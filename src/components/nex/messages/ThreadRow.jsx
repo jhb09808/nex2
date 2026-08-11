@@ -26,7 +26,7 @@ export default function ThreadRow({ convo, other, unread, onClick }) {
     >
       <span style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 2, background: unread ? "#2D7DFF" : "transparent" }} />
       <span style={{ position: "relative", flex: "none" }}>
-        <UserAvatar name={name} size="md" isOnline={other?.is_online} plan={other?.plan} interests={other?.interests} isVerified={other?.is_verified} />
+        <UserAvatar name={name} size="md" isOnline={other?.is_online} plan={other?.plan} interests={other?.interests} isVerified={other?.is_verified} gender={other?.gender} />
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
