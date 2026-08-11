@@ -10,7 +10,7 @@ import Logo from "@/components/nex/Logo";
 const SESSION_KEY = "nex_access_granted";
 
 export function hasAccess() {
-  return sessionStorage.getItem(SESSION_KEY) === "true";
+  return localStorage.getItem(SESSION_KEY) === "true";
 }
 
 export default function PasswordGate() {
@@ -45,7 +45,7 @@ export default function PasswordGate() {
       });
       const data = await response.json();
       if (data.valid) {
-        sessionStorage.setItem(SESSION_KEY, "true");
+        localStorage.setItem(SESSION_KEY, "true");
         window.location.reload();
       } else {
         setError(data.error ? `[${response.status}] ${data.error}` : "Incorrect password. Try again.");
@@ -107,7 +107,7 @@ export default function PasswordGate() {
       });
       const data = await response.json();
       if (data.approved) {
-        sessionStorage.setItem(SESSION_KEY, "true");
+        localStorage.setItem(SESSION_KEY, "true");
         window.location.href = `/approved?has_account=${data.has_account}`;
       } else if (data.status === "waitlisted" || data.status === "pending") {
         setError("You're on the list, but not approved yet. Check back soon!");
@@ -150,7 +150,7 @@ export default function PasswordGate() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(loginEmail, loginPassword);
-      sessionStorage.setItem(SESSION_KEY, "true");
+      localStorage.setItem(SESSION_KEY, "true");
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid email or password");
@@ -160,7 +160,7 @@ export default function PasswordGate() {
   };
 
   const handleGoogle = () => {
-    sessionStorage.setItem(SESSION_KEY, "true");
+    localStorage.setItem(SESSION_KEY, "true");
     base44.auth.loginWithProvider("google", "/");
   };
 
