@@ -128,40 +128,35 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
     <Portal>
       <AnimatePresence>
         {open && (
-          <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 z-[200] flex items-center justify-center"
+            style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleClose}
-              className="fixed inset-0 z-[200]"
-              style={{ background: "rgba(1,6,14,.74)", backdropFilter: "blur(4px)" }}
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[201] w-full safe-bottom"
-              style={{ maxWidth: 440 }}
+              initial={{ scale: 0.9, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 16 }}
+              transition={{ type: "spring", damping: 24, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="scrollbar-hide"
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: 380,
+                maxHeight: "85vh",
+                overflowY: "auto",
+                padding: 16,
+                background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
+                border: "1px solid rgba(105,190,255,.4)",
+                boxShadow: "0 20px 60px rgba(1,6,14,.8), 0 0 34px rgba(40,120,220,.22)",
+                clipPath: clip(18),
+              }}
             >
-              <div
-                style={{
-                  margin: "0 14px 20px",
-                  padding: 16,
-                  background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
-                  border: "1px solid rgba(105,190,255,.36)",
-                  boxShadow: "0 -12px 46px rgba(1,6,14,.75)",
-                  clipPath: clip(18),
-                }}
-              >
-                {/* Grab handle */}
-                <div
-                  aria-hidden="true"
-                  style={{ width: 38, height: 3, margin: "0 auto 16px", background: "rgba(140,200,255,.32)" }}
-                />
-
-                {status === "done" ? (
+              {status === "done" ? (
                   <div style={{ textAlign: "center", padding: "24px 0" }}>
                     <div
                       style={{
@@ -429,9 +424,8 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
                     </button>
                   </>
                 )}
-              </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </Portal>
