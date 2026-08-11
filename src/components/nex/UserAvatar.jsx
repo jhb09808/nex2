@@ -20,7 +20,7 @@ const TIER_STYLES = {
   },
 };
 
-export default function UserAvatar({ name, size = "md", isOnline, plan = "free", interests, isVerified, className = "" }) {
+export default function UserAvatar({ name, size = "md", isOnline, plan = "free", interests, isVerified, gender, className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -49,7 +49,7 @@ export default function UserAvatar({ name, size = "md", isOnline, plan = "free",
           boxShadow: `0 0 12px ${tier.glow}`,
         }}
       >
-        <GenerativeAvatar seed={seed} plan={plan} interests={interests} isVerified={isVerified} />
+        <GenerativeAvatar seed={seed} gender={gender} plan={plan} interests={interests} isVerified={isVerified} />
       </div>
       {isOnline !== undefined && (
         <div
