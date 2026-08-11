@@ -13,6 +13,8 @@ const CLIP_INPUT = "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 
 const CLIP_CTA = "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)";
 const CLIP_GOOGLE = "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)";
 
+const PENDING_KEY = "nex2_pending_verify_email";
+
 const STRENGTH_TONES = ["#ff7a7a", "#ffb454", "#4dffb0"];
 const STRENGTH_NAMES = ["", "Weak", "Fair", "Strong"];
 
@@ -87,14 +89,17 @@ function CyberShell({ children, footer }) {
 }
 
 export default function Register() {
-  const [email, setEmail] = useState("");
+  const pendingEmail = typeof window !== "undefined" ? localStorage.getItem(PENDING_KEY) : null;
+  const [email, setEmail] = useState(pendingEmail || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
+  // Resume the verification step after a reload / returning later for the code.
+  const [showOtp, setShowOtp] = useState(!!pendingEmail);
   const [otpCode, setOtpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showJoinLink, setShowJoinLink] = useState(false);
+  const [showCodeLink, setShowCodeLink] = useState(false);
 
   const pwStrength = useMemo(() => {
     const p = password;
@@ -110,6 +115,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setShowJoinLink(false);
+    setShowCodeLink(false);
     setLoading(true);
     try {
       const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email });
@@ -126,7 +132,8 @@ export default function Register() {
         return;
       }
       if (approvalRes.data.has_account) {
-        setError("An account already exists for this email. Please log in instead.");
+        setError("An account already exists for this email. Log in, or enter your verification code if you never finished signing up.");
+        setShowCodeLink(true);
         return;
       }
       const limitRes = await base44.functions.invoke("checkRegistrationLimit", {});
@@ -135,6 +142,7 @@ export default function Register() {
         return;
       }
       await base44.auth.register({ email, password });
+      localStorage.setItem(PENDING_KEY, email);
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Registration failed");
@@ -151,6 +159,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      localStorage.removeItem(PENDING_KEY);
       base44.analytics.track({ eventName: "signup_completed" });
       window.location.href = "/map";
     } catch (err) {
@@ -248,6 +257,15 @@ export default function Register() {
               Resend
             </button>
           </p>
+
+          <p style={{ textAlign: "center", marginTop: 12, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6f9dc8" }}>
+            <button
+              onClick={() => { localStorage.removeItem(PENDING_KEY); setShowOtp(false); setOtpCode(""); setError(""); }}
+              style={{ color: "inherit", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", letterSpacing: "inherit", textTransform: "inherit" }}
+            >
+              Use a different email
+            </button>
+          </p>
         </div>
       </CyberShell>
     );
@@ -324,6 +342,17 @@ export default function Register() {
                 <Link to="/welcome" style={{ color: "#7fc8ff", textDecoration: "none", borderBottom: "1px solid rgba(127,200,255,.4)", paddingBottom: 2, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 11 }}>
                   Join the waitlist
                 </Link>
+              </div>
+            )}
+            {showCodeLink && (
+              <div style={{ marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => { setError(""); localStorage.setItem(PENDING_KEY, email); setShowOtp(true); }}
+                  style={{ color: "#7fc8ff", background: "none", border: "none", cursor: "pointer", borderBottom: "1px solid rgba(127,200,255,.4)", paddingBottom: 2, fontFamily: "inherit", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" }}
+                >
+                  Enter verification code
+                </button>
               </div>
             )}
           </div>
