@@ -94,6 +94,7 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showJoinLink, setShowJoinLink] = useState(false);
 
   const pwStrength = useMemo(() => {
     const p = password;
@@ -108,13 +109,15 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setShowJoinLink(false);
     setLoading(true);
     try {
       const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email });
       if (!approvalRes.data.approved) {
         const status = approvalRes.data.status;
         if (status === "not_found") {
-          setError("You're not on the waitlist yet. Join the waitlist to get early access.");
+          setError("We couldn't find this email on the waitlist. Make sure it's the exact email you signed up with.");
+          setShowJoinLink(true);
         } else if (status === "waitlisted" || status === "pending") {
           setError("Your waitlist application is still pending approval. Check back soon!");
         } else {
@@ -169,8 +172,9 @@ export default function Register() {
 
   const handleGoogle = async () => {
     setError("");
+    setShowJoinLink(false);
     if (!email.trim()) {
-      setError("Enter your email first so we can check your waitlist approval.");
+      setError("Type your waitlist email in the field below first, then continue with Google.");
       return;
     }
     setLoading(true);
@@ -179,7 +183,8 @@ export default function Register() {
       if (!approvalRes.data.approved) {
         const status = approvalRes.data.status;
         if (status === "not_found") {
-          setError("You're not on the waitlist yet. Join the waitlist to get early access.");
+          setError("We couldn't find this email on the waitlist. Make sure it's the exact email you signed up with.");
+          setShowJoinLink(true);
         } else {
           setError("Your account hasn't been approved yet. Please wait for approval.");
         }
@@ -319,6 +324,9 @@ export default function Register() {
           <GoogleIcon className="w-[17px] h-[17px]" />
           Continue with Google
         </button>
+        <p style={{ margin: "9px 0 0", textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f9dc8" }}>
+          Enter your waitlist email below first
+        </p>
 
         {/* Divider */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 20 }}>
@@ -331,6 +339,13 @@ export default function Register() {
         {error && (
           <div style={{ marginTop: 16, padding: "10px 14px", background: "rgba(120,20,20,.3)", border: "1px solid rgba(255,80,80,.3)", borderRadius: 8, color: "#ff8a80", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 12, textAlign: "center" }}>
             {error}
+            {showJoinLink && (
+              <div style={{ marginTop: 8 }}>
+                <Link to="/welcome" style={{ color: "#7fc8ff", textDecoration: "none", borderBottom: "1px solid rgba(127,200,255,.4)", paddingBottom: 2, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 11 }}>
+                  Join the waitlist
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
