@@ -64,7 +64,7 @@ export default function PlatinumFeed() {
 
   if (notPlatinum) {
     return (
-      <div className="px-4 pt-10 safe-top">
+      <div className="px-4 pt-10 safe-top h-full overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ export default function PlatinumFeed() {
   const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-full overflow-y-auto overflow-x-hidden">
       <div className="holo-orb w-72 h-72 bg-cyan-500 top-0 -left-24" style={{ animation: "float-y 9s ease-in-out infinite" }} />
       <div className="holo-orb w-80 h-80 bg-blue-600 top-96 -right-28" style={{ animation: "float-y 11s ease-in-out infinite 1s" }} />
 
