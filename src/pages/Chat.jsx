@@ -255,10 +255,10 @@ export default function Chat() {
   const showPostChatPanel = limitReached || conversationEnded;
 
   return (
-    <div className="flex flex-col h-screen bg-[hsl(0,0%,4%)] max-w-lg mx-auto">
+    <div className="flex flex-col h-full bg-[hsl(0,0%,4%)] max-w-lg mx-auto">
       <NotificationListener />
       {/* Header */}
-      <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top">
+      <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top flex-none">
         <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5 text-white/60" />
         </button>
@@ -299,7 +299,7 @@ export default function Chat() {
       />
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg, i) => {
           const isMe = msg.sender_id === me?.id;
           const isSystem = msg.type === "system";

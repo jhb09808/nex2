@@ -313,7 +313,7 @@ export default function NearbyMap() {
   }
 
   return (
-    <div className="relative overflow-hidden" style={{ height: "100vh" }}>
+    <div className="relative overflow-hidden h-full flex flex-col">
       {/* Logo as faded background watermark — part of the background, not a floating box */}
       {!showRadarOnboarding && (
         <div className="absolute top-10 left-1/2 -translate-x-1/2 z-0 pointer-events-none safe-top opacity-[0.06]">

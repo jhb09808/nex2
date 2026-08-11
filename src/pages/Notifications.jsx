@@ -48,8 +48,8 @@ export default function Notifications() {
   }
 
   return (
-    <div className="px-4 pt-6 safe-top">
-      <div className="flex items-center justify-between mb-6 pr-12">
+    <div className="px-4 pt-6 safe-top h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6 pr-12 flex-none">
         <h1 className="text-2xl font-bold text-white">Notifications</h1>
         {notifications.some((n) => !n.is_read) && (
           <button
@@ -62,7 +62,7 @@ export default function Notifications() {
       </div>
 
       {notifications.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pb-24">
           {notifications.map((notif, i) => {
             const Icon = iconMap[notif.type] || Bell;
             return (

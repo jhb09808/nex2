@@ -4,5 +4,9 @@ import App from '@/App.jsx'
 import '@/index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <App />
+  <React.StrictMode>
+    <div className="h-[100dvh] overflow-hidden">
+      <App />
+    </div>
+  </React.StrictMode>
 )

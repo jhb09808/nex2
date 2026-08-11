@@ -64,14 +64,14 @@ export default function Home() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-full overflow-hidden flex flex-col">
       {/* Holographic background */}
       <div className="holo-orb w-72 h-72 bg-blue-600 top-0 -left-24" style={{ animation: "float-y 9s ease-in-out infinite" }} />
       <div className="holo-orb w-80 h-80 bg-violet-600 top-96 -right-28" style={{ animation: "float-y 11s ease-in-out infinite 1s" }} />
       <div className="holo-orb w-56 h-56 bg-cyan-500 bottom-32 left-1/3" style={{ animation: "float-y 7s ease-in-out infinite 2s" }} />
 
       <motion.div
-        className="relative px-4 pt-6 safe-top space-y-6 pb-28"
+        className="relative px-4 pt-6 safe-top space-y-6 pb-28 flex-1 min-h-0 overflow-y-auto"
         variants={stagger}
         initial="hidden"
         animate="show"

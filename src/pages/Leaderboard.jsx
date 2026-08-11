@@ -56,7 +56,7 @@ export default function Leaderboard() {
   const podiumOrder = hasPodium ? [1, 0, 2] : podium.map((_, i) => i);
 
   return (
-    <div className="min-h-screen pb-28 pt-20 px-4 relative">
+    <div className="h-full pb-24 pt-6 px-4 relative flex flex-col overflow-y-auto">
       {/* Background glow */}
       <div className="absolute -right-20 top-0 w-48 h-48 rounded-full bg-gradient-to-br from-amber-500/8 to-orange-600/4 blur-3xl pointer-events-none" />
       <div className="absolute -left-20 top-40 w-40 h-40 rounded-full bg-gradient-to-br from-blue-500/8 to-violet-600/4 blur-3xl pointer-events-none" />

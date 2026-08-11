@@ -102,15 +102,15 @@ export default function Messages() {
   }
 
   return (
-    <div className="px-4 pt-6 safe-top pb-8">
+    <div className="px-4 pt-6 safe-top h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 pr-12">
+      <div className="flex items-center justify-between mb-4 pr-12 flex-none">
         <h1 className="text-2xl font-bold text-white">Messages</h1>
       </div>
 
       {/* Incoming Chat Requests */}
       {waves.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-4 flex-none">
           <div className="flex items-center gap-2 mb-3">
             <Hand className="w-4 h-4 text-blue-400" />
             <h2 className="text-white/60 text-xs font-semibold uppercase tracking-wider">Chat Requests</h2>
@@ -175,7 +175,7 @@ export default function Messages() {
       )}
 
       {/* Search */}
-      <div className="glass rounded-xl flex items-center gap-3 px-3 py-2.5 mb-6">
+      <div className="glass rounded-xl flex items-center gap-3 px-3 py-2.5 mb-4 flex-none">
         <Search className="w-5 h-5 text-white/30" />
         <input
           value={search}
@@ -187,7 +187,7 @@ export default function Messages() {
 
       {/* Conversation List */}
       {conversations.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pb-24">
           {conversations.map((convo, i) => {
             const other = getOtherParticipant(convo);
             return (

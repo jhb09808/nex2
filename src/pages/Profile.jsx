@@ -63,7 +63,7 @@ export default function Profile() {
   const badge = planBadge[profile?.plan];
 
   return (
-    <div className="px-4 pt-6 safe-top space-y-4">
+    <div className="px-4 pt-6 safe-top space-y-4 h-full flex flex-col overflow-y-auto pb-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">Profile</h1>

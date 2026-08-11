@@ -61,8 +61,8 @@ export default function Welcome() {
     <div
       style={{
         position: "relative",
-        minHeight: "100vh",
-        overflow: "auto",
+        height: "100dvh",
+        overflow: "hidden",
         display: "flex",
         justifyContent: "center",
       }}
