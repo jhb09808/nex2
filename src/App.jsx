@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import PasswordGate, { hasAccess } from '@/components/PasswordGate';
+import { appParams } from '@/lib/app-params';
 
 // Auth pages
 import Login from '@/pages/Login';
@@ -120,7 +121,11 @@ function App() {
     window.location.pathname === '/welcome' ||
     window.location.pathname.startsWith('/legal/');
 
-  if (!hasAccess() && !isPublicPath) {
+  // A logged-in user (valid token) has already passed access control — never
+  // re-gate them behind PasswordGate. This also fixes mobile browsers dropping
+  // the sessionStorage access flag across the login redirect, which previously
+  // bounced authenticated users back to the old PasswordGate login screen.
+  if (!hasAccess() && !appParams.token && !isPublicPath) {
     return <PasswordGate />;
   }
 
