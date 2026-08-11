@@ -289,7 +289,7 @@ export default function Chat() {
         <button onClick={() => navigate("/messages")} style={ICON_BTN} aria-label="Back">
           <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
         </button>
-        <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} interests={otherUser?.interests} />
+        <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} interests={otherUser?.interests} gender={otherUser?.gender} />
         <div className="flex-1 min-w-0">
           <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 16, lineHeight: 1, letterSpacing: "0.02em", color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {getUserDisplayName(otherUser)}
