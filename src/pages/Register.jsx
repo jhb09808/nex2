@@ -18,7 +18,7 @@ const STRENGTH_NAMES = ["", "Weak", "Fair", "Strong"];
 
 function CyberShell({ children, footer }) {
   return (
-    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflow: "hidden" }}>
+    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflowY: "auto", overflowX: "hidden" }}>
       <main
         style={{
           position: "relative",
