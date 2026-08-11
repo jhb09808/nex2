@@ -101,7 +101,7 @@ export default function UserDetail() {
         <motion.div variants={fadeUp} className="flex flex-col items-center text-center">
           <div className="relative mb-4">
             <div className="absolute inset-0 rounded-full" style={{ boxShadow: "0 0 40px rgba(59,130,246,0.3), 0 0 80px rgba(139,92,246,0.15)" }} />
-            <UserAvatar name={getUserDisplayName(user)} size="xl" isOnline={user.is_online} plan={user.plan} />
+            <UserAvatar name={getUserDisplayName(user)} size="xl" isOnline={user.is_online} plan={user.plan} gender={user.gender} />
           </div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-cyber font-bold text-white neon-text">{getUserDisplayName(user)}</h1>
