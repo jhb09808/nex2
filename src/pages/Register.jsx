@@ -173,30 +173,10 @@ export default function Register() {
   const handleGoogle = async () => {
     setError("");
     setShowJoinLink(false);
-    if (!email.trim()) {
-      setError("Type your waitlist email in the field below first, then continue with Google.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email });
-      if (!approvalRes.data.approved) {
-        const status = approvalRes.data.status;
-        if (status === "not_found") {
-          setError("We couldn't find this email on the waitlist. Make sure it's the exact email you signed up with.");
-          setShowJoinLink(true);
-        } else {
-          setError("Your account hasn't been approved yet. Please wait for approval.");
-        }
-        return;
-      }
-      base44.analytics.track({ eventName: "google_signup_click" });
-      base44.auth.loginWithProvider("google", "/");
-    } catch (err) {
-      setError(err.message || "Approval check failed");
-    } finally {
-      setLoading(false);
-    }
+    // No email needed — approval is verified against the real Google account
+    // email right after sign-in (see AuthContext).
+    base44.analytics.track({ eventName: "google_signup_click" });
+    base44.auth.loginWithProvider("google", "/map");
   };
 
   // OTP Verification step
@@ -325,7 +305,7 @@ export default function Register() {
           Continue with Google
         </button>
         <p style={{ margin: "9px 0 0", textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "#6f9dc8" }}>
-          Enter your waitlist email below first
+          Fastest way in — one tap
         </p>
 
         {/* Divider */}
