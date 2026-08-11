@@ -13,7 +13,7 @@ export default function Welcome() {
   const { isAuthenticated } = useAuth();
   const [zip, setZip] = useState("");
   const [zipMsg, setZipMsg] = useState("");
-  const [counts, setCounts] = useState({ active_count: 36, waitlist_count: 34 });
+  const [counts, setCounts] = useState({ active_count: 38, waitlist_count: 34 });
   const [loggedOut, setLoggedOut] = useState(false);
 
   useEffect(() => {
