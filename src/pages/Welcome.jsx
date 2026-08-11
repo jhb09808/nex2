@@ -62,7 +62,8 @@ export default function Welcome() {
       style={{
         position: "relative",
         height: "100dvh",
-        overflow: "hidden",
+        overflowY: "auto",
+        overflowX: "hidden",
         display: "flex",
         justifyContent: "center",
       }}
@@ -71,7 +72,7 @@ export default function Welcome() {
         style={{
           position: "relative",
           overflow: "hidden",
-          height: "100dvh",
+          minHeight: "100dvh",
           maxWidth: 440,
           width: "100%",
           margin: "0 auto",
