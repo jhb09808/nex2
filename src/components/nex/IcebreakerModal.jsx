@@ -1,8 +1,23 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, RefreshCw, Send, Snowflake } from "lucide-react";
+import { X, RefreshCw, Send } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import Portal from "@/components/nex/Portal";
+
+const PANEL_CLIP = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
+const ICON_CLIP = "polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)";
+const TEXT_CLIP = "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)";
+const BTN_CLIP = "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)";
+
+// Burst glyph used on the icebreaker header and match sheet.
+function BurstIcon({ size = 26, color = "#7fc8ff" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M9 1v16M1.6 4.8l14.8 8.4M16.4 4.8L1.6 13.2" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M9 1l-2 2.2M9 1l2 2.2M9 17l-2-2.2M9 17l2-2.2" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function IcebreakerModal({ open, onClose, myProfile, otherUser, onUseSuggestion }) {
   const [loading, setLoading] = useState(false);
@@ -87,91 +102,134 @@ Return ONLY the message text.`;
 
   return (
     <Portal>
+      <style>{"@keyframes nxsheen{0%,12%{transform:translateX(-60px)}55%,100%{transform:translateX(340px)}}"}</style>
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+            className="fixed inset-0 z-[200] flex items-center justify-center"
+            style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
             onClick={onClose}
           >
             <motion.div
-              initial={{ scale: 0.85, opacity: 0, y: 20 }}
+              initial={{ scale: 0.9, opacity: 0, y: 16 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.85, opacity: 0, y: 20 }}
+              exit={{ scale: 0.9, opacity: 0, y: 16 }}
               transition={{ type: "spring", damping: 24, stiffness: 320 }}
               onClick={(e) => e.stopPropagation()}
-              className="cyber-frame rounded-3xl p-6 w-full max-w-sm relative overflow-hidden"
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: 360,
+                padding: "22px 20px 20px",
+                textAlign: "center",
+                background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
+                border: "1px solid rgba(105,190,255,.4)",
+                boxShadow: "0 20px 60px rgba(1,6,14,.8), 0 0 34px rgba(40,120,220,.22)",
+                clipPath: PANEL_CLIP,
+              }}
             >
-              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-
-              <button onClick={onClose} className="absolute top-3 right-3 z-10">
-                <X className="w-5 h-5 text-white/30" />
+              <button
+                onClick={onClose}
+                aria-label="Close"
+                style={{ position: "absolute", top: 6, right: 6, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", border: 0, background: "transparent", color: "#7fa9d4", cursor: "pointer" }}
+              >
+                <X className="w-3.5 h-3.5" />
               </button>
 
-              {/* Ice Cube */}
-              <div className="flex justify-center mb-4 mt-2">
-                <IceCube matchPct={matchPct} loading={loading} />
+              {/* Icon */}
+              <div
+                style={{ width: 64, height: 64, margin: "6px auto 0", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(120,200,255,.4)", background: "rgba(16,48,94,.6)", boxShadow: "0 0 26px rgba(60,150,255,.3)", clipPath: ICON_CLIP }}
+              >
+                <BurstIcon size={26} />
               </div>
 
-              {/* Match Percentage */}
-              <div className="text-center mb-3">
-                <p className="text-4xl font-cyber font-bold gradient-text">{matchPct}%</p>
-                <p className="text-blue-400/40 text-[10px] font-cyber tracking-widest uppercase mt-1">
-                  Connection Match
-                </p>
+              {/* Match percentage */}
+              <div style={{ marginTop: 16, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 40, lineHeight: 1, letterSpacing: "-0.01em", color: "#eaf6ff", textShadow: "0 0 26px rgba(90,180,255,.6)" }}>
+                {matchPct}%
+              </div>
+              <div style={{ marginTop: 9, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 10, lineHeight: 1, letterSpacing: "0.24em", textTransform: "uppercase", color: "#8fd0ff" }}>
+                Connection match
               </div>
 
-              {/* Shared Interests */}
-              {sharedInterests.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 justify-center mb-4">
+              {/* Shared interests / fallback line */}
+              {sharedInterests.length > 0 ? (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", margin: "14px 0 0" }}>
                   {sharedInterests.slice(0, 5).map((interest) => (
                     <span
                       key={interest}
-                      className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-300/80 border border-blue-500/15"
+                      style={{ padding: "5px 10px", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, color: "#a6cbec", background: "rgba(16,48,94,.5)", border: "1px solid rgba(105,190,255,.22)" }}
                     >
                       {interest}
                     </span>
                   ))}
                 </div>
-              )}
-              {sharedInterests.length === 0 && (
-                <p className="text-center text-white/30 text-xs mb-4">
-                  No direct overlap — but opposites connect too ✨
+              ) : (
+                <p style={{ margin: "14px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 12.5, lineHeight: 1.5, color: "#a6cbec" }}>
+                  No direct overlap — but opposites connect too
                 </p>
               )}
 
               {/* Suggestion */}
-              <div className="glass rounded-2xl p-4 mb-4 min-h-[80px] flex items-center justify-center">
+              <div style={{ marginTop: 16, padding: "15px 16px", textAlign: "left", background: "rgba(6,20,42,.8)", border: "1px solid rgba(105,190,255,.22)", minHeight: 78, display: "flex", alignItems: "center", clipPath: TEXT_CLIP }}>
                 {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Snowflake className="w-4 h-4 text-blue-400 animate-pulse" />
-                    <p className="text-white/40 text-sm font-cyber">Breaking the ice...</p>
-                  </div>
+                  <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 14, lineHeight: 1.55, color: "#7fa9d4", opacity: 0.85 }} className="animate-pulse">
+                    Breaking the ice…
+                  </p>
                 ) : suggestion ? (
-                  <p className="text-white/80 text-sm leading-relaxed text-center">"{suggestion}"</p>
+                  <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 14, lineHeight: 1.55, color: "#dceeff" }}>
+                    {suggestion}
+                  </p>
                 ) : (
-                  <p className="text-white/30 text-sm">Tap refresh to try again</p>
+                  <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 14, lineHeight: 1.55, color: "#7fa9d4" }}>
+                    Tap refresh to try again
+                  </p>
                 )}
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div style={{ display: "flex", gap: 9, marginTop: 16 }}>
                 <button
                   onClick={generateIcebreaker}
                   disabled={loading}
-                  className="w-12 py-3 rounded-xl cyber-input text-white/60 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-40"
+                  aria-label="New suggestion"
+                  style={{ flex: "none", width: 52, height: 50, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(120,190,255,.32)", background: "rgba(10,30,60,.6)", color: "#bfe2ff", cursor: loading ? "default" : "pointer", opacity: loading ? 0.5 : 1 }}
                 >
                   <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 </button>
                 <button
                   onClick={handleUse}
                   disabled={loading || !suggestion}
-                  className="flex-1 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40"
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    height: 50,
+                    border: "1.5px solid transparent",
+                    background:
+                      "linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box",
+                    color: "#fff",
+                    fontFamily: "var(--font-chakra)",
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    lineHeight: 1,
+                    letterSpacing: "0.17em",
+                    textTransform: "uppercase",
+                    cursor: loading || !suggestion ? "default" : "pointer",
+                    boxShadow: "0 0 22px rgba(80,110,255,.42), inset 0 0 22px rgba(70,120,255,.26)",
+                    clipPath: BTN_CLIP,
+                    opacity: loading || !suggestion ? 0.5 : 1,
+                  }}
                 >
-                  <Send className="w-4 h-4" /> USE ICEBREAKER
+                  <span aria-hidden="true" style={{ position: "absolute", top: 0, bottom: 0, width: 56, background: "linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.28),rgba(255,255,255,0))", animation: "nxsheen 4.5s ease-in-out infinite" }} />
+                  <Send className="w-3.5 h-3.5" style={{ position: "relative" }} />
+                  <span style={{ position: "relative" }}>Use icebreaker</span>
                 </button>
               </div>
             </motion.div>
@@ -179,68 +237,5 @@ Return ONLY the message text.`;
         )}
       </AnimatePresence>
     </Portal>
-  );
-}
-
-function IceCube({ matchPct, loading }) {
-  return (
-    <div className="relative w-24 h-28">
-      {/* Ambient glow */}
-      <div className="absolute inset-0 rounded-2xl bg-blue-400/20 blur-2xl" />
-
-      {/* Floating ice cube */}
-      <motion.div
-        animate={{ y: [0, -6, 0], rotate: [-2, 2, -2] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="relative w-24 h-24 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(96,165,250,0.18) 0%, rgba(59,130,246,0.06) 50%, rgba(96,165,250,0.18) 100%)",
-          border: "1px solid rgba(96,165,250,0.3)",
-          boxShadow: "0 0 30px rgba(59,130,246,0.2), inset 0 0 20px rgba(255,255,255,0.05)",
-        }}
-      >
-        {/* Top shine */}
-        <div
-          className="absolute top-2 left-2 right-8 h-6 rounded-xl"
-          style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)" }}
-        />
-        {/* Crystalline facets */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <line x1="20" y1="20" x2="50" y2="50" stroke="rgba(96,165,250,0.15)" strokeWidth="0.5" />
-          <line x1="80" y1="20" x2="50" y2="50" stroke="rgba(96,165,250,0.15)" strokeWidth="0.5" />
-          <line x1="20" y1="80" x2="50" y2="50" stroke="rgba(96,165,250,0.15)" strokeWidth="0.5" />
-          <line x1="80" y1="80" x2="50" y2="50" stroke="rgba(96,165,250,0.15)" strokeWidth="0.5" />
-        </svg>
-        {/* Snowflake */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            animate={loading ? { rotate: 360 } : { rotate: 0 }}
-            transition={loading ? { duration: 2, repeat: Infinity, ease: "linear" } : {}}
-          >
-            <Snowflake
-              className="w-8 h-8 text-blue-300"
-              style={{ filter: "drop-shadow(0 0 6px rgba(96,165,250,0.6))" }}
-            />
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Melting drips */}
-      {!loading && matchPct > 0 && (
-        <>
-          <motion.div
-            className="absolute bottom-4 left-1/4 w-1 h-1.5 rounded-full bg-blue-300/50"
-            animate={{ y: [0, 28], opacity: [0.6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-          />
-          <motion.div
-            className="absolute bottom-4 right-1/3 w-1 h-1.5 rounded-full bg-blue-300/50"
-            animate={{ y: [0, 24], opacity: [0.6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, delay: 0.8 }}
-          />
-        </>
-      )}
-    </div>
   );
 }
