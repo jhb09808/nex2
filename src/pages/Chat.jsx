@@ -16,6 +16,13 @@ import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const MAX_MESSAGES = 20;
 
+const dayLabel = (d) => {
+  const m = moment(d);
+  if (m.isSame(moment(), "day")) return "Today";
+  if (m.isSame(moment().subtract(1, "day"), "day")) return "Yesterday";
+  return m.format("MMM D, YYYY");
+};
+
 const distanceMiles = (lat1, lon1, lat2, lon2) => {
   const R = 3958.8;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -304,45 +311,79 @@ export default function Chat() {
       />
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1">
         {messages.map((msg, i) => {
           const isMe = msg.sender_id === me?.id;
           const isSystem = msg.type === "system";
+          const prev = messages[i - 1];
+          const next = messages[i + 1];
+          const showDay =
+            !prev || !moment(msg.created_date).isSame(moment(prev.created_date), "day");
+
+          const daySeparator = showDay ? (
+            <div className="flex justify-center py-2">
+              <span className="text-white/30 text-[10px] font-cyber tracking-widest uppercase px-3 py-1 rounded-full glass">
+                {dayLabel(msg.created_date)}
+              </span>
+            </div>
+          ) : null;
+
           if (isSystem) {
             return (
-              <div key={msg.id} className="flex justify-center">
-                <span className="text-white/30 text-[11px] font-cyber tracking-wider px-3 py-1 rounded-full glass">
-                  {msg.content}
-                </span>
-              </div>
+              <React.Fragment key={msg.id}>
+                {daySeparator}
+                <div className="flex justify-center py-1">
+                  <span className="text-white/30 text-[11px] font-cyber tracking-wider px-3 py-1 rounded-full glass">
+                    {msg.content}
+                  </span>
+                </div>
+              </React.Fragment>
             );
           }
+
+          const isLastOfGroup =
+            !next ||
+            next.type === "system" ||
+            next.sender_id !== msg.sender_id ||
+            !moment(next.created_date).isSame(moment(msg.created_date), "day");
+          const isFirstOfGroup =
+            !prev ||
+            prev.type === "system" ||
+            prev.sender_id !== msg.sender_id ||
+            showDay;
+
           return (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex items-end gap-1.5 ${isMe ? "justify-end" : "justify-start"}`}
-            >
-              {!isMe && otherUser && (
-                <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} className="flex-shrink-0" />
-              )}
-              <div
-                className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl shadow-sm ${
-                  isMe
-                    ? "gradient-blue text-white rounded-br-sm glow-blue-sm"
-                    : "glass text-white/90 rounded-bl-sm border border-white/5"
-                }`}
+            <React.Fragment key={msg.id}>
+              {daySeparator}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex items-end gap-1.5 ${isMe ? "justify-end" : "justify-start"} ${isFirstOfGroup ? "mt-2" : "mt-0.5"}`}
               >
-                <p className="text-sm leading-relaxed break-words">{msg.content}</p>
-                <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : ""}`}>
-                  <span className={`text-[10px] ${isMe ? "text-white/50" : "text-white/30"}`}>
-                    {moment(msg.created_date).format("h:mm A")}
-                  </span>
-                  {isMe && msg.is_read && <span className="text-[10px] text-white/50">✓✓</span>}
+                {!isMe && (
+                  otherUser && isLastOfGroup ? (
+                    <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} className="flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 flex-shrink-0" />
+                  )
+                )}
+                <div
+                  className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl shadow-sm ${
+                    isMe
+                      ? `gradient-blue text-white glow-blue-sm ${isLastOfGroup ? "rounded-br-sm" : ""}`
+                      : `glass text-white/90 border border-white/5 ${isLastOfGroup ? "rounded-bl-sm" : ""}`
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed break-words">{msg.content}</p>
+                  <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : ""}`}>
+                    <span className={`text-[10px] ${isMe ? "text-white/50" : "text-white/30"}`}>
+                      {moment(msg.created_date).format("h:mm A")}
+                    </span>
+                    {isMe && msg.is_read && <span className="text-[10px] text-white/50">✓✓</span>}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </React.Fragment>
           );
         })}
         <div ref={messagesEnd} />
