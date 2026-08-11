@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Image, Mic, Shield, Snowflake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -310,7 +310,7 @@ export default function Chat() {
         </button>
       </div>
 
-      <BlockReportSheet user={otherUser} open={safetyOpen} onClose={() => setSafetyOpen(false)} onBlocked={() => navigate("/messages")} />
+      <BlockReportSheet user={otherUser} open={safetyOpen} onClose={() => setSafetyOpen(false)} onBlocked={() => navigate("/messages")} conversationId={conversationId} />
 
       <IcebreakerModal
         open={showIcebreaker}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Flag, Ban, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Loader2, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import Portal from "@/components/nex/Portal";
 
@@ -15,7 +15,25 @@ const REPORT_REASONS = [
   { value: "other", label: "Other" },
 ];
 
-export default function BlockReportSheet({ user, open, onClose, onBlocked }) {
+const FONT = "var(--font-chakra)";
+const clip = (n) =>
+  `polygon(${n}px 0, 100% 0, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, 0 100%, 0 ${n}px)`;
+
+// Angular flag icon (matches the redesigned thread mockup)
+const FlagIcon = () => (
+  <svg width="17" height="18" viewBox="0 0 18 19" fill="none" aria-hidden="true" style={{ flex: "none" }}>
+    <path d="M2.4 17.6V1.4M2.4 2.2h11.4l-2 3.4 2 3.4H2.4" stroke="#ffb454" strokeWidth="1.4" strokeLinejoin="round" />
+  </svg>
+);
+
+const BlockIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 19 19" fill="none" aria-hidden="true" style={{ flex: "none" }}>
+    <circle cx="9.5" cy="9.5" r="8.2" stroke="#ff8080" strokeWidth="1.4" />
+    <path d="M3.7 3.7l11.6 11.6" stroke="#ff8080" strokeWidth="1.4" />
+  </svg>
+);
+
+export default function BlockReportSheet({ user, open, onClose, onBlocked, conversationId }) {
   const [mode, setMode] = useState(null); // null | 'report' | 'block'
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
@@ -74,6 +92,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked }) {
         reported_user_id: targetId,
         reason,
         description,
+        conversation_id: conversationId || null,
       });
       setStatus("done");
       setTimeout(() => handleClose(), 1500);
@@ -81,6 +100,28 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked }) {
       setError(err?.response?.data?.error || err.message);
       setStatus("idle");
     }
+  };
+
+  const title = {
+    margin: 0,
+    fontFamily: FONT,
+    fontWeight: 700,
+    fontStyle: "italic",
+    fontSize: 19,
+    lineHeight: 1,
+    letterSpacing: "0.02em",
+    textTransform: "uppercase",
+    color: "#fff",
+  };
+  const subtitle = {
+    margin: "9px 0 0",
+    fontFamily: FONT,
+    fontWeight: 500,
+    fontSize: 10.5,
+    lineHeight: 1,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    color: "#7fa9d4",
   };
 
   return (
@@ -93,28 +134,54 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleClose}
-              className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[200]"
+              style={{ background: "rgba(1,6,14,.74)", backdropFilter: "blur(4px)" }}
             />
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[201] w-full max-w-lg p-4 safe-bottom"
+              className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[201] w-full safe-bottom"
+              style={{ maxWidth: 440 }}
             >
-              <div className="glass-strong rounded-3xl p-6">
-                {/* Handle */}
-                <div className="w-10 h-1 rounded-full bg-white/10 mx-auto mb-5" />
+              <div
+                style={{
+                  margin: "0 14px 20px",
+                  padding: 16,
+                  background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
+                  border: "1px solid rgba(105,190,255,.36)",
+                  boxShadow: "0 -12px 46px rgba(1,6,14,.75)",
+                  clipPath: clip(18),
+                }}
+              >
+                {/* Grab handle */}
+                <div
+                  aria-hidden="true"
+                  style={{ width: 38, height: 3, margin: "0 auto 16px", background: "rgba(140,200,255,.32)" }}
+                />
 
                 {status === "done" ? (
-                  <div className="text-center py-6">
-                    <div className="inline-flex w-16 h-16 rounded-full bg-green-500/20 items-center justify-center mb-4">
-                      <Check className="w-8 h-8 text-green-400" />
+                  <div style={{ textAlign: "center", padding: "24px 0" }}>
+                    <div
+                      style={{
+                        display: "inline-flex",
+                        width: 60,
+                        height: 60,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 14,
+                        background: "rgba(77,255,176,.14)",
+                        border: "1px solid rgba(77,255,176,.4)",
+                        clipPath: clip(14),
+                      }}
+                    >
+                      <Check className="w-7 h-7" style={{ color: "#4dffb0" }} />
                     </div>
-                    <p className="text-white font-semibold">
+                    <p style={{ ...title, fontStyle: "normal", fontSize: 16 }}>
                       {mode === "block" ? "User blocked" : "Report submitted"}
                     </p>
-                    <p className="text-white/40 text-xs mt-1">
+                    <p style={{ ...subtitle, letterSpacing: "0.04em", textTransform: "none", marginTop: 8 }}>
                       {mode === "block"
                         ? "They won't be notified and can't contact you."
                         : "Our team will review this report."}
@@ -122,95 +189,242 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked }) {
                   </div>
                 ) : !mode ? (
                   <>
-                    <h3 className="text-white font-semibold text-lg mb-1">Safety options</h3>
-                    <p className="text-white/40 text-xs mb-5">
+                    <div style={title}>Safety options</div>
+                    <div style={subtitle}>
                       {user?.username ? `Managing @${user.username}` : "Managing this user"}
-                    </p>
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setMode("report")}
-                        className="w-full p-4 rounded-xl glass flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
-                      >
-                        <Flag className="w-5 h-5 text-amber-400" />
-                        <div>
-                          <p className="text-white text-sm font-medium">Report</p>
-                          <p className="text-white/30 text-xs">Flag for harassment, threats, or underage</p>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => setMode("block")}
-                        className="w-full p-4 rounded-xl glass flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
-                      >
-                        <Ban className="w-5 h-5 text-red-400" />
-                        <div>
-                          <p className="text-white text-sm font-medium">Block</p>
-                          <p className="text-white/30 text-xs">Silently block — they won't know</p>
-                        </div>
-                      </button>
                     </div>
-                    <button onClick={handleClose} className="w-full mt-4 py-3 text-white/40 text-sm">
+
+                    <button
+                      onClick={() => setMode("report")}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 13,
+                        width: "100%",
+                        marginTop: 16,
+                        padding: "14px 15px",
+                        textAlign: "left",
+                        background: "rgba(255,170,60,.08)",
+                        border: "1px solid rgba(255,180,84,.34)",
+                        cursor: "pointer",
+                        clipPath: clip(13),
+                      }}
+                    >
+                      <FlagIcon />
+                      <span>
+                        <span style={{ display: "block", font: `600 14.5px/1 ${FONT}`, color: "#ffd9a0" }}>
+                          Report
+                        </span>
+                        <span style={{ display: "block", marginTop: 7, font: `400 12px/1.4 ${FONT}`, color: "#c2a887" }}>
+                          Flag for harassment, threats, or underage
+                        </span>
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => setMode("block")}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 13,
+                        width: "100%",
+                        marginTop: 10,
+                        padding: "14px 15px",
+                        textAlign: "left",
+                        background: "rgba(255,90,90,.08)",
+                        border: "1px solid rgba(255,120,120,.34)",
+                        cursor: "pointer",
+                        clipPath: clip(13),
+                      }}
+                    >
+                      <BlockIcon />
+                      <span>
+                        <span style={{ display: "block", font: `600 14.5px/1 ${FONT}`, color: "#ffb3b3" }}>
+                          Block
+                        </span>
+                        <span style={{ display: "block", marginTop: 7, font: `400 12px/1.4 ${FONT}`, color: "#c99a9a" }}>
+                          Silently block — they won't know
+                        </span>
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={handleClose}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                        height: 48,
+                        marginTop: 12,
+                        border: 0,
+                        background: "transparent",
+                        color: "#a6cbec",
+                        font: `600 12.5px/1 ${FONT}`,
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                    >
                       Cancel
                     </button>
                   </>
                 ) : mode === "report" ? (
                   <>
-                    <div className="flex items-center gap-3 mb-5">
-                      <button onClick={() => setMode(null)} className="w-8 h-8 rounded-lg glass flex items-center justify-center">
-                        <X className="w-4 h-4 text-white/40" />
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                      <button
+                        onClick={() => setMode(null)}
+                        aria-label="Back"
+                        style={{
+                          flex: "none",
+                          width: 34,
+                          height: 34,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "rgba(8,26,54,.66)",
+                          border: "1px solid rgba(105,190,255,.26)",
+                          cursor: "pointer",
+                          clipPath: clip(10),
+                        }}
+                      >
+                        <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
                       </button>
-                      <h3 className="text-white font-semibold">Report user</h3>
+                      <div style={{ ...title, fontSize: 17 }}>Report user</div>
                     </div>
-                    <p className="text-white/40 text-xs mb-3">Select a reason</p>
-                    <div className="space-y-2 mb-4 max-h-48 overflow-y-auto scrollbar-hide">
-                      {REPORT_REASONS.map((r) => (
-                        <button
-                          key={r.value}
-                          onClick={() => setReason(r.value)}
-                          className={`w-full p-3 rounded-xl text-left text-sm transition-colors ${
-                            reason === r.value ? "glass-strong ring-1 ring-blue-500/50 text-white" : "glass text-white/50"
-                          }`}
-                        >
-                          {r.label}
-                        </button>
-                      ))}
+                    <div style={{ ...subtitle, marginTop: 0, marginBottom: 10 }}>Select a reason</div>
+                    <div
+                      className="scrollbar-hide"
+                      style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 192, overflowY: "auto", marginBottom: 14 }}
+                    >
+                      {REPORT_REASONS.map((r) => {
+                        const active = reason === r.value;
+                        return (
+                          <button
+                            key={r.value}
+                            onClick={() => setReason(r.value)}
+                            style={{
+                              width: "100%",
+                              padding: "12px 14px",
+                              textAlign: "left",
+                              font: `500 13.5px/1 ${FONT}`,
+                              color: active ? "#fff" : "#8fb4dc",
+                              background: active ? "rgba(43,114,232,.22)" : "rgba(8,26,54,.5)",
+                              border: active ? "1px solid rgba(120,190,255,.7)" : "1px solid rgba(105,190,255,.2)",
+                              cursor: "pointer",
+                              clipPath: clip(11),
+                            }}
+                          >
+                            {r.label}
+                          </button>
+                        );
+                      })}
                     </div>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Add details (optional)…"
                       rows={3}
-                      className="w-full px-4 py-3 rounded-xl glass text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-sm resize-none mb-4"
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        background: "rgba(8,26,54,.72)",
+                        border: "1px solid rgba(105,190,255,.3)",
+                        outline: "none",
+                        color: "#dceeff",
+                        font: `500 13.5px/1.5 ${FONT}`,
+                        resize: "none",
+                        marginBottom: 14,
+                        clipPath: clip(11),
+                      }}
                     />
-                    {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+                    {error && (
+                      <p style={{ font: `500 12px/1.4 ${FONT}`, color: "#ff8080", marginBottom: 12 }}>{error}</p>
+                    )}
                     <button
                       onClick={handleReport}
                       disabled={status === "submitting"}
-                      className="w-full py-3.5 rounded-2xl bg-red-500/20 text-red-400 font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 9,
+                        width: "100%",
+                        padding: "14px 15px",
+                        background: "rgba(255,90,90,.12)",
+                        border: "1px solid rgba(255,120,120,.4)",
+                        color: "#ffb3b3",
+                        font: `600 14px/1 ${FONT}`,
+                        letterSpacing: "0.04em",
+                        cursor: status === "submitting" ? "default" : "pointer",
+                        clipPath: clip(13),
+                      }}
                     >
-                      {status === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
+                      {status === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlagIcon />}
                       Submit Report
                     </button>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-3 mb-5">
-                      <button onClick={() => setMode(null)} className="w-8 h-8 rounded-lg glass flex items-center justify-center">
-                        <X className="w-4 h-4 text-white/40" />
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                      <button
+                        onClick={() => setMode(null)}
+                        aria-label="Back"
+                        style={{
+                          flex: "none",
+                          width: 34,
+                          height: 34,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "rgba(8,26,54,.66)",
+                          border: "1px solid rgba(105,190,255,.26)",
+                          cursor: "pointer",
+                          clipPath: clip(10),
+                        }}
+                      >
+                        <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
                       </button>
-                      <h3 className="text-white font-semibold">Block user</h3>
+                      <div style={{ ...title, fontSize: 17 }}>Block user</div>
                     </div>
-                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-4">
-                      <p className="text-white/60 text-sm leading-relaxed">
-                        Blocking is <span className="text-white font-medium">silent</span> — they won't be notified and won't be able to detect it. They can't wave at you, message you, or see your profile.
+                    <div
+                      style={{
+                        padding: 15,
+                        marginBottom: 14,
+                        background: "rgba(255,90,90,.08)",
+                        border: "1px solid rgba(255,120,120,.28)",
+                        clipPath: clip(13),
+                      }}
+                    >
+                      <p style={{ margin: 0, font: `400 13px/1.55 ${FONT}`, color: "#c9d9ec" }}>
+                        Blocking is <span style={{ color: "#fff", fontWeight: 600 }}>silent</span> — they won't be
+                        notified and won't be able to detect it. They can't wave at you, message you, or see your
+                        profile.
                       </p>
                     </div>
-                    {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+                    {error && (
+                      <p style={{ font: `500 12px/1.4 ${FONT}`, color: "#ff8080", marginBottom: 12 }}>{error}</p>
+                    )}
                     <button
                       onClick={handleBlock}
                       disabled={status === "submitting"}
-                      className="w-full py-3.5 rounded-2xl bg-red-500/20 text-red-400 font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 9,
+                        width: "100%",
+                        padding: "14px 15px",
+                        background: "rgba(255,90,90,.12)",
+                        border: "1px solid rgba(255,120,120,.4)",
+                        color: "#ffb3b3",
+                        font: `600 14px/1 ${FONT}`,
+                        letterSpacing: "0.04em",
+                        cursor: status === "submitting" ? "default" : "pointer",
+                        clipPath: clip(13),
+                      }}
                     >
-                      {status === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
+                      {status === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <BlockIcon />}
                       Confirm Block
                     </button>
                   </>
