@@ -33,7 +33,7 @@ export default function Leaderboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pb-24 pt-20 px-4">
+      <div className="h-full overflow-y-auto pb-24 pt-20 px-4">
         <div className="shimmer rounded-2xl h-40 mb-4" />
         <div className="shimmer rounded-2xl h-64 mb-4" />
         <div className="space-y-2">
