@@ -151,7 +151,7 @@ export default function Messages() {
                 >
                   <GlassCard className="!p-3 ai-border" strong>
                     <div className="flex items-center gap-3 mb-3">
-                      <UserAvatar name={getUserDisplayName(sender)} size="md" isOnline={sender?.is_online} plan={sender?.plan} />
+                      <UserAvatar name={getUserDisplayName(sender)} size="md" isOnline={sender?.is_online} plan={sender?.plan} gender={sender?.gender} />
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-medium text-sm truncate">{getUserDisplayName(sender)}</p>
                         <p className="text-white/40 text-xs truncate">
