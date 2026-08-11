@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/AuthContext";
 const NYC_ZIPS = ["100", "101", "102", "103", "104", "110", "111", "112", "113", "114", "116"];
 
 const SECTION_GAP = "clamp(8px, 2vh, 20px)";
+const TIGHT_GAP = "clamp(8px, 1.6vh, 16px)";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -182,14 +183,14 @@ export default function Welcome() {
         </div>
 
         {/* Location note */}
-        <p className="dense-areas-note" style={{ position: "relative", zIndex: 1, margin: 0, marginTop: SECTION_GAP, textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", lineHeight: 1.7, letterSpacing: "0.15em", textTransform: "uppercase", color: "#8fb9e2", flex: "none" }}>
+        <p className="dense-areas-note" style={{ position: "relative", zIndex: 1, margin: 0, marginTop: TIGHT_GAP, textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", lineHeight: 1.7, letterSpacing: "0.15em", textTransform: "uppercase", color: "#8fb9e2", flex: "none" }}>
           NEX2 works best in dense areas —<br />we're starting in <span style={{ color: "#cfe8ff", background: "rgba(60,140,255,0.3)", border: "1px solid rgba(120,200,255,0.5)", padding: "1px 5px" }}>NYC</span> and expanding city by city.
         </p>
 
         {/* CTA buttons */}
         <button
           onClick={() => navigate("/register")}
-          style={{ position: "relative", zIndex: 1, overflow: "hidden", width: "100%", height: "clamp(46px, 7vh, 58px)", marginTop: SECTION_GAP, border: "1.5px solid transparent", borderRadius: 2, background: "linear-gradient(180deg, #0a1c3e, #071228) padding-box, linear-gradient(100deg, #3b6bff, #9b4dff 48%, #2fd4d4) border-box", color: "#fff", fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: "clamp(13px, 3.6vw, 16px)", letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer", transition: "box-shadow 0.25s ease, transform 0.25s ease, filter 0.25s ease", boxShadow: "0 0 22px rgba(80,110,255,0.45), inset 0 0 22px rgba(70,120,255,0.28)", clipPath: "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)", flex: "none" }}
+          style={{ position: "relative", zIndex: 1, overflow: "hidden", width: "100%", height: "clamp(46px, 7vh, 58px)", marginTop: TIGHT_GAP, border: "1.5px solid transparent", borderRadius: 2, background: "linear-gradient(180deg, #0a1c3e, #071228) padding-box, linear-gradient(100deg, #3b6bff, #9b4dff 48%, #2fd4d4) border-box", color: "#fff", fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: "clamp(13px, 3.6vw, 16px)", letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer", transition: "box-shadow 0.25s ease, transform 0.25s ease, filter 0.25s ease", boxShadow: "0 0 22px rgba(80,110,255,0.45), inset 0 0 22px rgba(70,120,255,0.28)", clipPath: "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)", flex: "none" }}
         >
           <span aria-hidden="true" style={{ position: "absolute", top: -1, left: "50%", width: 70, height: 2, marginLeft: -35, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(190,220,255,0.95), rgba(255,255,255,0))", filter: "blur(0.5px)" }} />
           <span aria-hidden="true" style={{ position: "absolute", top: 0, bottom: 0, width: 60, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.30), rgba(255,255,255,0))", animation: "nxsheen 4.5s ease-in-out infinite" }} />
@@ -198,19 +199,19 @@ export default function Welcome() {
 
         <button
           onClick={() => navigate("/login")}
-          style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "clamp(46px, 7vh, 58px)", marginTop: SECTION_GAP, background: "rgba(10,30,60,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(120,190,255,0.32)", color: "#bcd9f5", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: "clamp(13px, 3.6vw, 16px)", letterSpacing: "0.17em", textTransform: "uppercase", cursor: "pointer", clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)", flex: "none" }}
+          style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "clamp(46px, 7vh, 58px)", marginTop: TIGHT_GAP, background: "rgba(10,30,60,0.5)", backdropFilter: "blur(8px)", border: "1px solid rgba(120,190,255,0.32)", color: "#bcd9f5", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: "clamp(13px, 3.6vw, 16px)", letterSpacing: "0.17em", textTransform: "uppercase", cursor: "pointer", clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)", flex: "none" }}
         >
           I already have an account ›
         </button>
 
         <Link
           to="/company"
-          style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: SECTION_GAP, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(139,185,226,0.7)", textDecoration: "none", flex: "none" }}
+          style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: TIGHT_GAP, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(139,185,226,0.7)", textDecoration: "none", flex: "none" }}
         >
           <Building2 style={{ width: 12, height: 12 }} /> Learn about NEX2 →
         </Link>
 
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: SECTION_GAP, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", letterSpacing: "0.1em", color: "rgba(139,185,226,0.4)", flex: "none" }}>
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: TIGHT_GAP, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: "clamp(8px, 2.4vw, 10px)", letterSpacing: "0.1em", color: "rgba(139,185,226,0.4)", flex: "none" }}>
           © 2026 NEX2, Inc. All Rights Reserved.
         </div>
       </main>
