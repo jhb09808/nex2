@@ -8,6 +8,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import ThreadRow from "@/components/nex/messages/ThreadRow";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
+import messagesBg from "@/assets/messages-bg.webp";
 
 export default function Messages() {
   const navigate = useNavigate();
@@ -109,7 +110,15 @@ export default function Messages() {
   }
 
   return (
-    <div className="px-4 pt-6 safe-top h-full flex flex-col overflow-hidden">
+    <div
+      className="px-4 pt-6 safe-top h-full flex flex-col overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(1,6,14,0.62) 0%, rgba(1,6,14,0.5) 42%, rgba(1,6,14,0.82) 100%), url(${messagesBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center top",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       {/* Header */}
       <div className="flex items-end justify-between mb-5 pr-12 flex-none">
         <div>
