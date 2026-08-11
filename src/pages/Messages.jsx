@@ -229,7 +229,7 @@ export default function Messages() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      {convo.connection_made && <span className="text-[11px] flex-none">\u{1F91D}</span>}
+                      {convo.connection_made && <span className="text-[11px] flex-none">🤝</span>}
                       <p className="text-white/40 text-xs truncate">{convo.last_message || "Start a conversation"}</p>
                     </div>
                   </div>
