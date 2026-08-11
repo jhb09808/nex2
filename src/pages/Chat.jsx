@@ -258,20 +258,25 @@ export default function Chat() {
     <div className="flex flex-col h-full bg-[hsl(0,0%,4%)] max-w-lg mx-auto">
       <NotificationListener />
       {/* Header */}
-      <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top flex-none">
+      <div className="glass-strong px-4 py-3 flex items-center gap-3 safe-top flex-none border-b border-white/5">
         <button onClick={() => navigate("/messages")} className="w-9 h-9 rounded-xl glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5 text-white/60" />
         </button>
         <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} />
         <div className="flex-1 min-w-0">
-          <p className="text-white font-medium text-sm truncate">{getUserDisplayName(otherUser)}</p>
-          <p className="text-white/30 text-[10px]">
-            {conversation?.connection_made
-              ? "🤝 Connected in real life"
-              : otherUser?.is_online
-              ? "Online"
-              : "Away"}
-          </p>
+          <p className="text-white font-semibold text-sm truncate">{getUserDisplayName(otherUser)}</p>
+          <div className="flex items-center gap-1.5">
+            {!conversation?.connection_made && (
+              <span className={`w-1.5 h-1.5 rounded-full flex-none ${otherUser?.is_online ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" : "bg-white/25"}`} />
+            )}
+            <p className="text-white/40 text-[10px] truncate">
+              {conversation?.connection_made
+                ? "🤝 Connected in real life"
+                : otherUser?.is_online
+                ? "Online"
+                : "Away"}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setShowIcebreaker(true)}
@@ -323,13 +328,13 @@ export default function Chat() {
                 <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} className="flex-shrink-0" />
               )}
               <div
-                className={`max-w-[65%] px-4 py-2.5 rounded-2xl ${
+                className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl shadow-sm ${
                   isMe
-                    ? "gradient-blue text-white rounded-br-md"
-                    : "glass text-white/80 rounded-bl-md"
+                    ? "gradient-blue text-white rounded-br-sm glow-blue-sm"
+                    : "glass text-white/90 rounded-bl-sm border border-white/5"
                 }`}
               >
-                <p className="text-sm leading-relaxed">{msg.content}</p>
+                <p className="text-sm leading-relaxed break-words">{msg.content}</p>
                 <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : ""}`}>
                   <span className={`text-[10px] ${isMe ? "text-white/50" : "text-white/30"}`}>
                     {moment(msg.created_date).format("h:mm A")}
@@ -373,7 +378,7 @@ export default function Chat() {
             <button className="w-9 h-9 rounded-xl glass flex items-center justify-center flex-shrink-0">
               <Image className="w-5 h-5 text-white/40" />
             </button>
-            <div className="flex-1 glass rounded-xl flex items-center px-3 py-2">
+            <div className="flex-1 glass rounded-xl flex items-center px-3 py-2 border border-white/5 focus-within:border-blue-500/30 focus-within:ring-1 focus-within:ring-blue-500/20 transition-colors">
               <input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
@@ -389,7 +394,7 @@ export default function Chat() {
               <button
                 onClick={handleSend}
                 disabled={sending}
-                className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
+                className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform glow-blue-sm"
               >
                 <Send className="w-4 h-4 text-white" />
               </button>
