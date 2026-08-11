@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflow: "hidden" }}>
+    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflowY: "auto", overflowX: "hidden" }}>
       <main
         style={{
           position: "relative",
