@@ -44,8 +44,8 @@ export default function LandingRadar() {
       {/* Disc box — the positioning context for ALL children */}
       <div style={{
         position: "relative",
-        width: DISC_SIZE,
-        height: DISC_SIZE,
+        height: `min(${DISC_SIZE}, 100%)`,
+        aspectRatio: "1 / 1",
         flex: "none",
         margin: "auto",
       }}>
