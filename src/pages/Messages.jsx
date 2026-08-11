@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, Edit3, Hand, Check, X, Loader2 } from "lucide-react";
+import { Search, Edit3, Hand, Check, X, Loader2, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
@@ -93,6 +93,12 @@ export default function Messages() {
     return profiles[meId] || profiles[convo.participants?.find((id) => id !== convo.created_by_id)] || null;
   };
 
+  const filteredConversations = conversations.filter((convo) => {
+    if (!search.trim()) return true;
+    const other = getOtherParticipant(convo);
+    return (getUserDisplayName(other) || "").toLowerCase().includes(search.trim().toLowerCase());
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -104,8 +110,21 @@ export default function Messages() {
   return (
     <div className="px-4 pt-6 safe-top h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 pr-12 flex-none">
-        <h1 className="text-2xl font-bold text-white">Messages</h1>
+      <div className="flex items-end justify-between mb-5 pr-12 flex-none">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Messages</h1>
+          <p className="text-white/30 text-xs mt-0.5">
+            {conversations.length > 0
+              ? `${conversations.length} conversation${conversations.length !== 1 ? "s" : ""}`
+              : "Your connections live here"}
+          </p>
+        </div>
+        {waves.length > 0 && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+            <Hand className="w-3.5 h-3.5 text-blue-400" />
+            <span className="text-blue-300 text-xs font-semibold">{waves.length}</span>
+          </div>
+        )}
       </div>
 
       {/* Incoming Chat Requests */}
@@ -127,7 +146,7 @@ export default function Messages() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                 >
-                  <GlassCard className="!p-3" strong>
+                  <GlassCard className="!p-3 ai-border" strong>
                     <div className="flex items-center gap-3 mb-3">
                       <UserAvatar name={getUserDisplayName(sender)} size="md" isOnline={sender?.is_online} plan={sender?.plan} />
                       <div className="flex-1 min-w-0">
@@ -175,7 +194,7 @@ export default function Messages() {
       )}
 
       {/* Search */}
-      <div className="glass rounded-xl flex items-center gap-3 px-3 py-2.5 mb-4 flex-none">
+      <div className="glass rounded-xl flex items-center gap-3 px-3.5 py-3 mb-4 flex-none border border-white/5 focus-within:border-blue-500/30 focus-within:ring-1 focus-within:ring-blue-500/20 transition-colors">
         <Search className="w-5 h-5 text-white/30" />
         <input
           value={search}
@@ -186,9 +205,9 @@ export default function Messages() {
       </div>
 
       {/* Conversation List */}
-      {conversations.length > 0 ? (
+      {filteredConversations.length > 0 ? (
         <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pb-24">
-          {conversations.map((convo, i) => {
+          {filteredConversations.map((convo, i) => {
             const other = getOtherParticipant(convo);
             return (
               <motion.div
@@ -198,23 +217,35 @@ export default function Messages() {
                 transition={{ delay: i * 0.03 }}
               >
                 <GlassCard
-                  className="flex items-center gap-3 !p-3"
+                  className="flex items-center gap-3 !p-3 active:scale-[0.99] transition-transform"
                   onClick={() => navigate(`/chat/${convo.id}`)}
                 >
                   <UserAvatar name={getUserDisplayName(other)} size="md" isOnline={other?.is_online} plan={other?.plan} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <p className="text-white font-medium text-sm truncate">{getUserDisplayName(other)}</p>
-                      <span className="text-white/30 text-[10px]">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <p className="text-white font-semibold text-sm truncate">{getUserDisplayName(other)}</p>
+                      <span className="text-white/30 text-[10px] flex-none">
                         {convo.last_message_at ? moment(convo.last_message_at).fromNow() : ""}
                       </span>
                     </div>
-                    <p className="text-white/40 text-xs truncate">{convo.last_message || "Start a conversation"}</p>
+                    <div className="flex items-center gap-1.5">
+                      {convo.connection_made && <span className="text-[11px] flex-none">\u{1F91D}</span>}
+                      <p className="text-white/40 text-xs truncate">{convo.last_message || "Start a conversation"}</p>
+                    </div>
                   </div>
+                  <ChevronRight className="w-4 h-4 text-white/15 flex-none" />
                 </GlassCard>
               </motion.div>
             );
           })}
+        </div>
+      ) : search.trim() ? (
+        <div className="flex flex-col items-center justify-center pt-24 text-center">
+          <div className="w-16 h-16 rounded-full glass-strong flex items-center justify-center mb-4">
+            <Search className="w-7 h-7 text-white/20" />
+          </div>
+          <p className="text-white/40 text-sm mb-1">No matches for “{search.trim()}”</p>
+          <p className="text-white/20 text-xs">Try a different name</p>
         </div>
       ) : waves.length === 0 ? (
         <div className="flex flex-col items-center justify-center pt-24 text-center">
