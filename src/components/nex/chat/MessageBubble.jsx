@@ -16,7 +16,7 @@ export default function MessageBubble({ message, isMe, otherUser, showAvatar }) 
       {!isMe && (
         <span style={{ flex: "none", width: 28 }}>
           {showAvatar && otherUser ? (
-            <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} interests={otherUser.interests} />
+            <UserAvatar name={getUserDisplayName(otherUser)} size="xs" plan={otherUser.plan} interests={otherUser.interests} gender={otherUser.gender} />
           ) : null}
         </span>
       )}
