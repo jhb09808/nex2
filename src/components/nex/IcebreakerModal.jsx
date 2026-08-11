@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, RefreshCw, Send, Snowflake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import Portal from "@/components/nex/Portal";
 
 export default function IcebreakerModal({ open, onClose, myProfile, otherUser, onUseSuggestion }) {
   const [loading, setLoading] = useState(false);
@@ -60,7 +61,8 @@ Return ONLY the message text.`;
           },
         },
       });
-      setSuggestion(res?.message || res);
+      const text = typeof res === "string" ? res : res?.message;
+      setSuggestion(typeof text === "string" ? text : null);
     } catch (err) {
       console.error(err);
       setSuggestion(null);
@@ -84,97 +86,99 @@ Return ONLY the message text.`;
   };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
-          onClick={onClose}
-        >
+    <Portal>
+      <AnimatePresence>
+        {open && (
           <motion.div
-            initial={{ scale: 0.85, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.85, opacity: 0, y: 20 }}
-            transition={{ type: "spring", damping: 24, stiffness: 320 }}
-            onClick={(e) => e.stopPropagation()}
-            className="cyber-frame rounded-3xl p-6 w-full max-w-sm relative overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+            onClick={onClose}
           >
-            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 24, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="cyber-frame rounded-3xl p-6 w-full max-w-sm relative overflow-hidden"
+            >
+              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
-            <button onClick={onClose} className="absolute top-3 right-3 z-10">
-              <X className="w-5 h-5 text-white/30" />
-            </button>
+              <button onClick={onClose} className="absolute top-3 right-3 z-10">
+                <X className="w-5 h-5 text-white/30" />
+              </button>
 
-            {/* Ice Cube */}
-            <div className="flex justify-center mb-4 mt-2">
-              <IceCube matchPct={matchPct} loading={loading} />
-            </div>
-
-            {/* Match Percentage */}
-            <div className="text-center mb-3">
-              <p className="text-4xl font-cyber font-bold gradient-text">{matchPct}%</p>
-              <p className="text-blue-400/40 text-[10px] font-cyber tracking-widest uppercase mt-1">
-                Connection Match
-              </p>
-            </div>
-
-            {/* Shared Interests */}
-            {sharedInterests.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-                {sharedInterests.slice(0, 5).map((interest) => (
-                  <span
-                    key={interest}
-                    className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-300/80 border border-blue-500/15"
-                  >
-                    {interest}
-                  </span>
-                ))}
+              {/* Ice Cube */}
+              <div className="flex justify-center mb-4 mt-2">
+                <IceCube matchPct={matchPct} loading={loading} />
               </div>
-            )}
-            {sharedInterests.length === 0 && (
-              <p className="text-center text-white/30 text-xs mb-4">
-                No direct overlap — but opposites connect too ✨
-              </p>
-            )}
 
-            {/* Suggestion */}
-            <div className="glass rounded-2xl p-4 mb-4 min-h-[80px] flex items-center justify-center">
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <Snowflake className="w-4 h-4 text-blue-400 animate-pulse" />
-                  <p className="text-white/40 text-sm font-cyber">Breaking the ice...</p>
+              {/* Match Percentage */}
+              <div className="text-center mb-3">
+                <p className="text-4xl font-cyber font-bold gradient-text">{matchPct}%</p>
+                <p className="text-blue-400/40 text-[10px] font-cyber tracking-widest uppercase mt-1">
+                  Connection Match
+                </p>
+              </div>
+
+              {/* Shared Interests */}
+              {sharedInterests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 justify-center mb-4">
+                  {sharedInterests.slice(0, 5).map((interest) => (
+                    <span
+                      key={interest}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-300/80 border border-blue-500/15"
+                    >
+                      {interest}
+                    </span>
+                  ))}
                 </div>
-              ) : suggestion ? (
-                <p className="text-white/80 text-sm leading-relaxed text-center">"{suggestion}"</p>
-              ) : (
-                <p className="text-white/30 text-sm">Tap refresh to try again</p>
               )}
-            </div>
+              {sharedInterests.length === 0 && (
+                <p className="text-center text-white/30 text-xs mb-4">
+                  No direct overlap — but opposites connect too ✨
+                </p>
+              )}
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={generateIcebreaker}
-                disabled={loading}
-                className="w-12 py-3 rounded-xl cyber-input text-white/60 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-40"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              </button>
-              <button
-                onClick={handleUse}
-                disabled={loading || !suggestion}
-                className="flex-1 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40"
-              >
-                <Send className="w-4 h-4" /> USE ICEBREAKER
-              </button>
-            </div>
+              {/* Suggestion */}
+              <div className="glass rounded-2xl p-4 mb-4 min-h-[80px] flex items-center justify-center">
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Snowflake className="w-4 h-4 text-blue-400 animate-pulse" />
+                    <p className="text-white/40 text-sm font-cyber">Breaking the ice...</p>
+                  </div>
+                ) : suggestion ? (
+                  <p className="text-white/80 text-sm leading-relaxed text-center">"{suggestion}"</p>
+                ) : (
+                  <p className="text-white/30 text-sm">Tap refresh to try again</p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={generateIcebreaker}
+                  disabled={loading}
+                  className="w-12 py-3 rounded-xl cyber-input text-white/60 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-40"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                </button>
+                <button
+                  onClick={handleUse}
+                  disabled={loading || !suggestion}
+                  className="flex-1 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-40"
+                >
+                  <Send className="w-4 h-4" /> USE ICEBREAKER
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </Portal>
   );
 }
 
