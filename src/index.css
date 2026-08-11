@@ -453,3 +453,7 @@
   0% { transform: translateX(-100%); }
   60%, 100% { transform: translateX(200%); }
 }
+
+@media (max-height: 700px) {
+  .dense-areas-note { display: none !important; }
+}
