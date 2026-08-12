@@ -5,6 +5,7 @@ import ProximityMatchNudge from "@/components/nex/ProximityMatchNudge";
 import VerificationGate from "@/components/nex/safety/VerificationGate";
 import NotificationListener from "@/components/nex/NotificationListener";
 import { base44 } from "@/api/base44Client";
+import ScaleToFit from "@/components/nex/ScaleToFit";
 
 export default function AppLayout() {
   const [verified, setVerified] = useState(false);
@@ -37,9 +38,9 @@ export default function AppLayout() {
 
   if (checking) {
     return (
-      <div className="h-full bg-black flex items-center justify-center max-w-lg mx-auto">
+      <ScaleToFit><div className="h-[874px] w-[402px] bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      </div>
+      </div></ScaleToFit>
     );
   }
 
@@ -49,18 +50,22 @@ export default function AppLayout() {
 
   if (!verified) {
     return (
-      <div className="max-w-lg mx-auto">
-        <VerificationGate profile={profile} onComplete={() => window.location.reload()} />
-      </div>
+      <ScaleToFit>
+        <div className="h-[874px] w-[402px] overflow-hidden">
+          <VerificationGate profile={profile} onComplete={() => window.location.reload()} />
+        </div>
+      </ScaleToFit>
     );
   }
 
   return (
-    <div className="h-full bg-black max-w-lg mx-auto relative overflow-hidden flex flex-col">
-      <NotificationListener />
-      <ProximityMatchNudge />
-      <Outlet />
-      <NavMenu />
-    </div>
+    <ScaleToFit>
+      <div className="h-[874px] w-[402px] bg-black relative overflow-hidden flex flex-col">
+        <NotificationListener />
+        <ProximityMatchNudge />
+        <Outlet />
+        <NavMenu />
+      </div>
+    </ScaleToFit>
   );
 }

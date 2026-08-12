@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, RefreshCw, Send } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import Portal from "@/components/nex/Portal";
 
 const PANEL_CLIP = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
 const ICON_CLIP = "polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)";
@@ -101,7 +100,7 @@ Return ONLY the message text.`;
   };
 
   return (
-    <Portal>
+    <>
       <style>{"@keyframes nxsheen{0%,12%{transform:translateX(-60px)}55%,100%{transform:translateX(340px)}}"}</style>
       <AnimatePresence>
         {open && (
@@ -109,7 +108,7 @@ Return ONLY the message text.`;
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center"
+            className="absolute inset-0 z-[200] flex items-center justify-center"
             style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
             onClick={onClose}
           >
@@ -236,6 +235,6 @@ Return ONLY the message text.`;
           </motion.div>
         )}
       </AnimatePresence>
-    </Portal>
+    </>
   );
 }

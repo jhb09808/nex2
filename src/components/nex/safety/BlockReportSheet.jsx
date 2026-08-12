@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import Portal from "@/components/nex/Portal";
 
 const REPORT_REASONS = [
   { value: "harassment", label: "Harassment" },
@@ -125,7 +124,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
   };
 
   return (
-    <Portal>
+    <>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -133,7 +132,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 z-[200] flex items-center justify-center"
+            className="absolute inset-0 z-[200] flex items-center justify-center"
             style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
           >
             <motion.div
@@ -147,7 +146,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
                 position: "relative",
                 width: "100%",
                 maxWidth: 380,
-                maxHeight: "85vh",
+                maxHeight: 740,
                 overflowY: "auto",
                 padding: 16,
                 background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
@@ -428,6 +427,6 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
           </motion.div>
         )}
       </AnimatePresence>
-    </Portal>
+    </>
   );
 }

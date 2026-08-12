@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
 import VerifyEmailPanel from "@/components/nex/auth/VerifyEmailPanel";
+import ScaleToFit from "@/components/nex/ScaleToFit";
 
 const BG_IMAGE = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/6b451b6af_login_bg.png";
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
@@ -45,15 +46,14 @@ export default function Login() {
   };
 
   return (
-    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflowY: "auto", overflowX: "hidden" }}>
+    <ScaleToFit>
+    <div style={{ position: "relative", height: 874, display: "flex", justifyContent: "center", overflow: "hidden" }}>
       <main
         style={{
           position: "relative",
           overflow: "hidden",
-          minHeight: "100dvh",
-          maxWidth: 440,
-          width: "100%",
-          margin: "0 auto",
+          height: 874,
+          width: 402,
           display: "flex",
           flexDirection: "column",
           padding: "calc(24px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))",
@@ -268,5 +268,6 @@ export default function Login() {
         </div>
       </main>
     </div>
+    </ScaleToFit>
   );
 }

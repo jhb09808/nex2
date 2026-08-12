@@ -292,7 +292,7 @@ export default function NearbyMap() {
 
   if (areaRestricted?.restricted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-8 text-center">
+      <div className="h-[874px] flex items-center justify-center px-8 text-center">
         <div>
           <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-10 h-10 text-amber-400" />
@@ -306,7 +306,7 @@ export default function NearbyMap() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[874px] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );

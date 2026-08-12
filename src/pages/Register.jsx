@@ -5,6 +5,7 @@ import { Loader2, ArrowRight } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import ScaleToFit from "@/components/nex/ScaleToFit";
 
 const BG_IMAGE = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/6b451b6af_login_bg.png";
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
@@ -20,15 +21,14 @@ const STRENGTH_NAMES = ["", "Weak", "Fair", "Strong"];
 
 function CyberShell({ children, footer }) {
   return (
-    <div style={{ position: "relative", height: "100dvh", display: "flex", justifyContent: "center", overflowY: "auto", overflowX: "hidden" }}>
+    <ScaleToFit>
+    <div style={{ position: "relative", height: 874, display: "flex", justifyContent: "center", overflow: "hidden" }}>
       <main
         style={{
           position: "relative",
           overflow: "hidden",
-          minHeight: "100dvh",
-          maxWidth: 440,
-          width: "100%",
-          margin: "0 auto",
+          height: 874,
+          width: 402,
           display: "flex",
           flexDirection: "column",
           padding: "calc(24px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))",
@@ -85,6 +85,7 @@ function CyberShell({ children, footer }) {
         </div>
       </main>
     </div>
+    </ScaleToFit>
   );
 }
 
