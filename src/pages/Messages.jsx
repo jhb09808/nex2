@@ -111,7 +111,7 @@ export default function Messages() {
 
   return (
     <div
-      className="px-4 pt-6 safe-top h-full flex flex-col overflow-hidden"
+      className="px-5 pt-6 safe-top h-full flex flex-col overflow-hidden"
       style={{
         backgroundImage: `linear-gradient(180deg, rgba(1,6,14,0.35) 0%, rgba(1,6,14,0.25) 45%, rgba(1,6,14,0.6) 100%), url(${messagesBg})`,
         backgroundSize: "cover",

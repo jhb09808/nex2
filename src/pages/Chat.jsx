@@ -284,7 +284,7 @@ export default function Chat() {
       {/* Header */}
       <div
         className="safe-top flex-none"
-        style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 11, padding: "0 14px 12px", borderBottom: "1px solid rgba(105,190,255,.16)" }}
+        style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 11, padding: "0 20px 12px", borderBottom: "1px solid rgba(105,190,255,.16)" }}
       >
         <button onClick={() => navigate("/messages")} style={ICON_BTN} aria-label="Back">
           <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
@@ -323,7 +323,7 @@ export default function Chat() {
       {/* Messages */}
       <div
         className="flex-1 min-h-0 overflow-y-auto"
-        style={{ position: "relative", zIndex: 1, padding: "18px 16px 10px", display: "flex", flexDirection: "column", gap: 16 }}
+        style={{ position: "relative", zIndex: 1, padding: "18px 20px 10px", display: "flex", flexDirection: "column", gap: 16 }}
       >
         {messages.map((msg, i) => {
           const isMe = msg.sender_id === me?.id;
@@ -395,7 +395,7 @@ export default function Chat() {
           />
         </div>
       ) : (
-        <div className="safe-bottom flex-none" style={{ position: "relative", zIndex: 3, padding: "12px 14px 0", borderTop: "1px solid rgba(105,190,255,.16)" }}>
+        <div className="safe-bottom flex-none" style={{ position: "relative", zIndex: 3, padding: "12px 20px 0", borderTop: "1px solid rgba(105,190,255,.16)" }}>
           <MessageCounter sentCount={sentCount} max={MAX_MESSAGES} />
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
             <button style={{ ...ICON_BTN, width: 44, height: 44 }} aria-label="Send image">
