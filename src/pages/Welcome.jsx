@@ -69,7 +69,7 @@ export default function Welcome() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px))",
+          padding: "calc(20px + env(safe-area-inset-top, 0px)) 20px 24px",
           background: "radial-gradient(120% 78% at 50% 16%, #0d2a58 0%, #061428 46%, #020710 100%)",
         }}
       >

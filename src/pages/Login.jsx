@@ -53,7 +53,7 @@ export default function Login() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "calc(24px + env(safe-area-inset-top, 0px)) 22px calc(28px + env(safe-area-inset-bottom, 0px))",
+          padding: "calc(24px + env(safe-area-inset-top, 0px)) 22px 28px",
           background: "radial-gradient(120% 55% at 50% 4%, #0d2a58 0%, #061428 42%, #020710 100%)",
         }}
       >
