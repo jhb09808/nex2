@@ -457,3 +457,9 @@
 @media (max-height: 700px) {
   .dense-areas-note { display: none !important; }
 }
+
+/* Inside a ScaleToFit frame the device safe-area insets are already applied by
+   the frame's holder, so the helpers must fall back to their base spacing —
+   otherwise the inset is counted twice and content overflows the design box. */
+.scaled-frame .safe-top { padding-top: 1rem; }
+.scaled-frame .safe-bottom { padding-bottom: 1rem; }

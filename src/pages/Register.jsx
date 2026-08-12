@@ -31,7 +31,7 @@ function CyberShell({ children, footer }) {
           width: 402,
           display: "flex",
           flexDirection: "column",
-          padding: "calc(24px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom))",
+          padding: "24px 22px 28px",
           background: "radial-gradient(120% 60% at 50% 8%, #0d2a58 0%, #061428 44%, #020710 100%)",
         }}
       >
