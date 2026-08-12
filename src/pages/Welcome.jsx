@@ -1,9 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 
-// Landing page content removed. Renders nothing; authenticated users are
-// still redirected into the app.
 export default function Welcome() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -14,5 +12,16 @@ export default function Welcome() {
     }
   }, [isAuthenticated, navigate]);
 
-  return null;
+  return (
+    <div style={{ minHeight: "100dvh", background: "#ffffff", color: "#000000", padding: 24 }}>
+      <h1>NEX2</h1>
+      <p>Discover people nearby who share your interests.</p>
+      <p>
+        <Link to="/register">Get started</Link>
+      </p>
+      <p>
+        <Link to="/login">I already have an account</Link>
+      </p>
+    </div>
+  );
 }
