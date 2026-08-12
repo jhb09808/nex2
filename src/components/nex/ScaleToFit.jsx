@@ -1,11 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 
+// The design is authored at this width. Every fixed pixel value in the pages
+// is relative to it, so locking the width and scaling by it keeps the layout
+// proportional edge-to-edge on any phone.
 const DESIGN_W = 402;
-const DESIGN_H = 874;
 
-export default function ScaleToFit({ children, background = "#01050c", maxScale = 1.35 }) {
-  const [scale, setScale] = useState(0);
+/**
+ * Fills the whole screen instead of letterboxing a fixed-size box.
+ *
+ * The width is scaled to the device (so 402 design px always spans the full
+ * screen width), and the height is whatever the screen gives us, expressed in
+ * design pixels. Pages are height:100%, so their flexible rows — the radar, a
+ * message list, a spacer — absorb the difference. Taller phones get more room,
+ * shorter phones get less, and nothing is boxed in or cropped.
+ */
+export default function ScaleToFit({ children, background = "#01050c" }) {
   const box = useRef(null);
+  const [{ scale, designH }, setFit] = useState({ scale: 0, designH: 0 });
 
   useEffect(() => {
     const el = box.current;
@@ -13,7 +24,8 @@ export default function ScaleToFit({ children, background = "#01050c", maxScale 
     const fit = () => {
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      setScale(Math.min(r.width / DESIGN_W, r.height / DESIGN_H, maxScale));
+      const s = r.width / DESIGN_W;
+      setFit({ scale: s, designH: r.height / s });
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -27,7 +39,7 @@ export default function ScaleToFit({ children, background = "#01050c", maxScale 
       window.visualViewport?.removeEventListener("resize", fit);
       window.visualViewport?.removeEventListener("scroll", fit);
     };
-  }, [maxScale]);
+  }, []);
 
   return (
     <div style={{
@@ -42,10 +54,14 @@ export default function ScaleToFit({ children, background = "#01050c", maxScale 
         <div
           className="scaled-frame"
           style={{
-            width: DESIGN_W, height: DESIGN_H, flex: "none",
-            transform: `scale(${scale})`, transformOrigin: "center center",
+            width: DESIGN_W,
+            height: designH || "100%",
+            flex: "none",
+            transform: `scale(${scale})`,
+            transformOrigin: "center center",
             visibility: scale ? "visible" : "hidden",
-            position: "relative", overflow: "hidden",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           {children}

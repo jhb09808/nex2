@@ -57,7 +57,7 @@ export default function Welcome() {
     <div
       style={{
         position: "relative",
-        height: 874,
+        height: "100%",
         overflow: "hidden",
         display: "flex",
         justifyContent: "center",
@@ -68,8 +68,8 @@ export default function Welcome() {
         style={{
           position: "relative",
           overflow: "hidden",
-          height: 874,
-          width: 402,
+          height: "100%",
+          width: "100%",
           display: "flex",
           flexDirection: "column",
           padding: "20px 20px 24px",

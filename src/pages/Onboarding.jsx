@@ -236,7 +236,7 @@ export default function Onboarding() {
 
   return (
     <ScaleToFit>
-    <div className="h-[874px] w-[402px] cyber-bg px-6 py-8 safe-top safe-bottom flex flex-col overflow-hidden">
+    <div className="h-full w-full cyber-bg px-6 py-8 safe-top safe-bottom flex flex-col overflow-hidden">
       {/* Progress */}
       <div className="flex gap-2 mb-8">
         {[0, 1, 2, 3, 4].map((i) => (
