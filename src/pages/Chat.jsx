@@ -14,7 +14,6 @@ import MessageBubble from "@/components/nex/chat/MessageBubble";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
-import ScaleToFit from "@/components/nex/ScaleToFit";
 
 const MAX_MESSAGES = 20;
 
@@ -277,10 +276,9 @@ export default function Chat() {
   const showPostChatPanel = limitReached || conversationEnded;
 
   return (
-    <ScaleToFit>
     <div
-      className="flex flex-col"
-      style={{ height: 874, width: 402, background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
+      className="flex flex-col w-full"
+      style={{ height: "100dvh", background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
     >
       <NotificationListener />
       {/* Header */}
@@ -441,6 +439,5 @@ export default function Chat() {
         )}
       </AnimatePresence>
     </div>
-    </ScaleToFit>
   );
 }

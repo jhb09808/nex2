@@ -5,7 +5,6 @@ import { ArrowRight, ArrowLeft, MapPin, User, Eye, EyeOff, Shield, Zap, Loader2 
 import { base44 } from "@/api/base44Client";
 import InterestPicker from "@/components/nex/radar/InterestPicker";
 import { MIN_INTEREST_SELECTIONS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
-import ScaleToFit from "@/components/nex/ScaleToFit";
 
 const VISIBILITY_OPTIONS = [
   { value: "anonymous", icon: EyeOff, label: "Anonymous", desc: "Hide your identity completely" },
@@ -235,8 +234,7 @@ export default function Onboarding() {
   ];
 
   return (
-    <ScaleToFit>
-    <div className="h-[874px] w-[402px] cyber-bg px-6 py-8 safe-top safe-bottom flex flex-col overflow-hidden">
+    <div className="cyber-bg px-6 py-8 safe-top safe-bottom flex flex-col w-full" style={{ minHeight: "100dvh" }}>
       {/* Progress */}
       <div className="flex gap-2 mb-8">
         {[0, 1, 2, 3, 4].map((i) => (
@@ -294,6 +292,5 @@ export default function Onboarding() {
         )}
       </div>
     </div>
-    </ScaleToFit>
   );
 }

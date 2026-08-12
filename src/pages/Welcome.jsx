@@ -4,7 +4,6 @@ import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import ScaleToFit from "@/components/nex/ScaleToFit";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -53,12 +52,11 @@ export default function Welcome() {
   };
 
   return (
-    <ScaleToFit>
     <div
       style={{
         position: "relative",
-        height: 874,
-        overflow: "hidden",
+        minHeight: "100dvh",
+        width: "100%",
         display: "flex",
         justifyContent: "center",
         background: "#020710",
@@ -67,12 +65,11 @@ export default function Welcome() {
       <main
         style={{
           position: "relative",
-          overflow: "hidden",
-          height: 874,
-          width: 402,
+          minHeight: "100dvh",
+          width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "20px 20px 24px",
+          padding: "calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px))",
           background: "radial-gradient(120% 78% at 50% 16%, #0d2a58 0%, #061428 46%, #020710 100%)",
         }}
       >
@@ -200,6 +197,5 @@ export default function Welcome() {
         </button>
       </main>
     </div>
-    </ScaleToFit>
   );
 }

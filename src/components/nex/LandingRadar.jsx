@@ -10,7 +10,8 @@ const BLIPS = [
   { name: "Priya", interest: "running", distance: "1.6mi", dx: 80, dy: 70, revealDelay: "3.3s", floatDur: "9.4s", floatDelay: "1.5s", color: "#ff8fb0" },
 ];
 
-const DISC = 334; // px — fixed radar disk size
+// Screen-relative so the radar is as big as the phone allows.
+const DISC = "min(88vw, 46vh)";
 
 export default function LandingRadar() {
   const [scanning, setScanning] = useState(false);
@@ -33,7 +34,7 @@ export default function LandingRadar() {
         position: "relative",
         zIndex: 1,
         flex: 1,
-        minHeight: 300,
+        minHeight: DISC,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -47,7 +48,7 @@ export default function LandingRadar() {
       {/* Scan effect overlay */}
       {scanning && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", width: DISC, height: DISC, transform: "rotateX(66deg)" }}>
+          <div style={{ position: "absolute", width: "100%", height: "100%", transform: "rotateX(66deg)" }}>
             <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid rgba(170,230,255,0.9)", boxShadow: "0 0 34px rgba(120,200,255,0.7)", animation: "nxping 1.5s ease-out" }} />
             <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(170,230,255,0.6)", animation: "nxping 1.5s ease-out 0.35s" }} />
           </div>
@@ -60,7 +61,7 @@ export default function LandingRadar() {
       <div style={{ position: "absolute", width: 380, height: 186, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(45,130,255,0.34) 0%, rgba(6,20,40,0) 68%)", filter: "blur(2px)" }} />
 
       {/* Radar disk (3D-tilted) */}
-      <div style={{ position: "absolute", width: DISC, height: DISC, transform: "rotateX(66deg)", transformStyle: "preserve-3d", animation: "nxtilt 16s ease-in-out infinite" }}>
+      <div style={{ position: "absolute", width: "100%", height: "100%", transform: "rotateX(66deg)", transformStyle: "preserve-3d", animation: "nxtilt 16s ease-in-out infinite" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: "50%", overflow: "hidden" }}>
           <div style={{ position: "absolute", inset: 0, background: "conic-gradient(from 0deg, rgba(130,210,255,0.55), rgba(130,210,255,0.10) 28%, rgba(130,210,255,0) 56%)", animation: "nxsweep 4.5s linear infinite" }} />
         </div>
@@ -74,7 +75,7 @@ export default function LandingRadar() {
       </div>
 
       {/* Vertical line + center dot */}
-      <div style={{ position: "absolute", left: "50%", top: "50%", width: 2, height: 86, marginLeft: -1, marginTop: -86, background: "linear-gradient(180deg, rgba(180,232,255,0), rgba(180,232,255,0.95))", boxShadow: "0 0 28px rgba(120,200,255,0.9)" }} />
+      <div style={{ position: "absolute", left: "50%", top: "50%", width: 2, height: "26%", marginLeft: -1, transform: "translateY(-100%)", background: "linear-gradient(180deg, rgba(180,232,255,0), rgba(180,232,255,0.95))", boxShadow: "0 0 28px rgba(120,200,255,0.9)" }} />
       <div style={{ position: "absolute", left: "50%", top: "50%", width: 14, height: 14, margin: "-7px 0 0 -7px", borderRadius: "50%", background: "#bfe6ff", boxShadow: "0 0 32px 8px rgba(120,200,255,0.9)" }} />
 
       {/* Person blips — fixed px offsets from center, each a distinct color */}
