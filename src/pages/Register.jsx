@@ -22,13 +22,13 @@ const STRENGTH_NAMES = ["", "Weak", "Fair", "Strong"];
 function CyberShell({ children, footer }) {
   return (
     <ScaleToFit>
-    <div style={{ position: "relative", height: "100%", display: "flex", justifyContent: "center", overflow: "hidden" }}>
+    <div style={{ position: "relative", height: 874, display: "flex", justifyContent: "center", overflow: "hidden" }}>
       <main
         style={{
           position: "relative",
           overflow: "hidden",
-          height: "100%",
-          width: "100%",
+          height: 874,
+          width: 402,
           display: "flex",
           flexDirection: "column",
           padding: "24px 22px 28px",

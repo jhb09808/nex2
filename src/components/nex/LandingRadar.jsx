@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 
 // Fixed pixel positions (offset from disc center) — no viewport units, so the
 // radar never resizes or shifts as the mobile browser chrome shows/hides.
@@ -14,24 +14,6 @@ const DISC = 334; // px — fixed radar disk size
 
 export default function LandingRadar() {
   const [scanning, setScanning] = useState(false);
-  const slot = useRef(null);
-  // The radar is authored at a fixed size, but the page now fills the screen,
-  // so on a short phone this row gets less room than the design allows. Scale
-  // the whole block — disc, rings and blips together — to whatever it gets.
-  const [fit, setFit] = useState(1);
-
-  useEffect(() => {
-    const el = slot.current;
-    if (!el) return;
-    const measure = () => {
-      const h = el.clientHeight;
-      if (h) setFit(Math.min(1, h / DISC));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const handleScan = () => {
     setScanning(false);
@@ -47,12 +29,11 @@ export default function LandingRadar() {
       aria-label="Scan for people nearby"
       onClick={handleScan}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleScan(); } }}
-      ref={slot}
       style={{
         position: "relative",
         zIndex: 1,
         flex: 1,
-        minHeight: 0,
+        minHeight: 300,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -63,7 +44,6 @@ export default function LandingRadar() {
         WebkitTapHighlightColor: "transparent",
       }}
     >
-      <div style={{ position: "relative", width: DISC, height: DISC, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${fit})`, transformOrigin: "center center" }}>
       {/* Scan effect overlay */}
       {scanning && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
@@ -114,7 +94,6 @@ export default function LandingRadar() {
           </div>
         </div>
       ))}
-      </div>
     </div>
   );
 }

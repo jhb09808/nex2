@@ -280,7 +280,7 @@ export default function Chat() {
     <ScaleToFit>
     <div
       className="flex flex-col"
-      style={{ height: "100%", width: "100%", background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
+      style={{ height: 874, width: 402, background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
     >
       <NotificationListener />
       {/* Header */}

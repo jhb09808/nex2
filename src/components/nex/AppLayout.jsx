@@ -38,7 +38,7 @@ export default function AppLayout() {
 
   if (checking) {
     return (
-      <ScaleToFit><div className="h-full w-full bg-black flex items-center justify-center">
+      <ScaleToFit><div className="h-[874px] w-[402px] bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div></ScaleToFit>
     );
@@ -51,7 +51,7 @@ export default function AppLayout() {
   if (!verified) {
     return (
       <ScaleToFit>
-        <div className="h-full w-full overflow-hidden">
+        <div className="h-[874px] w-[402px] overflow-hidden">
           <VerificationGate profile={profile} onComplete={() => window.location.reload()} />
         </div>
       </ScaleToFit>
@@ -60,7 +60,7 @@ export default function AppLayout() {
 
   return (
     <ScaleToFit>
-      <div className="h-full w-full bg-black relative overflow-hidden flex flex-col">
+      <div className="h-[874px] w-[402px] bg-black relative overflow-hidden flex flex-col">
         <NotificationListener />
         <ProximityMatchNudge />
         <Outlet />
