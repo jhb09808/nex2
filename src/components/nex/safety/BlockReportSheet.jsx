@@ -132,7 +132,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 z-[200] flex items-center justify-center"
+            className="absolute inset-0 z-[200] flex items-center justify-center"
             style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
           >
             <motion.div
@@ -146,7 +146,7 @@ export default function BlockReportSheet({ user, open, onClose, onBlocked, conve
                 position: "relative",
                 width: "100%",
                 maxWidth: 380,
-                maxHeight: "80dvh",
+                maxHeight: 740,
                 overflowY: "auto",
                 padding: 16,
                 background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))",
