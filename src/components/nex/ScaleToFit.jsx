@@ -14,7 +14,7 @@ const DESIGN_W = 402;
  * message list, a spacer — absorb the difference. Taller phones get more room,
  * shorter phones get less, and nothing is boxed in or cropped.
  */
-export default function ScaleToFit({ children, background = "#01050c" }) {
+export default function ScaleToFit({ children, background = "#01050c", maxScale = 1.35 }) {
   const box = useRef(null);
   const [{ scale, designH }, setFit] = useState({ scale: 0, designH: 0 });
 
@@ -24,7 +24,10 @@ export default function ScaleToFit({ children, background = "#01050c" }) {
     const fit = () => {
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const s = r.width / DESIGN_W;
+      // Phones land under the cap, so the design spans the full width. Wider
+      // viewports (desktop, the Base44 preview) stop at maxScale and stay a
+      // centered phone-sized column instead of blowing up to fill the window.
+      const s = Math.min(r.width / DESIGN_W, maxScale);
       setFit({ scale: s, designH: r.height / s });
     };
     fit();
@@ -39,7 +42,7 @@ export default function ScaleToFit({ children, background = "#01050c" }) {
       window.visualViewport?.removeEventListener("resize", fit);
       window.visualViewport?.removeEventListener("scroll", fit);
     };
-  }, []);
+  }, [maxScale]);
 
   return (
     <div style={{
