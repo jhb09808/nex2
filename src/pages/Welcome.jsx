@@ -77,7 +77,7 @@ export default function Welcome() {
         }}
       >
         {loggedOut && (
-          <div style={{ position: "relative", zIndex: 2, marginBottom: 16, padding: "10px 16px", background: "rgba(16, 80, 50, 0.35)", border: "1px solid rgba(80, 220, 140, 0.4)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, backdropFilter: "blur(12px)", flex: "none" }}>
+          <div style={{ position: "absolute", zIndex: 20, top: "calc(18px + env(safe-area-inset-top))", left: 20, right: 20, padding: "10px 16px", background: "rgba(16, 80, 50, 0.55)", border: "1px solid rgba(80, 220, 140, 0.4)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, backdropFilter: "blur(12px)", boxShadow: "0 8px 28px rgba(1,6,14,0.6)", pointerEvents: "none" }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0", flex: "none" }} />
             <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 12, color: "#bff5d6", letterSpacing: "0.04em" }}>You've been logged out.</span>
           </div>
