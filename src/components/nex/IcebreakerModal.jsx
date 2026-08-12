@@ -108,7 +108,7 @@ Return ONLY the message text.`;
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[200] flex items-center justify-center"
+            className="fixed inset-0 z-[200] flex items-center justify-center"
             style={{ padding: "0 18px", background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }}
             onClick={onClose}
           >
