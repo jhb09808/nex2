@@ -95,16 +95,24 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
 
-      // Check waitlist approval — block users who are on the waitlist but not yet approved.
-      // Users not on the waitlist at all (status: "not_found") are allowed through
-      // (they predate the waitlist system or are platform-admin accounts).
+      // Check waitlist approval. Anyone not approved is blocked — including
+      // emails that were never on the waitlist at all ("not_found"), which is
+      // how Google sign-ins were slipping past the gate. Accounts that existed
+      // before the gate was tightened, and admins, are grandfathered in.
+      const GATE_CUTOFF = new Date("2026-08-12T00:00:00Z").getTime();
+      const isLegacyAccount = currentUser.created_date
+        && new Date(currentUser.created_date).getTime() < GATE_CUTOFF;
+      const isAdmin = currentUser.role === "admin";
+
       try {
         const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email: currentUser.email });
-        if (!approvalRes.data.approved && approvalRes.data.status !== "not_found") {
+        if (!approvalRes.data.approved && !isAdmin && !(isLegacyAccount && approvalRes.data.status === "not_found")) {
           await base44.auth.logout();
           setAuthError({
             type: "waitlist_pending",
-            message: "Your waitlist application is still pending approval."
+            message: approvalRes.data.status === "not_found"
+              ? "This email hasn't been approved for access yet. Join the waitlist to request access."
+              : "Your waitlist application is still pending approval."
           });
           setIsLoadingAuth(false);
           setAuthChecked(true);
