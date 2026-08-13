@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import { getRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
 import { getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
+import radarMap from "@/assets/radar-map.webp";
 
 const PALETTE = {
   bg: "#000000",
@@ -274,6 +275,12 @@ export default function RadarScope({
     >
       {/* ── Layer 0: background. Never transformed. ── */}
       <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 0 }}>
+        {/* City map from the design, with its two scrims */}
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          <img src={radarMap} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(62% 34% at 50% 47%, rgba(1,6,14,.96) 0%, rgba(1,6,14,.80) 52%, rgba(1,6,14,.34) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(1,6,14,.86) 0%, rgba(1,6,14,.42) 24%, rgba(1,6,14,.46) 70%, rgba(1,5,12,.94) 100%)" }} />
+        </div>
       {/* Atmospheric ambient haze */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -330,6 +337,13 @@ export default function RadarScope({
           transition: "transform .12s linear",
         }}
       >
+        {/* HUD frame — tilts with the radar */}
+        <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", inset: 8, border: "1px solid rgba(86,180,255,.10)", zIndex: 5 }} />
+        <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", top: 8, left: 8, width: 20, height: 20, borderLeft: "1.5px solid rgba(125,205,255,.55)", borderTop: "1.5px solid rgba(125,205,255,.55)", zIndex: 5 }} />
+        <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", top: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderTop: "1.5px solid rgba(125,205,255,.55)", zIndex: 5 }} />
+        <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", bottom: 8, left: 8, width: 20, height: 20, borderLeft: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", zIndex: 5 }} />
+        <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", zIndex: 5 }} />
+
       {/* Radar scope circle — 15% larger, shifted up */}
       <div className="relative aspect-square" style={{ transform: "translateY(-3%)", width: "min(340px, 78vw)", margin: "auto", maxHeight: "100%" }}>
         {/* Scope background with glass depth */}

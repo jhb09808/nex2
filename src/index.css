@@ -502,3 +502,11 @@ html, body, #root { overflow-x: hidden; max-width: 100%; }
 
 .card { display: flex; align-items: center; gap: 13px; padding: 13px; background: rgba(8,24,48,.62); border: 1px solid rgba(105,190,255,.18); backdrop-filter: blur(10px) }
 .tag { height: 24px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(105,190,255,.2); background: rgba(16,44,84,.36); font: 500 10.5px/1 var(--font-chakra); letter-spacing: .04em; color: #a6cbec }
+
+.notch-lg { clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px) }
+
+.chip { height: 34px; padding: 0 13px; border-radius: 999px; font: 600 12px/1 var(--font-chakra); letter-spacing: .04em; cursor: pointer; transition: background .2s ease, border-color .2s ease, color .2s ease; border: 1px solid rgba(105,190,255,.22); background: rgba(16,44,84,.4); color: #a6cbec }
+.chip[aria-pressed="true"] { border-color: rgba(140,205,255,.75); background: rgba(45,115,215,.4); color: #eaf6ff }
+
+.cta { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; border: 1.5px solid transparent; background: linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box; color: #fff; cursor: pointer; box-shadow: 0 0 22px rgba(80,110,255,.45), inset 0 0 22px rgba(70,120,255,.28) }
+.cta .sheen { position: absolute; top: 0; bottom: 0; width: 60px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.30), rgba(255,255,255,0)); animation: nxsheen 4.5s ease-in-out infinite }

@@ -449,21 +449,23 @@ export default function NearbyMap() {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute bottom-24 left-0 right-0 z-30 px-4"
+            className="absolute inset-0 z-30 flex items-center justify-center"
+            style={{ padding: "0 14px" }}
           >
-            <GlassCard strong className="space-y-4">
+            <div className="absolute inset-0" onClick={handleCloseFilters} style={{ background: "rgba(1,6,14,.78)", backdropFilter: "blur(4px)" }} />
+            <div className="notch-lg" style={{ position: "relative", width: "100%", maxHeight: "86dvh", overflowY: "auto", padding: 18, background: "linear-gradient(180deg, rgba(10,32,64,.97), rgba(5,16,34,.98))", border: "1px solid rgba(105,190,255,.38)", boxShadow: "0 20px 60px rgba(1,6,14,.8)" }}>
               <div className="flex items-center justify-between">
-                <h3 className="text-white font-cyber font-bold neon-text tracking-wider">FILTERS</h3>
-                <button onClick={handleCloseFilters}>
-                  <X className="w-5 h-5 text-white/40" />
+                <div style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontStyle: "italic", fontSize: 19, lineHeight: 1, letterSpacing: "0.04em", textTransform: "uppercase", color: "#fff" }}>Filters</div>
+                <button onClick={handleCloseFilters} aria-label="Close filters" style={{ width: 44, height: 44, margin: "-10px -10px -10px 0", display: "flex", alignItems: "center", justifyContent: "center", border: 0, background: "transparent", color: "#7fa9d4", cursor: "pointer" }}>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider">
+                  <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8fb9e2" }}>
                     Radius: {tierCeiling == null ? "Global" : `${filters.distance} mi`}
-                  </label>
+                  </span>
                   {tierCeiling != null && (
                     <button
                       onClick={() => setPaywallVariant("radius")}
@@ -487,22 +489,23 @@ export default function NearbyMap() {
                     }
                     setFilters({ ...filters, distance: val });
                   }}
-                  className="w-full accent-blue-500"
+                  className="w-full" style={{ accentColor: "#3f9dff", cursor: "pointer" }}
                 />
               </div>
 
               <label className="flex items-center justify-between">
-                <span className="text-blue-200/60 text-sm">Online only</span>
+                <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 14, lineHeight: 1, color: "#dceeff" }}>Online only</span>
                 <button
                   onClick={() => setFilters({ ...filters, onlineOnly: !filters.onlineOnly })}
-                  className={`w-11 h-6 rounded-full transition-colors relative ${filters.onlineOnly ? "gradient-blue" : "bg-white/10"}`}
+                  aria-pressed={filters.onlineOnly}
+                  style={{ position: "relative", flex: "none", width: 52, height: 30, border: 0, borderRadius: 999, background: filters.onlineOnly ? "#1b62d6" : "rgba(105,190,255,.2)", cursor: "pointer", transition: "background .2s ease" }}
                 >
-                  <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${filters.onlineOnly ? "left-[22px]" : "left-0.5"}`} />
+                  <span style={{ position: "absolute", top: 3, left: filters.onlineOnly ? 25 : 3, width: 24, height: 24, borderRadius: "50%", background: "#fff", transition: "left .2s ease" }} />
                 </button>
               </label>
 
               <div>
-                <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider mb-2 block">Show Me</label>
+                <div style={{ fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8fb9e2", marginBottom: 10 }}>Show me</div>
                 <div className="flex gap-2">
                   {[
                     { value: "all", label: "Everyone", icon: Users },
@@ -525,9 +528,9 @@ export default function NearbyMap() {
                             console.error(e);
                           }
                         }}
-                        className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-medium transition-all active:scale-95 ${
-                          active ? "neon-btn text-white" : "cyber-input text-white/40"
-                        }`}
+                        className="notch"
+                        aria-pressed={active}
+                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, height: 44, cursor: "pointer", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 12, lineHeight: 1, letterSpacing: "0.06em", transition: "background .2s ease, border-color .2s ease", border: active ? "1px solid rgba(140,205,255,.75)" : "1px solid rgba(105,190,255,.2)", background: active ? "rgba(45,115,215,.4)" : "rgba(16,44,84,.4)", color: active ? "#eaf6ff" : "#a6cbec" }}
                       >
                         <Icon className="w-3.5 h-3.5" /> {opt.label}
                       </button>
@@ -538,9 +541,9 @@ export default function NearbyMap() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-blue-200/50 font-cyber uppercase tracking-wider">Prioritize Interests</label>
+                  <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8fb9e2" }}>Prioritize interests</span>
                   {activeFilters.length > 0 && (
-                    <button onClick={clearFilters} className="text-[10px] text-blue-400 font-medium">
+                    <button onClick={clearFilters} style={{ height: 28, border: 0, background: "transparent", padding: 0, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.16em", textTransform: "uppercase", color: "#7fc8ff", cursor: "pointer" }}>
                       Clear all
                     </button>
                   )}
@@ -552,9 +555,8 @@ export default function NearbyMap() {
                       <button
                         key={interestId}
                         onClick={() => toggleFilter(interestId)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 ${
-                          isActive ? "neon-btn text-white" : "cyber-input text-white/40"
-                        }`}
+                        className="chip"
+                        aria-pressed={isActive}
                       >
                         {getSubInterestName(interestId)}
                       </button>
@@ -565,10 +567,15 @@ export default function NearbyMap() {
                   <p className="text-white/30 text-[11px] mt-2">Showing all interests. Tap to prioritize.</p>
                 )}
                 {activeFilters.length > 0 && (
-                  <p className="text-white/30 text-[11px] mt-2">Prioritizing selected interests. All nearby users still visible.</p>
+                  <p style={{ margin: "12px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 11, lineHeight: 1.5, color: "#7fa9d4" }}>Prioritizing selected interests. All nearby users still visible.</p>
                 )}
               </div>
-            </GlassCard>
+
+              <button onClick={handleCloseFilters} className="cta notch" style={{ width: "100%", height: 52, marginTop: 16, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 13, lineHeight: 1, letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                <span className="sheen" />
+                <span style={{ position: "relative" }}>Show {displayUsers.length} results</span>
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
