@@ -79,7 +79,7 @@ export default function EditProfile() {
   };
 
   return (
-    <div className="px-4 pt-4 safe-top pb-8 max-w-lg mx-auto">
+    <div className="px-4 pt-4 safe-top pb-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl glass flex items-center justify-center">

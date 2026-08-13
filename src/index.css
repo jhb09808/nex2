@@ -473,3 +473,15 @@
     font-size: 16px !important;
   }
 }
+
+/* Screen sizing, matching the landing page.
+   100vh is the height with the browser chrome hidden, so on iOS a 100vh page
+   is permanently taller than the visible area — that is what pushed content
+   off screen. Every full-height utility resolves to the dynamic viewport
+   instead. Declared after Tailwind so it wins at equal specificity. */
+.min-h-screen { min-height: 100dvh; }
+.h-screen { height: 100dvh; }
+
+/* Nothing may scroll sideways: decorative art is deliberately drawn beyond the
+   page edges and must be clipped, not turned into horizontal scroll. */
+html, body, #root { overflow-x: hidden; max-width: 100%; }

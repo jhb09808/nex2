@@ -85,7 +85,7 @@ export default function Premium() {
   }, []);
 
   return (
-    <div className="px-4 pt-4 safe-top pb-8 max-w-lg mx-auto">
+    <div className="px-4 pt-4 safe-top pb-8 w-full">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5 text-white/60" />
