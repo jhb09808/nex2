@@ -204,6 +204,10 @@ export default function Welcome() {
         >
           <Building2 style={{ width: 12, height: 12, flex: "none" }} /> Learn about NEX2 →
         </Link>
+
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: 6, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, lineHeight: 1, letterSpacing: "0.1em", color: "rgba(139,185,226,0.4)", flex: "none" }}>
+          © 2026 NEX2, Inc. All Rights Reserved.
+        </div>
       </main>
     </div>
   );
