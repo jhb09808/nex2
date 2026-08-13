@@ -457,3 +457,16 @@
 @media (max-height: 700px) {
   .dense-areas-note { display: none !important; }
 }
+
+/* iOS Safari zooms the page whenever a focused field is smaller than 16px.
+   Force every field to 16px on touch devices so tapping an input brings up
+   the keyboard without zooming. !important is needed because the fields set
+   their size inline and via utility classes. Pinch-zoom stays available —
+   this is why we don't use maximum-scale, which would disable it. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
