@@ -169,6 +169,57 @@ export default function RadarScope({
   const scopeRef = useRef(null);
   const pinchRef = useRef(null);
 
+  // Tilt. Only the tilt wrapper below is transformed — never the background
+  // or the corner lights.
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [needsPerm, setNeedsPerm] = useState(
+    typeof DeviceOrientationEvent !== "undefined" &&
+    typeof DeviceOrientationEvent.requestPermission === "function"
+  );
+
+  // iOS 13+ fires nothing until this runs, and it must come from a real
+  // gesture — never from mount or an effect.
+  const enableTilt = async () => {
+    try {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res === "granted") setNeedsPerm(false);
+    } catch (e) { /* denied or unsupported */ }
+  };
+
+  useEffect(() => {
+    if (needsPerm) return;
+    const clamp = (v) => Math.max(-1, Math.min(1, v));
+    const onOrient = (e) => {
+      // gamma = left/right tilt, beta = front/back tilt
+      setTilt({
+        x: clamp((e.gamma || 0) / 35),
+        y: clamp(((e.beta || 0) - 40) / 35),
+      });
+    };
+    window.addEventListener("deviceorientation", onOrient, true);
+    return () => window.removeEventListener("deviceorientation", onOrient, true);
+  }, [needsPerm]);
+
+  // Desktop fallback so tilt is testable without a phone.
+  useEffect(() => {
+    const el = scopeRef.current;
+    if (!el) return;
+    const clamp = (v) => Math.max(-1, Math.min(1, v));
+    const onMove = (e) => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      setTilt({
+        x: clamp(((e.clientX - r.left) / r.width - 0.5) * 2),
+        y: clamp(((e.clientY - r.top) / r.height - 0.5) * 2),
+      });
+    };
+    el.addEventListener("mousemove", onMove);
+    return () => el.removeEventListener("mousemove", onMove);
+  }, []);
+
+  const lightOpacity = (sx, sy) =>
+    (0.10 + Math.max(0, sx * tilt.x) * 0.46 + Math.max(0, sy * tilt.y) * 0.46).toFixed(3);
+
   const onScopeTouchStart = (e) => {
     if (e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -212,14 +263,17 @@ export default function RadarScope({
       onTouchStart={onScopeTouchStart}
       onTouchEnd={onScopeTouchEnd}
       onWheel={onWheel}
-      className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+      className="absolute inset-0 z-0 overflow-hidden"
       style={{
         background: `radial-gradient(circle at center, #01060e 0%, #000000 80%)`,
         filter: blurred ? "blur(16px) brightness(0.35)" : "none",
         transition: "filter 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
         touchAction: "none",
+        perspective: "1100px",
       }}
     >
+      {/* ── Layer 0: background. Never transformed. ── */}
+      <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 0 }}>
       {/* Atmospheric ambient haze */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -256,6 +310,26 @@ export default function RadarScope({
         />
       ))}
 
+      </div>
+
+      {/* ── Layer 1: corner lights. Never transformed. ── */}
+      <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", inset: "-12%", zIndex: 1, mixBlendMode: "screen" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 8% 4%, rgba(90,190,255,.85), rgba(90,190,255,0) 70%)", opacity: lightOpacity(-1, -1), transition: "opacity .16s ease-out" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 92% 4%, rgba(169,140,255,.85), rgba(169,140,255,0) 70%)", opacity: lightOpacity(1, -1), transition: "opacity .16s ease-out" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 8% 96%, rgba(77,255,176,.75), rgba(77,255,176,0) 70%)", opacity: lightOpacity(-1, 1), transition: "opacity .16s ease-out" }} />
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 92% 96%, rgba(255,180,84,.72), rgba(255,180,84,0) 70%)", opacity: lightOpacity(1, 1), transition: "opacity .16s ease-out" }} />
+      </div>
+
+      {/* ── Layer 2: the ONLY element that receives the tilt transform ── */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          zIndex: 2,
+          transform: `rotateX(${(-tilt.y * 9).toFixed(2)}deg) rotateY(${(tilt.x * 9).toFixed(2)}deg)`,
+          transformStyle: "preserve-3d",
+          transition: "transform .12s linear",
+        }}
+      >
       {/* Radar scope circle — 15% larger, shifted up */}
       <div className="relative aspect-square" style={{ transform: "translateY(-3%)", width: "min(340px, 78vw)", margin: "auto", maxHeight: "100%" }}>
         {/* Scope background with glass depth */}
@@ -396,6 +470,16 @@ export default function RadarScope({
           </div>
         ))}
       </div>
+      </div>
+
+      {needsPerm && (
+        <button
+          onClick={enableTilt}
+          style={{ position: "absolute", left: "50%", bottom: 18, transform: "translateX(-50%)", zIndex: 3, height: 38, padding: "0 14px", border: "1px solid rgba(105,190,255,.4)", borderRadius: 999, background: "rgba(8,26,54,.8)", backdropFilter: "blur(10px)", color: "#bfe2ff", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 10, lineHeight: 1, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
+        >
+          Enable tilt
+        </button>
+      )}
     </div>
   );
 }
