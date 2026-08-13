@@ -37,7 +37,7 @@ export default function AppLayout() {
 
   if (checking) {
     return (
-      <div className="bg-black flex items-center justify-center w-full" style={{ height: "100dvh" }}>
+      <div className="bg-black flex items-center justify-center" style={{ position: "fixed", inset: 0, height: "100dvh" }}>
         <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>    );
   }
@@ -48,14 +48,14 @@ export default function AppLayout() {
 
   if (!verified) {
     return (
-        <div className="w-full" style={{ minHeight: "100dvh" }}>
+        <div style={{ position: "fixed", inset: 0, height: "100dvh", overflowY: "auto" }}>
           <VerificationGate profile={profile} onComplete={() => window.location.reload()} />
         </div>
     );
   }
 
   return (
-      <div className="bg-black relative overflow-hidden flex flex-col w-full" style={{ height: "100dvh" }}>
+      <div className="bg-black relative overflow-hidden flex flex-col" style={{ position: "fixed", inset: 0, height: "100dvh", minHeight: 0 }}>
         <NotificationListener />
         <ProximityMatchNudge />
         <Outlet />

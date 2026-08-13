@@ -65,6 +65,7 @@ export default function Welcome() {
       <main
         style={{
           position: "relative",
+          overflow: "hidden",
           minHeight: "100dvh",
           width: "100%",
           display: "flex",

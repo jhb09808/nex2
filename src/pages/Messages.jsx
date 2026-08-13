@@ -111,7 +111,7 @@ export default function Messages() {
 
   return (
     <div
-      className="px-5 pt-6 safe-top h-full flex flex-col overflow-hidden"
+      className="px-5 pt-6 safe-top flex-1 min-h-0 flex flex-col overflow-hidden"
       style={{
         backgroundImage: `linear-gradient(180deg, rgba(1,6,14,0.35) 0%, rgba(1,6,14,0.25) 45%, rgba(1,6,14,0.6) 100%), url(${messagesBg})`,
         backgroundSize: "cover",
@@ -141,7 +141,7 @@ export default function Messages() {
 
       {/* Incoming Chat Requests */}
       {waves.length > 0 && (
-        <div className="mb-4 flex-none">
+        <div className="mb-4 flex-none overflow-y-auto scrollbar-hide" style={{ maxHeight: "38%" }}>
           <div className="flex items-center gap-2 mb-3">
             <Hand className="w-4 h-4 text-blue-400" />
             <h2 className="text-white/60 text-xs font-semibold uppercase tracking-wider">Chat Requests</h2>

@@ -277,8 +277,8 @@ export default function Chat() {
 
   return (
     <div
-      className="flex flex-col w-full"
-      style={{ height: "100dvh", background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
+      className="flex flex-col"
+      style={{ position: "fixed", inset: 0, height: "100dvh", minHeight: 0, background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
     >
       <NotificationListener />
       {/* Header */}
@@ -373,7 +373,7 @@ export default function Chat() {
 
       {/* Input / Post-chat panel / Ended state */}
       {conversationEnded ? (
-        <div className="glass-strong px-4 py-6 safe-bottom text-center">
+        <div className="glass-strong px-4 py-6 safe-bottom text-center flex-none">
           <p className="font-cyber text-sm text-white/40 tracking-wider">
             {isMyEnded ? "You ended this connection." : "Connection ended."}
           </p>
@@ -385,7 +385,7 @@ export default function Chat() {
           </button>
         </div>
       ) : showPostChatPanel ? (
-        <div className="glass-strong safe-bottom">
+        <div className="glass-strong safe-bottom flex-none">
           <PostChatPanel
             conversation={conversation}
             myProfile={myProfile}
