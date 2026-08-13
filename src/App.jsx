@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import WaitlistPendingScreen from '@/components/nex/auth/WaitlistPendingScreen';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import PasswordGate, { hasAccess } from '@/components/PasswordGate';
@@ -39,7 +40,7 @@ import Leaderboard from '@/pages/Leaderboard';
 import AppLayout from '@/components/nex/AppLayout';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, logout } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -54,22 +55,11 @@ const AuthenticatedApp = () => {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'waitlist_pending') {
       return (
-        <div className="fixed inset-0 cyber-bg flex items-center justify-center px-4">
-          <div className="max-w-md text-center space-y-4">
-            <h1 className="font-cyber text-xl font-bold tracking-wider text-white neon-text">
-              AWAITING APPROVAL
-            </h1>
-            <p className="text-blue-200/60 text-sm">
-              {authError.message || "Your waitlist application is still pending approval. You'll be notified once you're approved."}
-            </p>
-            <button
-              onClick={() => { window.location.href = '/welcome'; }}
-              className="px-6 py-3 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider"
-            >
-              BACK TO HOME
-            </button>
-          </div>
-        </div>
+        <WaitlistPendingScreen
+          email={authError.email}
+          message={authError.message}
+          onLogout={() => { logout(false); window.location.href = '/welcome'; }}
+        />
       );
     } else if (authError.type === 'auth_required') {
       navigateToLogin();

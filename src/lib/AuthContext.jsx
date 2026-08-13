@@ -107,9 +107,13 @@ export const AuthProvider = ({ children }) => {
       try {
         const approvalRes = await base44.functions.invoke("checkWaitlistApproval", { email: currentUser.email });
         if (!approvalRes.data.approved && !isAdmin && !(isLegacyAccount && approvalRes.data.status === "not_found")) {
-          await base44.auth.logout();
+          // Don't log out here — the SDK logout reloads the page, which threw
+          // unapproved users into an endless landing-page loop instead of
+          // showing them why they can't get in. Keep the session, block the
+          // app, and let them log out from the status screen.
           setAuthError({
             type: "waitlist_pending",
+            email: currentUser.email,
             message: approvalRes.data.status === "not_found"
               ? "This email hasn't been approved for access yet. Join the waitlist to request access."
               : "Your waitlist application is still pending approval."
