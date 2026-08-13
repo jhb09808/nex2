@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Building2 } from "lucide-react";
 import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
 import { base44 } from "@/api/base44Client";
@@ -196,6 +197,13 @@ export default function Welcome() {
         >
           I already have an account ›
         </button>
+
+        <Link
+          to="/company"
+          style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, height: 44, marginTop: 6, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, lineHeight: 1, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(139,185,226,0.7)", textDecoration: "none", flex: "none" }}
+        >
+          <Building2 style={{ width: 12, height: 12, flex: "none" }} /> Learn about NEX2 →
+        </Link>
       </main>
     </div>
   );
