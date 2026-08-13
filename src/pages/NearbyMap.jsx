@@ -286,6 +286,11 @@ export default function NearbyMap() {
     return result;
   };
 
+  const hasActiveFilters =
+    activeFilters.length > 0 ||
+    filters.onlineOnly ||
+    (myProfile?.radar_gender_filter || "all") !== "all";
+
   const bestMatchId = viewMode === "best" && ranked.length > 0 ? ranked[0].id : null;
   const matchPct = selectedUser ? Math.min(99, Math.max(35, 50 + (selectedUser._shared || 0) * 8 + Math.max(0, 15 - (selectedUser._dist || 1) * 10))) : 0;
   const markers = computeClusters(displayUsers);
@@ -323,8 +328,8 @@ export default function NearbyMap() {
 
       {/* View Toggle — centered at top */}
       {!showRadarOnboarding && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 safe-top">
-          <div className="seg-wrap">
+        <div className="absolute top-6 left-0 right-0 z-20 safe-top flex items-center gap-3 px-4">
+          <div className="seg-wrap" style={{ flex: 1 }}>
             <button
               onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
               className="seg"
@@ -340,6 +345,20 @@ export default function NearbyMap() {
               <Users className="w-3.5 h-3.5" /> All Nearby
             </button>
           </div>
+
+          {/* Filters — the design puts this in the header; previously it was
+              only reachable from the nav menu. */}
+          <button
+            onClick={() => setShowFilters(true)}
+            className="circ"
+            style={{ position: "relative" }}
+            aria-label="Filters"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            {hasActiveFilters && (
+              <span style={{ position: "absolute", top: 5, right: 5, width: 7, height: 7, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0" }} />
+            )}
+          </button>
         </div>
       )}
 
