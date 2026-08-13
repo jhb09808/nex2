@@ -87,9 +87,9 @@ export default function WaitlistPendingScreen({ email, message, onLogout }) {
           >
             LOG OUT
           </button>
-          <a href="/welcome" className="font-chakra text-[10px] tracking-[0.15em] uppercase text-blue-300/60">
+          <button onClick={onLogout} className="font-chakra text-[10px] tracking-[0.15em] uppercase text-blue-300/60">
             Back to home
-          </a>
+          </button>
         </div>
       </div>
     </div>
