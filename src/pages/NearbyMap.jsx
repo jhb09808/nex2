@@ -328,7 +328,15 @@ export default function NearbyMap() {
 
       {/* View Toggle — centered at top */}
       {!showRadarOnboarding && (
-        <div className="absolute top-6 left-0 right-0 z-20 safe-top flex items-center gap-3 px-4">
+        <div
+          className="absolute left-0 right-0 z-20 flex items-center gap-3"
+          style={{
+            top: "calc(max(1rem, env(safe-area-inset-top, 0px)) - 4px)",
+            paddingLeft: 16,
+            // clear NavMenu's 36px hamburger, which is fixed at right-4
+            paddingRight: 64,
+          }}
+        >
           <div className="seg-wrap" style={{ flex: 1 }}>
             <button
               onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
@@ -354,7 +362,12 @@ export default function NearbyMap() {
             style={{ position: "relative" }}
             aria-label="Filters"
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3.4 2v4.4M3.4 10.2V16M9 2v2.6M9 8.4V16M14.6 2v7.4M14.6 13.2V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="3.4" cy="8.3" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="9" cy="6.5" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="14.6" cy="11.3" r="1.9" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
             {hasActiveFilters && (
               <span style={{ position: "absolute", top: 5, right: 5, width: 7, height: 7, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0" }} />
             )}
