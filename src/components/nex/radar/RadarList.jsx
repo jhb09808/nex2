@@ -1,6 +1,5 @@
 import React from "react";
 import { MapPin, EyeOff, Sparkles, MessageCircle } from "lucide-react";
-import GlassCard from "@/components/nex/GlassCard";
 import UserAvatar from "@/components/nex/UserAvatar";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { getSubInterestName, getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
@@ -20,14 +19,19 @@ export default function RadarList({ users, onUserClick }) {
   }
 
   return (
-    <div className="absolute inset-0 px-4 pt-32 pb-28 space-y-2 overflow-y-auto scrollbar-hide">
+    <div className="absolute inset-0 px-4 pt-32 overflow-y-auto scrollbar-hide"
+      style={{ paddingBottom: "calc(112px + env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", gap: 10 }}>
       {users.map((user) => {
         const name = getUserDisplayName(user);
         return (
-          <GlassCard
+          <div
             key={user.id}
+            role="button"
+            tabIndex={0}
             onClick={() => onUserClick(user)}
-            className="flex items-center gap-3 !p-3"
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onUserClick(user); } }}
+            className="card notch"
+            style={{ cursor: "pointer" }}
           >
             {user.visibility === "anonymous" ? (
               <div className="w-12 h-12 rounded-full glass flex items-center justify-center flex-shrink-0">
@@ -63,17 +67,19 @@ export default function RadarList({ users, onUserClick }) {
                     if (!cat) return null;
                     const Icon = cat.icon;
                     return (
-                      <span key={interestId} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/5">
+                      <span key={interestId} className="tag" style={{ gap: 5 }}>
                         <Icon className="w-2.5 h-2.5 text-blue-300/60" />
-                        <span className="text-[9px] text-blue-200/50">{getSubInterestName(interestId)}</span>
+                        <span>{getSubInterestName(interestId)}</span>
                       </span>
                     );
                   })}
                 </div>
               )}
             </div>
-            <MessageCircle className="w-4 h-4 text-white/20 flex-shrink-0" />
-          </GlassCard>
+            <span style={{ flex: "none", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(120,190,255,.24)", borderRadius: "50%", color: "#bfe2ff" }}>
+              <MessageCircle className="w-4 h-4" />
+            </span>
+          </div>
         );
       })}
     </div>

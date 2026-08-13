@@ -324,22 +324,20 @@ export default function NearbyMap() {
       {/* View Toggle — centered at top */}
       {!showRadarOnboarding && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 safe-top">
-          <div className="cyber-frame rounded-full p-0.5 flex gap-0.5">
+          <div className="seg-wrap">
             <button
               onClick={() => { setViewMode("best"); setExpandedClusters({}); }}
-              className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                viewMode === "best" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
-              }`}
+              className="seg"
+              aria-pressed={viewMode === "best"}
             >
-              <Sparkles className="w-3 h-3" /> Best Matches
+              <Sparkles className="w-3.5 h-3.5" /> Best Matches
             </button>
             <button
               onClick={() => { setViewMode("all"); setExpandedClusters({}); }}
-              className={`px-5 py-1.5 rounded-full text-xs font-cyber font-medium flex items-center gap-1.5 transition-all ${
-                viewMode === "all" ? "bg-blue-500/15 text-blue-300" : "text-white/40"
-              }`}
+              className="seg"
+              aria-pressed={viewMode === "all"}
             >
-              <Users className="w-3 h-3" /> All Nearby
+              <Users className="w-3.5 h-3.5" /> All Nearby
             </button>
           </div>
         </div>
@@ -388,34 +386,35 @@ export default function NearbyMap() {
       {!showRadarOnboarding && (
         <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3">
           {layoutMode === "sonar" && (
-            <div className="cyber-frame rounded-2xl flex flex-col items-center py-1">
-              <button
-                onClick={() => setZoom((z) => Math.min(5, z + 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
-              >
+            <div className="rail">
+              <button onClick={() => setZoom((z) => Math.min(5, z + 0.5))} className="rail-btn" aria-label="Zoom in">
                 <Plus className="w-4 h-4" />
               </button>
-              <div className="px-2 py-1.5 border-t border-b border-blue-500/10">
-                <span className="text-[10px] font-cyber text-blue-300/50 tracking-wider">{zoom.toFixed(1)}×</span>
+              <div className="rail-sep" />
+              <div style={{ width: 44, height: 38, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 11, lineHeight: 1, color: "#8fb9e2" }}>
+                {zoom.toFixed(1)}×
               </div>
-              <button
-                onClick={() => setZoom((z) => Math.max(1, z - 0.5))}
-                className="w-10 h-10 flex items-center justify-center text-blue-300/70 active:scale-90 transition-transform"
-              >
+              <div className="rail-sep" />
+              <button onClick={() => setZoom((z) => Math.max(1, z - 0.5))} className="rail-btn" aria-label="Zoom out">
                 <Minus className="w-4 h-4" />
               </button>
             </div>
           )}
-          <div className="cyber-frame rounded-full p-0.5 flex flex-col gap-0.5">
+          <div className="rail">
             <button
               onClick={() => setLayoutMode("sonar")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "sonar" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
+              className="rail-btn"
+              aria-current={layoutMode === "sonar" ? "page" : undefined}
+              aria-label="Radar view"
             >
               <Radar className="w-4 h-4" />
             </button>
+            <div className="rail-sep" />
             <button
               onClick={() => setLayoutMode("list")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${layoutMode === "list" ? "bg-blue-500/15 text-blue-300" : "text-white/30"}`}
+              className="rail-btn"
+              aria-current={layoutMode === "list" ? "page" : undefined}
+              aria-label="List view"
             >
               <List className="w-4 h-4" />
             </button>

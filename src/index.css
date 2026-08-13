@@ -485,3 +485,20 @@
 /* Nothing may scroll sideways: decorative art is deliberately drawn beyond the
    page edges and must be clipped, not turned into horizontal scroll. */
 html, body, #root { overflow-x: hidden; max-width: 100%; }
+
+/* ── Radar / list chrome, from NEX2radar5d + NEX2list ──────────────────── */
+.notch { clip-path: polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px) }
+
+.seg { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; padding: 0 6px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap; font: 600 10.5px/1 var(--font-chakra); letter-spacing: .05em; text-transform: uppercase; transition: background .2s ease, color .2s ease; background: transparent; color: #7fa9d4 }
+.seg[aria-pressed="true"] { background: rgba(45,115,215,.55); color: #eaf6ff; box-shadow: 0 0 18px rgba(60,150,255,.5), inset 0 0 14px rgba(120,200,255,.25) }
+
+.seg-wrap { display: flex; padding: 4px; border: 1px solid rgba(105,190,255,.28); border-radius: 999px; background: rgba(8,26,54,.66); backdrop-filter: blur(10px) }
+
+.rail { display: flex; flex-direction: column; border: 1px solid rgba(105,190,255,.26); border-radius: 22px; background: rgba(8,26,54,.72); backdrop-filter: blur(12px); overflow: hidden }
+.rail-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #bfe2ff; cursor: pointer; transition: background .2s ease }
+.rail-btn:hover { background: rgba(60,140,255,.18) }
+.rail-btn[aria-current="page"] { background: rgba(45,115,215,.34); color: #eaf6ff }
+.rail-sep { height: 1px; background: rgba(105,190,255,.18) }
+
+.card { display: flex; align-items: center; gap: 13px; padding: 13px; background: rgba(8,24,48,.62); border: 1px solid rgba(105,190,255,.18); backdrop-filter: blur(10px) }
+.tag { height: 24px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(105,190,255,.2); background: rgba(16,44,84,.36); font: 500 10.5px/1 var(--font-chakra); letter-spacing: .04em; color: #a6cbec }
