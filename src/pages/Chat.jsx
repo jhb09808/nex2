@@ -402,7 +402,7 @@ export default function Chat() {
               <Image className="w-4 h-4" style={{ color: "#bfe2ff" }} />
             </button>
             <div
-              style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 9, height: 48, padding: "0 14px", background: "rgba(8,26,54,.72)", border: "1px solid rgba(105,190,255,.3)", clipPath: "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)" }}
+              style={{ position: "relative", flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 9, height: 48, padding: "0 14px", background: "rgba(8,26,54,.72)", border: "1px solid rgba(105,190,255,.3)", clipPath: "polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)" }}
             >
               <input
                 value={newMessage}

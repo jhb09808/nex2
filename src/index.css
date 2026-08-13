@@ -112,8 +112,11 @@
 }
 
 /* Safe area padding for mobile */
+/* Only bottom bars and sheets use this — the chat input, the nav and the
+   action sheets. They must clear the home indicator or the controls end up
+   underneath it. Full-bleed pages set their own padding inline. */
 .safe-bottom {
-  padding-bottom: 1rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 .safe-top {
   padding-top: max(1rem, env(safe-area-inset-top));
