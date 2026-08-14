@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Image, Mic, Shield, Snowflake } from "lucide-react";
+import { ArrowLeft, Send, Image, Shield, Snowflake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserAvatar from "@/components/nex/UserAvatar";
 import IcebreakerModal from "@/components/nex/IcebreakerModal";
@@ -68,6 +68,7 @@ export default function Chat() {
   const [showContactExchange, setShowContactExchange] = useState(false);
   const messagesEnd = useRef(null);
   const fileInputRef = useRef(null);
+  const [mediaError, setMediaError] = useState("");
 
   const limitReached = sentCount >= MAX_MESSAGES;
   const conversationEnded = conversation?.ended_by != null;
@@ -268,6 +269,11 @@ export default function Chat() {
 
   const sendMedia = async (file, type) => {
     if (!file || sending || limitReached) return;
+    setMediaError("");
+    if (type === "image" && file.size > 8 * 1024 * 1024) {
+      setMediaError("Images need to be under 8MB.");
+      return;
+    }
     setSending(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -280,6 +286,7 @@ export default function Chat() {
       if (res.data?.sent_count != null) setSentCount(res.data.sent_count);
     } catch (err) {
       console.error(err);
+      setMediaError(type === "voice" ? "Couldn't send that recording." : "Couldn't send that photo.");
     } finally {
       setSending(false);
     }
@@ -418,6 +425,11 @@ export default function Chat() {
       ) : (
         <div className="flex-none" style={{ position: "relative", zIndex: 3, paddingTop: 12, paddingLeft: 20, paddingRight: 20, paddingBottom: "max(16px, env(safe-area-inset-bottom, 0px))", borderTop: "1px solid rgba(105,190,255,.16)" }}>
           <MessageCounter sentCount={sentCount} max={MAX_MESSAGES} />
+          {mediaError && (
+            <div style={{ marginBottom: 8, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 11, letterSpacing: "0.06em", color: "#ff8a80" }}>
+              {mediaError}
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
             <input
               ref={fileInputRef}
@@ -461,6 +473,7 @@ export default function Chat() {
               style={{ ...ICON_BTN, width: 44, height: 44 }}
               disabled={sending}
               onRecorded={(file) => sendMedia(file, "voice")}
+              onError={setMediaError}
             />
           </div>
         </div>

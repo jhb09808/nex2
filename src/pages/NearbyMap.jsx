@@ -340,10 +340,12 @@ export default function NearbyMap() {
         <div
           className="absolute left-0 right-0 z-20 flex items-center gap-3"
           style={{
-            top: "calc(max(1rem, env(safe-area-inset-top, 0px)) - 4px)",
+            // Centres this row on NavMenu's 44px hamburger: the row is 50px
+            // tall (seg-wrap), the hamburger 44px at the same safe-area top.
+            top: "calc(max(1rem, env(safe-area-inset-top, 0px)) - 3px)",
             paddingLeft: 16,
-            // clear NavMenu's 36px hamburger, which is fixed at right-4
-            paddingRight: 64,
+            // clear the hamburger (44px at right:16) and keep the design's 12px gap
+            paddingRight: 72,
           }}
         >
           <div className="seg-wrap" style={{ flex: 1 }}>

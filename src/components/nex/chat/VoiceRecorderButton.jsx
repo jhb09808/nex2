@@ -1,8 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2 } from "lucide-react";
 
 // Hold-free voice note: tap to start, tap again to stop and send.
-export default function VoiceRecorderButton({ style, disabled, onRecorded }) {
+export default function VoiceRecorderButton({ style, disabled, onRecorded, onError }) {
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const recorderRef = useRef(null);
@@ -15,10 +15,17 @@ export default function VoiceRecorderButton({ style, disabled, onRecorded }) {
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
     rec.onstop = async () => {
       stream.getTracks().forEach((t) => t.stop());
-      const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+      const mime = rec.mimeType || "audio/webm";
+      const blob = new Blob(chunksRef.current, { type: mime });
+      chunksRef.current = [];
+      // Safari records audio/mp4 — a .webm name gets served as the wrong type
+      // and won't play back.
+      const ext = mime.includes("mp4") || mime.includes("mpeg") ? "m4a"
+        : mime.includes("ogg") ? "ogg"
+        : "webm";
       setBusy(true);
       try {
-        await onRecorded(new File([blob], `voice-${Date.now()}.webm`, { type: blob.type }));
+        await onRecorded(new File([blob], `voice-${Date.now()}.${ext}`, { type: mime }));
       } finally {
         setBusy(false);
       }
@@ -36,11 +43,22 @@ export default function VoiceRecorderButton({ style, disabled, onRecorded }) {
       return;
     }
     try {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        onError?.("Voice messages aren't supported on this browser.");
+        return;
+      }
       await start();
     } catch (e) {
       console.error("Mic permission denied or unavailable", e);
+      onError?.("Microphone access was denied.");
     }
   };
+
+  // Leaving the chat mid-recording must release the mic, or iOS keeps the
+  // recording indicator up.
+  useEffect(() => () => {
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+  }, []);
 
   return (
     <button
