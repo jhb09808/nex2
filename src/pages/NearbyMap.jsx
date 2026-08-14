@@ -394,7 +394,12 @@ export default function NearbyMap() {
           bestMatchId={bestMatchId}
         />
       ) : (
-        <RadarList users={displayUsers} onUserClick={(user) => setSelectedUser(user)} />
+        <RadarList
+          users={displayUsers}
+          onUserClick={(user) => setSelectedUser(user)}
+          activeInterests={activeFilters}
+          radiusMiles={effectiveRadius}
+        />
       )}
 
       {/* Live status — sonar only */}
