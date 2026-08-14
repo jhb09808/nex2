@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, Clock, XCircle, CheckCircle2 } from "lucide-react";
+import useIsDesktop from "@/hooks/useIsDesktop";
+import WaitlistPendingDesktop from "@/components/nex/auth/WaitlistPendingDesktop";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
 
@@ -17,6 +19,8 @@ export default function WaitlistPendingScreen({ email, message, onLogout }) {
   const [checkEmail, setCheckEmail] = useState(email || "");
   const [status, setStatus] = useState(null);
   const [checking, setChecking] = useState(false);
+  const [details, setDetails] = useState(null);
+  const isDesktop = useIsDesktop();
 
   const check = async () => {
     setChecking(true);
@@ -24,14 +28,33 @@ export default function WaitlistPendingScreen({ email, message, onLogout }) {
     try {
       const res = await base44.functions.invoke("checkWaitlistApproval", { email: checkEmail.trim() });
       setStatus(res.data.status || "not_found");
+      // The desktop layout shows location/date rows when the API returns them.
+      setDetails({ location: res.data.location || res.data.zip_code || null, requested: res.data.requested_at || res.data.created_date || null });
     } catch {
       setStatus("not_found");
+      setDetails(null);
     } finally {
       setChecking(false);
     }
   };
 
   const info = status ? STATUS_COPY[status] || STATUS_COPY.not_found : null;
+
+  if (isDesktop) {
+    return (
+      <WaitlistPendingDesktop
+        email={email}
+        message={message}
+        checkEmail={checkEmail}
+        setCheckEmail={setCheckEmail}
+        status={status}
+        checking={checking}
+        onCheck={check}
+        onLogout={onLogout}
+        details={details}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 cyber-bg flex items-center justify-center px-5 overflow-y-auto">

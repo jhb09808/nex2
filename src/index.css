@@ -514,3 +514,25 @@ html, body, #root { overflow-x: hidden; max-width: 100%; }
 /* The radar's round icon buttons (filters, menu) — from the design */
 .circ { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(105,190,255,.28); border-radius: 50%; background: rgba(8,26,54,.66); backdrop-filter: blur(10px); color: #bfe2ff; cursor: pointer; transition: border-color .2s ease, color .2s ease }
 .circ:hover { border-color: rgba(160,215,255,.7); color: #fff }
+
+/* ── Desktop landing + pending (1024px and up) ─────────────────────────── */
+.dk { --pad: clamp(32px, 4.4vw, 62px); --disc: min(62vw, 86vh) }
+.dk-notch { clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px) }
+.dk-notch-sm { clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px) }
+.dk-notch-lg { clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px) }
+.dk-ghost { display: flex; align-items: center; height: 44px; padding: 0 20px; border: 1px solid rgba(120,190,255,.32); background: rgba(10,30,60,.5); backdrop-filter: blur(8px); color: #bcd9f5; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .17em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease }
+.dk-ghost:hover { border-color: rgba(160,215,255,.75); color: #fff }
+.dk-cta:hover { box-shadow: 0 0 46px rgba(110,140,255,.85), inset 0 0 32px rgba(90,150,255,.45); transform: translateY(-1px); filter: brightness(1.12) }
+.dk-cta:active { transform: translateY(1px) }
+.dk-stat b { display: block; font: 700 clamp(26px,2.4vw,34px)/1 var(--font-chakra); color: #eaf6ff }
+.dk-stat span { display: block; margin-top: 7px; font: 500 9.5px/1 var(--font-chakra); letter-spacing: .18em; text-transform: uppercase; color: #8fb9e2 }
+.dk-pin { position: absolute; left: 50%; top: 50% }
+.dk-pin .stem { position: absolute; left: 50%; top: 100%; width: 1px; height: 26px; margin-left: -.5px; background: linear-gradient(180deg, rgba(150,220,255,.85), rgba(150,220,255,0)) }
+.dk-pin .foot { position: absolute; left: 50%; top: calc(100% + 26px); width: 8px; height: 8px; margin-left: -4px; margin-top: -4px; border-radius: 50%; box-shadow: 0 0 14px 4px rgba(120,200,255,.8) }
+.dk-pin .pcard { display: flex; align-items: center; gap: 9px; padding: 8px 13px; border: 1px solid rgba(150,220,255,.5); background: rgba(10,32,66,.78); backdrop-filter: blur(10px); box-shadow: 0 0 22px rgba(70,150,255,.35); white-space: nowrap; clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px) }
+@keyframes nxrise { from { transform: translateY(10px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes nxfade { from { opacity: 0 } to { opacity: 1 } }
+/* Short desktop windows drop the redundant second sign-out so the column fits. */
+@media (max-height: 800px) { .dk-signout2 { display: none } }
+.dk-dt { font: 600 9.5px/1.5 var(--font-chakra); letter-spacing: .18em; text-transform: uppercase; color: #7fa9d4 }
+.dk-dd { margin: 0; text-align: right; font: 500 12.5px/1.5 var(--font-jetbrains); color: #dceeff }

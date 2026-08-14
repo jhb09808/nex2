@@ -6,6 +6,8 @@ import LandingRadar from "@/components/nex/LandingRadar";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import WaitlistModal from "@/components/nex/waitlist/WaitlistModal";
+import useIsDesktop from "@/hooks/useIsDesktop";
+import WelcomeDesktop from "@/pages/WelcomeDesktop";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ export default function Welcome() {
   const [counts, setCounts] = useState({ active_count: 38, waitlist_count: 34 });
   const [loggedOut, setLoggedOut] = useState(false);
   const [showWaitlist, setShowWaitlist] = useState(false);
+  const isDesktop = useIsDesktop();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,6 +56,23 @@ export default function Welcome() {
       setZipMsg("Couldn't check that ZIP — try again.");
     }
   };
+
+  if (isDesktop) {
+    return (
+      <>
+        <WelcomeDesktop
+          zip={zip}
+          setZip={setZip}
+          zipMsg={zipMsg}
+          checkZip={checkZip}
+          counts={counts}
+          loggedOut={loggedOut}
+          onGetStarted={() => setShowWaitlist(true)}
+        />
+        {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
+      </>
+    );
+  }
 
   return (
     <div
