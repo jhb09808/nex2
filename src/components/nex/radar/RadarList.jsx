@@ -19,12 +19,6 @@ const STAR = (
   </svg>
 );
 
-const CHAT = (
-  <svg width="17" height="16" viewBox="0 0 18 17" fill="none" aria-hidden="true">
-    <path d="M1 8a6.6 6.6 0 0 1 6.9-6.5h2.2A6.6 6.6 0 0 1 17 8a6.6 6.6 0 0 1-6.9 6.5H5.4L1 16.4l1.2-3.6A6.4 6.4 0 0 1 1 8z" stroke="#9fd8ff" strokeWidth="1.4" strokeLinejoin="round" />
-  </svg>
-);
-
 const META_DIST = { display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 11, lineHeight: 1, color: "#7fa9d4" };
 const META_SHARED = { display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 11, lineHeight: 1, letterSpacing: "0.06em", color: "#8fd0ff" };
 const TAG_ON = { borderColor: "rgba(90,175,255,.7)", background: "rgba(45,115,215,.4)", color: "#eaf6ff" };
@@ -132,9 +126,6 @@ export default function RadarList({ users, onUserClick, activeInterests = [], ra
                   )}
                 </div>
 
-                <span style={{ flex: "none", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(120,190,255,.24)", borderRadius: "50%" }}>
-                  {CHAT}
-                </span>
               </div>
             );
           })

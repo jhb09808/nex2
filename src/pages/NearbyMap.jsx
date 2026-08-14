@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, MessageCircle, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, Loader2, UserCircle } from "lucide-react";
+import { X, EyeOff, Shield, Crown, BadgeCheck, MapPin, Lock, Sparkles, Users, Check, Radar, List, Handshake, Plus, Minus, Loader2, UserCircle } from "lucide-react";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
@@ -20,6 +20,14 @@ import { calculateSharedInterests, getSharedInterestLabels, getSubInterestName, 
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
 
 const DEFAULT_LOCATION = { lat: 40.7589, lng: -73.9851 };
+
+// Match sheet — the bottom panel shown when a blip or list row is tapped.
+const SHEET_SUB = { marginTop: 9, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 13.5, lineHeight: 1.4, letterSpacing: "0.04em", color: "#a6cbec" };
+const SHEET_LABEL = { fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", color: "#7fa9d4" };
+const SHEET_STAT = { fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 26, lineHeight: 1, letterSpacing: "-0.02em", color: "#eaf6ff" };
+const SHEET_DIV = { width: 1, alignSelf: "stretch", background: "rgba(105,190,255,.22)" };
+const SHEET_GHOST = { display: "flex", alignItems: "center", justifyContent: "center", height: 52, border: "1px solid rgba(120,190,255,.32)", background: "rgba(10,30,60,.55)", backdropFilter: "blur(8px)", color: "#dceeff", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 12, lineHeight: 1, letterSpacing: "0.16em", textTransform: "uppercase", cursor: "pointer" };
+const SHEET_DOT_FALLBACK = "#8fd0ff";
 // Toggle mock bots on the radar for testing chat/notification flows
 const SHOW_MOCK_BOTS = true;
 
@@ -292,6 +300,7 @@ export default function NearbyMap() {
     (myProfile?.radar_gender_filter || "all") !== "all";
 
   const bestMatchId = viewMode === "best" && ranked.length > 0 ? ranked[0].id : null;
+  const sheetColor = selectedUser?._blipColor || SHEET_DOT_FALLBACK;
   const matchPct = selectedUser ? Math.min(99, Math.max(35, 50 + (selectedUser._shared || 0) * 8 + Math.max(0, 15 - (selectedUser._dist || 1) * 10))) : 0;
   const markers = computeClusters(displayUsers);
 
@@ -386,7 +395,7 @@ export default function NearbyMap() {
           effectiveRadius={effectiveRadius}
           getUserLatLng={getUserLatLng}
           distanceMiles={distanceMiles}
-          onUserClick={(user) => setSelectedUser(user)}
+          onUserClick={(user, blipColor) => setSelectedUser(blipColor ? { ...user, _blipColor: blipColor } : user)}
           onClusterClick={(key) => handleExpandCluster(key)}
           blurred={showRadarOnboarding}
           zoom={zoom}
@@ -602,73 +611,86 @@ export default function NearbyMap() {
       <AnimatePresence>
         {selectedUser && (
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 32, stiffness: 320 }}
-            className="absolute bottom-24 left-0 right-0 z-30 px-4"
+            initial={{ y: 14, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 14, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="notch-lg"
+            style={{
+              position: "absolute",
+              left: 16,
+              right: 16,
+              bottom: "calc(24px + env(safe-area-inset-bottom, 0px))",
+              zIndex: 30,
+              padding: "16px 16px 14px",
+              background: "linear-gradient(180deg, rgba(10,32,64,.92), rgba(6,20,42,.96))",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(105,190,255,.34)",
+              boxShadow: "0 -8px 34px rgba(2,10,25,.6), 0 0 30px rgba(40,120,220,.18)",
+            }}
           >
-            <div className="cyber-frame rounded-2xl p-5 relative overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
-              <button onClick={() => setSelectedUser(null)} className="absolute top-3 right-3 z-10">
-                <X className="w-4 h-4 text-white/30" />
-              </button>
-
-              <div className="relative">
-                <p className="text-[10px] font-cyber text-blue-400/50 tracking-widest mb-2">NEARBY MATCH</p>
-
-                {selectedUser.visibility !== "anonymous" && (() => {
-                  const sharedLabels = getSharedInterestLabels(myProfile?.interests || [], selectedUser.interests || [], 3);
-                  const theirInterests = (selectedUser.interests || []).slice(0, 5).map((id) => getSubInterestName(id));
-                  return (
-                    <div className="mb-4">
-                      {sharedLabels.length > 0 && (
-                        <p className="text-blue-200/60 text-xs mb-2">
-                          You both like {sharedLabels.join(", ")}.
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-1.5">
-                        {theirInterests.map((name) => (
-                          <span key={name} className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-blue-500/8 text-blue-300/80 border border-blue-500/10">
-                            {name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-                {selectedUser.visibility === "anonymous" && (
-                  <p className="text-white/30 text-xs mb-4">Anonymous user — interests hidden</p>
-                )}
-
-                <div className="flex items-center gap-5 mb-4">
-                  <div>
-                    <p className="text-2xl font-cyber font-bold text-white neon-text">{Math.round(matchPct)}%</p>
-                    <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">interest match</p>
+            <div>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 10, lineHeight: 1, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8fd0ff" }}>
+                    <span style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: sheetColor, boxShadow: `0 0 10px ${sheetColor}` }} />
+                    Nearby match
                   </div>
-                  <div className="h-8 w-px bg-blue-500/10" />
-                  <div>
-                    <p className="text-lg font-cyber font-bold text-white">
-                      {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)}ft` : `${selectedUser._dist?.toFixed(1)}mi`}
-                    </p>
-                    <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">away</p>
-                  </div>
-                  {selectedUser.connections_count != null && (
-                    <>
-                      <div className="h-8 w-px bg-blue-500/10" />
-                      <div>
-                        <p className="text-lg font-cyber font-bold text-white">{selectedUser.connections_count}</p>
-                        <p className="text-[9px] font-cyber text-blue-400/40 tracking-wider uppercase mt-0.5">connections</p>
-                      </div>
-                    </>
-                  )}
+
+                  {selectedUser.visibility === "anonymous" ? (
+                    <div style={SHEET_SUB}>Anonymous user — interests hidden</div>
+                  ) : (() => {
+                    const sharedLabels = getSharedInterestLabels(myProfile?.interests || [], selectedUser.interests || [], 3);
+                    return sharedLabels.length > 0
+                      ? <div style={SHEET_SUB}>You both like {sharedLabels.join(", ")}.</div>
+                      : <div style={SHEET_SUB}>{getUserDisplayName(selectedUser)}</div>;
+                  })()}
                 </div>
 
-                <div className="flex gap-2">
+                <button onClick={() => setSelectedUser(null)} aria-label="Dismiss" style={{ flex: "none", width: 44, height: 44, margin: "-10px -10px 0 0", display: "flex", alignItems: "center", justifyContent: "center", border: 0, background: "transparent", cursor: "pointer", color: "#7fa9d4" }}>
+                  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M1.5 1.5l13 13M14.5 1.5l-13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+
+              {selectedUser.visibility !== "anonymous" && selectedUser.interests?.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
+                  {selectedUser.interests.slice(0, 5).map((id) => (
+                    <span key={id} className="tag">{getSubInterestName(id)}</span>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 22, marginTop: 16 }}>
+                <div>
+                  <div style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 34, lineHeight: 1, letterSpacing: "-0.01em", color: "#eaf6ff", textShadow: "0 0 22px rgba(90,180,255,.55)" }}>{Math.round(matchPct)}%</div>
+                  <div style={{ ...SHEET_LABEL, color: "#8fd0ff", marginTop: 7 }}>Interest match</div>
+                </div>
+                <div style={SHEET_DIV} />
+                <div>
+                  <div style={SHEET_STAT}>
+                    {selectedUser._dist < 0.1 ? `${Math.round(selectedUser._dist * 5280)} ft` : `${selectedUser._dist?.toFixed(1)} mi`}
+                  </div>
+                  <div style={{ ...SHEET_LABEL, marginTop: 8 }}>Away</div>
+                </div>
+                {selectedUser.connections_count != null && (
+                  <>
+                    <div style={SHEET_DIV} />
+                    <div>
+                      <div style={SHEET_STAT}>{selectedUser.connections_count}</div>
+                      <div style={{ ...SHEET_LABEL, marginTop: 8 }}>Connections</div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div style={{ display: "flex", gap: 9, marginTop: 16 }}>
                   {capabilities && !capabilities.can_start_chat ? (
                     <button
                       onClick={() => setPaywallVariant("chat_limit")}
-                      className="flex-1 py-3.5 rounded-xl cyber-input flex items-center justify-center gap-1.5 text-white/40 font-cyber font-medium text-sm"
+                      className="notch"
+                      style={{ ...SHEET_GHOST, flex: 1, gap: 9 }}
                     >
                       <Lock className="w-4 h-4" /> Chat limit reached
                     </button>
@@ -724,18 +746,23 @@ export default function NearbyMap() {
                           console.error(err);
                         }
                       }}
-                      className="flex-1 py-3.5 rounded-xl neon-btn text-white font-cyber font-bold text-sm tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                      className="cta notch"
+                      style={{ flex: 1, height: 52, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 13, lineHeight: 1, letterSpacing: "0.17em", textTransform: "uppercase" }}
                     >
-                      <MessageCircle className="w-4 h-4" /> REQUEST CHAT
+                      <span className="sheen" />
+                      <svg width="16" height="15" viewBox="0 0 18 17" fill="none" aria-hidden="true" style={{ position: "relative" }}>
+                        <path d="M1 8a6.6 6.6 0 0 1 6.9-6.5h2.2A6.6 6.6 0 0 1 17 8a6.6 6.6 0 0 1-6.9 6.5H5.4L1 16.4l1.2-3.6A6.4 6.4 0 0 1 1 8z" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" />
+                      </svg>
+                      <span style={{ position: "relative" }}>Request chat</span>
                     </button>
                   )}
                   <button
                     onClick={() => navigate(`/user/${selectedUser.id}`, { state: { user: selectedUser } })}
-                    className="px-4 py-3.5 rounded-xl cyber-input text-white/60 font-medium text-sm active:scale-[0.98] transition-transform"
+                    className="notch"
+                    style={{ ...SHEET_GHOST, flex: "none", padding: "0 20px" }}
                   >
                     Profile
                   </button>
-                </div>
               </div>
             </div>
           </motion.div>

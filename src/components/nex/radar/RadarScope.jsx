@@ -513,7 +513,7 @@ function Blip({ blip, onUserClick, isBestMatch }) {
 
   return (
     <button
-      onClick={() => onUserClick(blip.user)}
+      onClick={() => onUserClick(blip.user, color)}
       aria-label="View profile"
       className="active:scale-90 transition-transform"
       style={{ width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: 0, padding: 0, cursor: "pointer" }}
