@@ -4,6 +4,7 @@ import UserAvatar from "@/components/nex/UserAvatar";
 import VerifiedBadges from "@/components/nex/VerifiedBadges";
 import { getSubInterestName, getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
+import listBg from "@/assets/radar-map.webp";
 
 const PIN = (
   <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden="true" style={{ flex: "none" }}>
@@ -38,7 +39,20 @@ export default function RadarList({ users, onUserClick, activeInterests = [], ra
   const onlineCount = users.filter((u) => u.is_online).length;
 
   return (
-    <div className="absolute inset-0 flex flex-col" style={{ paddingTop: HEADER_CLEARANCE }}>
+    <div className="absolute inset-0 flex flex-col" style={{ paddingTop: HEADER_CLEARANCE, background: "radial-gradient(110% 40% at 50% 0%, #0a2545 0%, #04101f 44%, #01050c 100%)" }}>
+      {/* City-lights background under its scrim */}
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        <img src={listBg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(3,12,26,.62) 0%, rgba(2,9,20,.88) 22%, rgba(1,6,14,.96) 44%, #01050c 68%)" }} />
+      </div>
+
+      {/* HUD frame */}
+      <div aria-hidden="true" style={{ position: "absolute", inset: 8, border: "1px solid rgba(86,180,255,.10)", pointerEvents: "none", zIndex: 5 }} />
+      <div aria-hidden="true" style={{ position: "absolute", top: 8, left: 8, width: 20, height: 20, borderLeft: "1.5px solid rgba(125,205,255,.55)", borderTop: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
+      <div aria-hidden="true" style={{ position: "absolute", top: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderTop: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
+      <div aria-hidden="true" style={{ position: "absolute", bottom: 8, left: 8, width: 20, height: 20, borderLeft: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
+      <div aria-hidden="true" style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
+
       {/* Count line */}
       <div style={{ position: "relative", flex: "none", zIndex: 2, display: "flex", alignItems: "baseline", justifyContent: "space-between", padding: "16px 16px 10px" }}>
         <div style={{ fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 9.5, lineHeight: 1, letterSpacing: "0.18em", textTransform: "uppercase", color: "#7fa9d4" }}>
