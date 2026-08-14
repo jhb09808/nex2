@@ -5,8 +5,8 @@ import radarMap from "@/assets/radar-map.webp";
 
 const PALETTE = {
   bg: "#000000",
-  grid: "rgba(59, 130, 246, 0.05)",
-  gridBright: "rgba(59, 130, 246, 0.09)",
+  grid: "rgba(110, 190, 255, 0.13)",
+  gridBright: "rgba(110, 190, 255, 0.22)",
   green: "#39FF6A",
   blue: "#60A5FA",
   orange: "#FF9A2E",
@@ -364,16 +364,21 @@ export default function RadarScope({
         />
 
         {/* Concentric range rings */}
-        {rings.map((s, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              inset: `${(1 - s) * 50}%`,
-              border: `1px solid ${i === rings.length - 1 ? PALETTE.gridBright : PALETTE.grid}`,
-            }}
-          />
-        ))}
+        {rings.map((s, i) => {
+          // innermost → outermost, the outer edge reads strongest
+          const alpha = [0.14, 0.16, 0.19, 0.26][i] ?? 0.14;
+          return (
+            <div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                inset: `${(1 - s) * 50}%`,
+                border: `1px solid rgba(110, 190, 255, ${alpha})`,
+                boxShadow: i === rings.length - 1 ? "0 0 18px rgba(60,150,255,.14)" : "none",
+              }}
+            />
+          );
+        })}
 
         {/* Radial spokes */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
