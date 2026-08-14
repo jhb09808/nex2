@@ -249,13 +249,6 @@ export default function Login() {
             Continue with Google
           </button>
 
-          {/* Sign up */}
-          <div style={{ textAlign: "center", marginTop: 22, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8fb9e2" }}>
-            New here?{" "}
-            <Link to="/register" style={{ color: "#7fc8ff", textDecoration: "none", borderBottom: "1px solid rgba(127,200,255,.4)", paddingBottom: 2 }}>
-              Create an account
-            </Link>
-          </div>
           </>
           )}
         </form>
