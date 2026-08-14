@@ -19,13 +19,11 @@ Deno.serve(async (req) => {
     }
 
     const entry = entries[0];
-    // Anyone who joined the waitlist may complete signup. Only explicitly
-    // rejected emails are blocked.
-    if (entry.status === "rejected") {
-      return Response.json({ approved: false, status: "rejected" });
+    if (entry.status === "active" || entry.status === "approved") {
+      const users = await base44.asServiceRole.entities.User.filter({ email });
+      return Response.json({ approved: true, status: entry.status, has_account: users.length > 0 });
     }
-    const users = await base44.asServiceRole.entities.User.filter({ email });
-    return Response.json({ approved: true, status: entry.status, has_account: users.length > 0 });
+    return Response.json({ approved: false, status: entry.status });
   } catch (error) {
     return Response.json({ approved: false, error: error.message }, { status: 500 });
   }

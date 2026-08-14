@@ -5,6 +5,7 @@ import Logo from "@/components/nex/Logo";
 import LandingRadar from "@/components/nex/LandingRadar";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import WaitlistModal from "@/components/nex/waitlist/WaitlistModal";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function Welcome() {
   const [zipMsg, setZipMsg] = useState("");
   const [counts, setCounts] = useState({ active_count: 38, waitlist_count: 34 });
   const [loggedOut, setLoggedOut] = useState(false);
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -183,7 +185,7 @@ export default function Welcome() {
 
         {/* CTA buttons */}
         <button
-          onClick={() => navigate("/register")}
+          onClick={() => setShowWaitlist(true)}
           style={{ position: "relative", zIndex: 1, overflow: "hidden", width: "100%", height: 58, marginTop: 12, border: "1.5px solid transparent", borderRadius: 2, background: "linear-gradient(180deg, #0a1c3e, #071228) padding-box, linear-gradient(100deg, #3b6bff, #9b4dff 48%, #2fd4d4) border-box", color: "#fff", fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 15.5, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", cursor: "pointer", transition: "box-shadow 0.25s ease, transform 0.25s ease, filter 0.25s ease", boxShadow: "0 0 22px rgba(80,110,255,0.45), inset 0 0 22px rgba(70,120,255,0.28)", clipPath: "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)", flex: "none" }}
         >
           <span aria-hidden="true" style={{ position: "absolute", top: -1, left: "50%", width: 70, height: 2, marginLeft: -35, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(190,220,255,0.95), rgba(255,255,255,0))", filter: "blur(0.5px)" }} />
@@ -208,6 +210,8 @@ export default function Welcome() {
         <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: 6, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 10, lineHeight: 1, letterSpacing: "0.1em", color: "rgba(139,185,226,0.4)", flex: "none" }}>
           © 2026 NEX2, Inc. All Rights Reserved.
         </div>
+
+        {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
       </main>
     </div>
   );
