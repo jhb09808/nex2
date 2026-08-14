@@ -475,7 +475,12 @@ export default function RadarScope({
             style={{ left: `${blip.x}%`, top: `${blip.y}%`, transform: "translate(-50%, -50%)" }}
           >
             {blip.type === "cluster" ? (
-              <button onClick={() => onClusterClick(blip.key)} className="active:scale-90 transition-transform">
+              <button
+                onClick={() => onClusterClick(blip.key)}
+                aria-label={`Expand ${blip.count} nearby people`}
+                className="active:scale-90 transition-transform"
+                style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: 0, padding: 0, cursor: "pointer" }}
+              >
                 <div className="relative w-8 h-8 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: PALETTE.blue, opacity: 0.1 }} />
                   <div className="relative w-6 h-6 rounded-full border border-blue-400/20 flex items-center justify-center text-white text-[10px] font-cyber font-bold" style={{ background: `${PALETTE.blue}22`, boxShadow: `0 0 8px ${PALETTE.blue}44` }}>
@@ -507,7 +512,12 @@ function Blip({ blip, onUserClick, isBestMatch }) {
   const color = blip.color || DEFAULT_BLIP_COLOR;
 
   return (
-    <button onClick={() => onUserClick(blip.user)} className="active:scale-90 transition-transform">
+    <button
+      onClick={() => onUserClick(blip.user)}
+      aria-label="View profile"
+      className="active:scale-90 transition-transform"
+      style={{ width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", border: 0, padding: 0, cursor: "pointer" }}
+    >
       <div className="relative flex items-center justify-center">
         {/* Best match pulsing ring — always visible */}
         {isBestMatch && (
