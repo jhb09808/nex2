@@ -8,10 +8,12 @@ export default async function(req: Request): Promise<Response> {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { conversation_id, content, type } = await req.json();
-    if (!conversation_id || !content?.trim()) {
-      return Response.json({ error: 'conversation_id and content required' }, { status: 400 });
+    const { conversation_id, content, type, media_url } = await req.json();
+    if (!conversation_id || (!content?.trim() && !media_url)) {
+      return Response.json({ error: 'conversation_id and content or media_url required' }, { status: 400 });
     }
+    const msgType = type || (media_url ? 'image' : 'text');
+    const body = content?.trim() || (msgType === 'voice' ? 'Voice message' : 'Photo');
 
     const convo = await base44.asServiceRole.entities.Conversation.get(conversation_id);
     if (!convo) return Response.json({ error: 'Conversation not found' }, { status: 404 });
@@ -40,12 +42,13 @@ export default async function(req: Request): Promise<Response> {
     const msg = await base44.asServiceRole.entities.Message.create({
       conversation_id,
       sender_id: user.id,
-      content: content.trim(),
-      type: type || 'text',
+      content: body,
+      type: msgType,
+      ...(media_url ? { media_url } : {}),
     });
 
     await base44.asServiceRole.entities.Conversation.update(conversation_id, {
-      last_message: content.trim(),
+      last_message: body,
       last_message_at: new Date().toISOString(),
     });
 

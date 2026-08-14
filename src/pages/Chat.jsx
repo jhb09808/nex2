@@ -11,6 +11,7 @@ import MessageCounter from "@/components/nex/chat/MessageCounter";
 import PostChatPanel from "@/components/nex/chat/PostChatPanel";
 import ContactExchangeSheet from "@/components/nex/chat/ContactExchangeSheet";
 import MessageBubble from "@/components/nex/chat/MessageBubble";
+import VoiceRecorderButton from "@/components/nex/chat/VoiceRecorderButton";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import { generateMockProfiles } from "@/components/nex/mapMockProfiles";
@@ -66,6 +67,7 @@ export default function Chat() {
   const [sentCount, setSentCount] = useState(0);
   const [showContactExchange, setShowContactExchange] = useState(false);
   const messagesEnd = useRef(null);
+  const fileInputRef = useRef(null);
 
   const limitReached = sentCount >= MAX_MESSAGES;
   const conversationEnded = conversation?.ended_by != null;
@@ -264,6 +266,25 @@ export default function Chat() {
     }
   };
 
+  const sendMedia = async (file, type) => {
+    if (!file || sending || limitReached) return;
+    setSending(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.functions.invoke("sendMessage", {
+        conversation_id: conversationId,
+        media_url: file_url,
+        type,
+        content: type === "voice" ? "Voice message" : "Photo",
+      });
+      if (res.data?.sent_count != null) setSentCount(res.data.sent_count);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleEndConnection = async () => {
     try {
       await base44.functions.invoke("endConversation", { conversation_id: conversationId });
@@ -398,7 +419,23 @@ export default function Chat() {
         <div className="flex-none" style={{ position: "relative", zIndex: 3, paddingTop: 12, paddingLeft: 20, paddingRight: 20, paddingBottom: "max(16px, env(safe-area-inset-bottom, 0px))", borderTop: "1px solid rgba(105,190,255,.16)" }}>
           <MessageCounter sentCount={sentCount} max={MAX_MESSAGES} />
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-            <button style={{ ...ICON_BTN, width: 44, height: 44 }} aria-label="Send image">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) sendMedia(file, "image");
+              }}
+              style={{ display: "none" }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending}
+              style={{ ...ICON_BTN, width: 44, height: 44 }}
+              aria-label="Send image"
+            >
               <Image className="w-4 h-4" style={{ color: "#bfe2ff" }} />
             </button>
             <div
@@ -420,9 +457,11 @@ export default function Chat() {
                 <Send className="w-3.5 h-3.5" />
               </button>
             </div>
-            <button style={{ ...ICON_BTN, width: 44, height: 44 }} aria-label="Voice message">
-              <Mic className="w-4 h-4" style={{ color: "#bfe2ff" }} />
-            </button>
+            <VoiceRecorderButton
+              style={{ ...ICON_BTN, width: 44, height: 44 }}
+              disabled={sending}
+              onRecorded={(file) => sendMedia(file, "voice")}
+            />
           </div>
         </div>
       )}

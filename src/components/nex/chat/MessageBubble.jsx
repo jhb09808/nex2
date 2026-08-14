@@ -30,9 +30,19 @@ export default function MessageBubble({ message, isMe, otherUser, showAvatar }) 
             : { background: "rgba(10,30,60,.72)", backdropFilter: "blur(10px)", border: "1px solid rgba(105,190,255,.22)" }),
         }}
       >
-        <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 14.5, lineHeight: 1.5, color: isMe ? "#fff" : "#dceeff", wordBreak: "break-word" }}>
-          {message.content}
-        </p>
+        {message.type === "image" && message.media_url ? (
+          <img
+            src={message.media_url}
+            alt={message.content || "Photo"}
+            style={{ display: "block", maxWidth: 220, width: "100%", borderRadius: 6 }}
+          />
+        ) : message.type === "voice" && message.media_url ? (
+          <audio src={message.media_url} controls style={{ display: "block", width: 210, height: 36 }} />
+        ) : (
+          <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 14.5, lineHeight: 1.5, color: isMe ? "#fff" : "#dceeff", wordBreak: "break-word" }}>
+            {message.content}
+          </p>
+        )}
         <div style={{ marginTop: 8, textAlign: isMe ? "right" : "left", fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 9.5, color: isMe ? "rgba(255,255,255,.62)" : "#7fa9d4" }}>
           {moment(message.created_date).format("h:mm A")}
           {isMe && message.is_read ? " ✓✓" : ""}
