@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import DesktopFrame from "@/components/nex/desktop/DesktopFrame";
+import DesktopLoginModal from "@/components/nex/desktop/DesktopLoginModal";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
 
@@ -19,7 +19,10 @@ const SCRIMS = [
 ];
 
 export default function WelcomeDesktop({ zip, setZip, zipMsg, checkZip, counts, radiusMiles = 2, loggedOut, onGetStarted }) {
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
+    <>
     <DesktopFrame background="radial-gradient(85% 90% at 72% 50%, #0d2a58 0%, #061428 44%, #020710 100%)" scrims={SCRIMS}>
       {loggedOut && (
         <div style={{ position: "absolute", zIndex: 20, top: "clamp(24px,3vh,40px)", left: "50%", transform: "translateX(-50%)", padding: "10px 18px", background: "rgba(16,80,50,.55)", border: "1px solid rgba(80,220,140,.4)", borderRadius: 8, display: "flex", alignItems: "center", gap: 10, backdropFilter: "blur(12px)", boxShadow: "0 8px 28px rgba(1,6,14,.6)", pointerEvents: "none" }}>
@@ -36,7 +39,7 @@ export default function WelcomeDesktop({ zip, setZip, zipMsg, checkZip, counts, 
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4dffb0", boxShadow: "0 0 8px #4dffb0", animation: "nxglow 2s ease-in-out infinite" }} />
             Early access · NYC
           </div>
-          <Link to="/login" className="dk-ghost dk-notch-sm" style={{ textDecoration: "none" }}>Log in</Link>
+          <button type="button" onClick={() => setShowLogin(true)} className="dk-ghost dk-notch-sm">Log in</button>
         </div>
       </header>
 
@@ -143,6 +146,10 @@ export default function WelcomeDesktop({ zip, setZip, zipMsg, checkZip, counts, 
         <span>NEX2 works best in dense areas — starting in NYC, expanding city by city.</span>
         <span>© 2026 NEX2, Inc.</span>
       </footer>
+
     </DesktopFrame>
+
+    {showLogin && <DesktopLoginModal activeCount={counts.active_count} onClose={() => setShowLogin(false)} />}
+    </>
   );
 }
