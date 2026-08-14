@@ -25,11 +25,17 @@ export default function Login() {
     setLoading(true);
     try {
       const url = new URL(window.location.href);
+      const returnTo = url.searchParams.get("returnTo") || "/map";
       if (!url.searchParams.has("returnTo")) {
-        url.searchParams.set("returnTo", "/map");
+        url.searchParams.set("returnTo", returnTo);
         window.history.replaceState({}, "", url.toString());
       }
       await base44.auth.loginViaEmailPassword(email, password);
+      // Standalone (home-screen) iOS doesn't always follow the SDK's own
+      // redirect, which left the button doing nothing. Navigate explicitly.
+      const dest = returnTo.startsWith("/") ? returnTo : "/map";
+      window.location.href = dest;
+      return;
     } catch (err) {
       const msg = err.message || "Invalid email or password";
       setError(msg);
