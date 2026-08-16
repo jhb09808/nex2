@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import { getRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
 import { getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 import radarMap from "@/assets/radar-map.webp";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
 const PALETTE = {
   bg: "#000000",
@@ -78,6 +79,7 @@ export default function RadarScope({
   onZoomChange,
   bestMatchId,
 }) {
+  const isDesktop = useIsDesktop();
   const baseRadius = effectiveRadius || 1;
   const visibleRadius = baseRadius / zoom;
   const [sweepColor, setSweepColor] = useState(getRadarSweepColor);
@@ -345,7 +347,7 @@ export default function RadarScope({
         <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", zIndex: 5 }} />
 
       {/* Radar scope circle — 15% larger, shifted up */}
-      <div className="relative aspect-square" style={{ transform: "translateY(-3%)", width: "min(340px, 78vw)", margin: "auto", maxHeight: "100%" }}>
+      <div className="relative aspect-square" style={{ transform: "translateY(-3%)", width: isDesktop ? "min(70vw, 76dvh)" : "min(340px, 78vw)", margin: "auto", maxHeight: "100%" }}>
         {/* Scope background with glass depth */}
         <div
           className="absolute inset-0 rounded-full"
