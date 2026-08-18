@@ -421,11 +421,11 @@ export default function NearbyMap() {
               <div className="absolute inset-0 rounded-full bg-green-400 animate-ping" />
             </div>
             <span className="text-[11px] font-cyber text-white/70 tracking-wider">
-              {users.filter((u) => u.is_online).length} users online
+              {ranked.filter((u) => u.is_online).length} users online
             </span>
           </div>
           <p className="text-[10px] font-cyber text-blue-400/30 tracking-widest">
-            {users.length > 0 ? `BEST MATCH DETECTED · ${ranked[0]?._dist < 0.1 ? `${Math.round(ranked[0]._dist * 5280)}FT` : `${ranked[0]?._dist?.toFixed(1)} MI`} AWAY` : "SCANNING"}
+            {ranked.length > 0 ? `BEST MATCH DETECTED · ${ranked[0]?._dist < 0.1 ? `${Math.round(ranked[0]._dist * 5280)}FT` : `${ranked[0]?._dist?.toFixed(1)} MI`} AWAY` : "SCANNING"}
           </p>
         </div>
       )}
