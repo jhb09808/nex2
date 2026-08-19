@@ -9,6 +9,8 @@ import ThreadRow from "@/components/nex/messages/ThreadRow";
 import moment from "moment";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import messagesBg from "@/assets/messages-bg.webp";
+import MessagesDesktop from "@/pages/MessagesDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
 export default function Messages() {
   const navigate = useNavigate();
@@ -19,6 +21,10 @@ export default function Messages() {
   const [actionLoading, setActionLoading] = useState({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [myProfile, setMyProfile] = useState(null);
+  const [openId, setOpenId] = useState(null);
+  // Same breakpoint as the desktop radar — the rail plus a 380px inbox needs it.
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadData();
@@ -27,6 +33,8 @@ export default function Messages() {
   const loadData = async () => {
     try {
       const me = await base44.auth.me();
+      const mine = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+      if (mine[0]) setMyProfile(mine[0]);
 
       // Load conversations
       const convos = await base44.entities.Conversation.list("-updated_date", 30);
@@ -100,6 +108,22 @@ export default function Messages() {
     const other = getOtherParticipant(convo);
     return (getUserDisplayName(other) || "").toLowerCase().includes(search.trim().toLowerCase());
   });
+
+  if (isDesktop && !loading) {
+    return (
+      <MessagesDesktop
+        conversations={filteredConversations}
+        getOtherParticipant={getOtherParticipant}
+        isUnread={(convo) => !!getOtherParticipant(convo)?.is_online}
+        search={search}
+        setSearch={setSearch}
+        myProfile={myProfile}
+        openId={openId}
+        setOpenId={setOpenId}
+        unreadCount={conversations.filter((c) => getOtherParticipant(c)?.is_online).length}
+      />
+    );
+  }
 
   if (loading) {
     return (

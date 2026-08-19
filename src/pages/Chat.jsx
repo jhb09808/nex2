@@ -50,8 +50,11 @@ const distanceMiles = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-export default function Chat() {
-  const { conversationId } = useParams();
+// `embedded` drops the phone chrome (fixed shell, page background, back
+// button) so desktop Messages can host the thread beside its inbox.
+export default function Chat({ conversationId: conversationIdProp, embedded = false }) {
+  const params = useParams();
+  const conversationId = conversationIdProp || params.conversationId;
   const navigate = useNavigate();
   const location = useLocation();
   const chatUser = location.state?.chatUser;
@@ -306,17 +309,23 @@ export default function Chat() {
   return (
     <div
       className="flex flex-col"
-      style={{ position: "fixed", inset: 0, height: "100dvh", minHeight: 0, background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
+      style={embedded
+        ? { flex: 1, minHeight: 0 }
+        : { position: "fixed", inset: 0, height: "100dvh", minHeight: 0, background: "radial-gradient(110% 30% at 50% 0%, #0a2545 0%, #04101f 40%, #01050c 100%)" }}
     >
-      <NotificationListener />
+      {!embedded && <NotificationListener />}
       {/* Header */}
       <div
         className="flex-none"
-        style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 11, paddingTop: "max(16px, env(safe-area-inset-top, 0px))", paddingLeft: 20, paddingRight: 20, paddingBottom: 12, borderBottom: "1px solid rgba(105,190,255,.16)" }}
+        style={embedded
+          ? { position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 12, padding: "20px 26px", borderBottom: "1px solid rgba(105,190,255,.16)" }
+          : { position: "relative", zIndex: 3, display: "flex", alignItems: "center", gap: 11, paddingTop: "max(16px, env(safe-area-inset-top, 0px))", paddingLeft: 20, paddingRight: 20, paddingBottom: 12, borderBottom: "1px solid rgba(105,190,255,.16)" }}
       >
-        <button onClick={() => navigate("/messages")} style={ICON_BTN} aria-label="Back">
-          <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
-        </button>
+        {!embedded && (
+          <button onClick={() => navigate("/messages")} style={ICON_BTN} aria-label="Back">
+            <ArrowLeft className="w-4 h-4" style={{ color: "#bfe2ff" }} />
+          </button>
+        )}
         <UserAvatar name={getUserDisplayName(otherUser)} size="sm" isOnline={otherUser?.is_online} plan={otherUser?.plan} interests={otherUser?.interests} gender={otherUser?.gender} />
         <div className="flex-1 min-w-0">
           <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 16, lineHeight: 1, letterSpacing: "0.02em", color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -351,7 +360,7 @@ export default function Chat() {
       {/* Messages */}
       <div
         className="flex-1 min-h-0 overflow-y-auto"
-        style={{ position: "relative", zIndex: 1, padding: "18px 20px 10px", display: "flex", flexDirection: "column", gap: 16, overscrollBehavior: "contain" }}
+        style={{ position: "relative", zIndex: 1, padding: embedded ? "22px 26px 12px" : "18px 20px 10px", display: "flex", flexDirection: "column", gap: 16, overscrollBehavior: "contain" }}
       >
         {messages.map((msg, i) => {
           const isMe = msg.sender_id === me?.id;
@@ -423,7 +432,9 @@ export default function Chat() {
           />
         </div>
       ) : (
-        <div className="flex-none" style={{ position: "relative", zIndex: 3, paddingTop: 12, paddingLeft: 20, paddingRight: 20, paddingBottom: "max(16px, env(safe-area-inset-bottom, 0px))", borderTop: "1px solid rgba(105,190,255,.16)" }}>
+        <div className="flex-none" style={embedded
+          ? { position: "relative", zIndex: 3, padding: "16px 26px 20px", borderTop: "1px solid rgba(105,190,255,.16)" }
+          : { position: "relative", zIndex: 3, paddingTop: 12, paddingLeft: 20, paddingRight: 20, paddingBottom: "max(16px, env(safe-area-inset-bottom, 0px))", borderTop: "1px solid rgba(105,190,255,.16)" }}>
           <MessageCounter sentCount={sentCount} max={MAX_MESSAGES} />
           {mediaError && (
             <div style={{ marginBottom: 8, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 11, letterSpacing: "0.06em", color: "#ff8a80" }}>
