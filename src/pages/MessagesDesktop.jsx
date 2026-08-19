@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import Chat from "@/pages/Chat";
 import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
-import NotificationListener from "@/components/nex/NotificationListener";
 import { getUserDisplayName } from "@/components/nex/userDisplay";
 import moment from "moment";
 import radarBg from "@/assets/radar-map.webp";
@@ -90,10 +89,15 @@ export default function MessagesDesktop({
 }) {
   const location = useLocation();
 
-  return (
-    <div style={{ position: "fixed", inset: 0, display: "flex", overflow: "hidden", padding: 20, boxSizing: "border-box", background: "radial-gradient(80% 70% at 44% 52%, #08203f 0%, #04101f 46%, #01050c 100%)" }}>
-      <NotificationListener />
+  // Hides AppLayout's floating phone menu while this shell — which has its own
+  // nav rail — is mounted.
+  useEffect(() => {
+    document.body.dataset.desktopShell = "1";
+    return () => { delete document.body.dataset.desktopShell; };
+  }, []);
 
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 70, display: "flex", overflow: "hidden", padding: 20, boxSizing: "border-box", background: "radial-gradient(80% 70% at 44% 52%, #08203f 0%, #04101f 46%, #01050c 100%)" }}>
       {/* Background */}
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0 }}>
         <img src={radarBg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />

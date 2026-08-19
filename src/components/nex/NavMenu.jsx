@@ -103,7 +103,7 @@ export default function NavMenu() {
     : baseNavItems;
 
   return (
-    <>
+    <div className="nav-menu">
       {/* Hamburger / close — the design swaps the glyph in place. */}
       <button
         onClick={() => setOpen(!open)}
@@ -200,6 +200,6 @@ export default function NavMenu() {
           </div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

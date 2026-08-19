@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import RadarScope from "@/components/nex/radar/RadarScope";
@@ -114,13 +114,20 @@ export default function NearbyMapDesktop({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const location = useLocation();
 
+  // Hides AppLayout's floating phone menu while this shell — which has its own
+  // nav rail — is mounted.
+  useEffect(() => {
+    document.body.dataset.desktopShell = "1";
+    return () => { delete document.body.dataset.desktopShell; };
+  }, []);
+
   const closest = [...onScope]
     .filter((u) => u._dist != null)
     .sort((a, b) => a._dist - b._dist)
     .slice(0, 3);
 
   return (
-    <div style={{ position: "fixed", inset: 0, display: "flex", overflow: "hidden", padding: 20, boxSizing: "border-box", background: "radial-gradient(80% 70% at 44% 52%, #08203f 0%, #04101f 46%, #01050c 100%)" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 70, display: "flex", overflow: "hidden", padding: 20, boxSizing: "border-box", background: "radial-gradient(80% 70% at 44% 52%, #08203f 0%, #04101f 46%, #01050c 100%)" }}>
       {/* Background */}
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 0 }}>
         <img src={radarBg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
