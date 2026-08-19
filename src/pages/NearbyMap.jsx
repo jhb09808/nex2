@@ -14,6 +14,8 @@ import { getUserDisplayName, getUserNumberLabel } from "@/components/nex/userDis
 import RadarOnboardingOverlay from "@/components/nex/radar/RadarOnboardingOverlay";
 import RadarScope from "@/components/nex/radar/RadarScope";
 import RadarList from "@/components/nex/radar/RadarList";
+import NearbyMapDesktop from "@/pages/NearbyMapDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 import ChatRequestOverlay from "@/components/nex/radar/ChatRequestOverlay";
 
 import { calculateSharedInterests, getSharedInterestLabels, getSubInterestName, INTEREST_CATEGORIES } from "@/components/nex/radar/interestCategories";
@@ -51,6 +53,9 @@ export default function NearbyMap() {
   const [activeFilters, setActiveFilters] = useState([]);
   const [expandedClusters, setExpandedClusters] = useState({});
   const [zoom, setZoom] = useState(1);
+  // The radar needs room for its rail and side panel — 1200, not the 1024
+  // the other desktop screens use.
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadUsers();
@@ -191,6 +196,58 @@ export default function NearbyMap() {
     setExpandedClusters({});
   };
 
+  // Shared by the phone sheet and the desktop side panel.
+  const requestChat = async () => {
+    try {
+      // Mock users — simulate the other person deciding
+      if (selectedUser.isMock) {
+        const bot = selectedUser;
+        const myId = myProfile?.created_by_id;
+        setSelectedUser(null);
+        setRequestWaiting(true);
+        // Create a real conversation so the chat works end-to-end
+        let convo;
+        try {
+          convo = await base44.entities.Conversation.create({
+            participants: [myId, bot.id].filter(Boolean),
+            is_active: true,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+        // Simulate response delay (~2.5s)
+        setTimeout(() => {
+          setRequestWaiting(false);
+          const accepted = Math.random() < 0.65;
+          if (accepted && convo?.id) {
+            navigate(`/chat/${convo.id}`, { state: { chatUser: bot } });
+          }
+          // If denied — silently close, no notification shown
+        }, 2500);
+        return;
+      }
+      const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
+      if (!enforceRes.data?.allowed) {
+        setPaywallVariant("chat_limit");
+        return;
+      }
+      const targetId = selectedUser.created_by_id || selectedUser.id;
+      const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
+      const data = res.data;
+      if (data?.mutual_match && data?.conversation_id) {
+        setSelectedUser(null);
+        navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
+      } else if (data?.error) {
+        console.error("Request error:", data.error);
+      } else {
+        setSelectedUser(null);
+        setRequestSent(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleExpandCluster = (key) => {
     setExpandedClusters((prev) => ({ ...prev, [key]: true }));
   };
@@ -301,8 +358,48 @@ export default function NearbyMap() {
 
   const bestMatchId = viewMode === "best" && ranked.length > 0 ? ranked[0].id : null;
   const sheetColor = selectedUser?._blipColor || SHEET_DOT_FALLBACK;
-  const matchPct = selectedUser ? Math.min(99, Math.max(35, 50 + (selectedUser._shared || 0) * 8 + Math.max(0, 15 - (selectedUser._dist || 1) * 10))) : 0;
+  // One formula for the sheet, the desktop panel and its shortcut list.
+  const matchPctFor = (u) =>
+    u ? Math.min(99, Math.max(35, 50 + (u._shared || 0) * 8 + Math.max(0, 15 - (u._dist || 1) * 10))) : 0;
+  const matchPct = matchPctFor(selectedUser);
   const markers = computeClusters(displayUsers);
+
+  if (isDesktop && !loading && !areaRestricted?.restricted && !showRadarOnboarding) {
+    return (
+      <>
+        <NearbyMapDesktop
+          scope={{
+            center: userLocation,
+            markers,
+            getUserLatLng,
+            distanceMiles,
+            onClusterClick: handleExpandCluster,
+            bestMatchId,
+          }}
+          myProfile={myProfile}
+          viewMode={viewMode}
+          setViewMode={(m) => { setViewMode(m); setExpandedClusters({}); }}
+          onlineCount={users.filter((u) => u.is_online).length}
+          onScope={displayUsers}
+          effectiveRadius={effectiveRadius}
+          zoom={zoom}
+          setZoom={setZoom}
+          selectedUser={selectedUser}
+          setSelectedUser={setSelectedUser}
+          matchPct={matchPct}
+          matchPctFor={matchPctFor}
+          onRequestChat={requestChat}
+          filters={filters}
+          setFilters={setFilters}
+          activeFilters={activeFilters}
+          toggleFilter={toggleFilter}
+          clearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+        <PaywallPrompt variant={paywallVariant} open={!!paywallVariant} onClose={() => setPaywallVariant(null)} />
+      </>
+    );
+  }
 
   if (areaRestricted?.restricted) {
     return (
@@ -698,56 +795,7 @@ export default function NearbyMap() {
                     </button>
                   ) : (
                     <button
-                      onClick={async () => {
-                        try {
-                          // Mock users — simulate the other person deciding
-                          if (selectedUser.isMock) {
-                            const bot = selectedUser;
-                            const myId = myProfile?.created_by_id;
-                            setSelectedUser(null);
-                            setRequestWaiting(true);
-                            // Create a real conversation so the chat works end-to-end
-                            let convo;
-                            try {
-                              convo = await base44.entities.Conversation.create({
-                                participants: [myId, bot.id].filter(Boolean),
-                                is_active: true,
-                              });
-                            } catch (e) {
-                              console.error(e);
-                            }
-                            // Simulate response delay (~2.5s)
-                            setTimeout(() => {
-                              setRequestWaiting(false);
-                              const accepted = Math.random() < 0.65;
-                              if (accepted && convo?.id) {
-                                navigate(`/chat/${convo.id}`, { state: { chatUser: bot } });
-                              }
-                              // If denied — silently close, no notification shown
-                            }, 2500);
-                            return;
-                          }
-                          const enforceRes = await base44.functions.invoke("enforceChatLimit", {});
-                          if (!enforceRes.data?.allowed) {
-                            setPaywallVariant("chat_limit");
-                            return;
-                          }
-                          const targetId = selectedUser.created_by_id || selectedUser.id;
-                          const res = await base44.functions.invoke("submitWave", { receiver_id: targetId });
-                          const data = res.data;
-                          if (data?.mutual_match && data?.conversation_id) {
-                            setSelectedUser(null);
-                            navigate(`/chat/${data.conversation_id}`, { state: { chatUser: selectedUser } });
-                          } else if (data?.error) {
-                            console.error("Request error:", data.error);
-                          } else {
-                            setSelectedUser(null);
-                            setRequestSent(true);
-                          }
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
+                      onClick={requestChat}
                       className="cta notch"
                       style={{ flex: 1, height: 52, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 13, lineHeight: 1, letterSpacing: "0.17em", textTransform: "uppercase" }}
                     >
