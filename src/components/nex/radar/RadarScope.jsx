@@ -187,6 +187,9 @@ export default function RadarScope({
     typeof DeviceOrientationEvent !== "undefined" &&
     typeof DeviceOrientationEvent.requestPermission === "function"
   );
+  // Tilt is a phone-only effect: it follows the device's gyroscope, and there
+  // is no desktop equivalent worth faking.
+  const tiltEnabled = !isDesktop;
 
   // iOS 13+ fires nothing until this runs, and it must come from a real
   // gesture — never from mount or an effect.
@@ -198,7 +201,7 @@ export default function RadarScope({
   };
 
   useEffect(() => {
-    if (needsPerm) return;
+    if (needsPerm || !tiltEnabled) return;
     const clamp = (v) => Math.max(-1, Math.min(1, v));
     const onOrient = (e) => {
       // gamma = left/right tilt, beta = front/back tilt
@@ -209,24 +212,7 @@ export default function RadarScope({
     };
     window.addEventListener("deviceorientation", onOrient, true);
     return () => window.removeEventListener("deviceorientation", onOrient, true);
-  }, [needsPerm]);
-
-  // Desktop fallback so tilt is testable without a phone.
-  useEffect(() => {
-    const el = scopeRef.current;
-    if (!el) return;
-    const clamp = (v) => Math.max(-1, Math.min(1, v));
-    const onMove = (e) => {
-      const r = el.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      setTilt({
-        x: clamp(((e.clientX - r.left) / r.width - 0.5) * 2),
-        y: clamp(((e.clientY - r.top) / r.height - 0.5) * 2),
-      });
-    };
-    el.addEventListener("mousemove", onMove);
-    return () => el.removeEventListener("mousemove", onMove);
-  }, []);
+  }, [needsPerm, tiltEnabled]);
 
   const lightOpacity = (sx, sy) =>
     (0.10 + Math.max(0, sx * tilt.x) * 0.46 + Math.max(0, sy * tilt.y) * 0.46).toFixed(3);
@@ -344,7 +330,9 @@ export default function RadarScope({
         className="absolute inset-0 flex items-center justify-center"
         style={{
           zIndex: 2,
-          transform: `rotateX(${(-tilt.y * 9).toFixed(2)}deg) rotateY(${(tilt.x * 9).toFixed(2)}deg)`,
+          transform: tiltEnabled
+            ? `rotateX(${(-tilt.y * 9).toFixed(2)}deg) rotateY(${(tilt.x * 9).toFixed(2)}deg)`
+            : "none",
           transformStyle: "preserve-3d",
           transition: "transform .12s linear",
         }}
@@ -512,7 +500,7 @@ export default function RadarScope({
       </div>
       </div>
 
-      {needsPerm && (
+      {needsPerm && tiltEnabled && (
         <button
           onClick={enableTilt}
           style={{ position: "absolute", left: "50%", bottom: 18, transform: "translateX(-50%)", zIndex: 3, height: 38, padding: "0 14px", border: "1px solid rgba(105,190,255,.4)", borderRadius: 999, background: "rgba(8,26,54,.8)", backdropFilter: "blur(10px)", color: "#bfe2ff", fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 10, lineHeight: 1, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer" }}
