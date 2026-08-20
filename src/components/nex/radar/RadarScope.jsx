@@ -317,13 +317,16 @@ export default function RadarScope({
 
       </div>
 
-      {/* ── Layer 1: corner lights. Never transformed. ── */}
+      {/* ── Layer 1: corner lights. Never transformed. Part of the tilt rig —
+           without tilt they just sit at their base opacity, so they go too. ── */}
+      {tiltEnabled && (
       <div aria-hidden="true" className="pointer-events-none" style={{ position: "absolute", inset: "-12%", zIndex: 1, mixBlendMode: "screen" }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 8% 4%, rgba(90,190,255,.85), rgba(90,190,255,0) 70%)", opacity: lightOpacity(-1, -1), transition: "opacity .16s ease-out" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 92% 4%, rgba(169,140,255,.85), rgba(169,140,255,0) 70%)", opacity: lightOpacity(1, -1), transition: "opacity .16s ease-out" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 8% 96%, rgba(77,255,176,.75), rgba(77,255,176,0) 70%)", opacity: lightOpacity(-1, 1), transition: "opacity .16s ease-out" }} />
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(58% 44% at 92% 96%, rgba(255,180,84,.72), rgba(255,180,84,0) 70%)", opacity: lightOpacity(1, 1), transition: "opacity .16s ease-out" }} />
       </div>
+      )}
 
       {/* ── Layer 2: the ONLY element that receives the tilt transform ── */}
       <div
