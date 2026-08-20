@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import PremiumDesktop from "@/pages/PremiumDesktop";
 import useIsDesktop from "@/hooks/useIsDesktop";
+import useSubscribe from "@/hooks/useSubscribe";
 
 export const PLANS = [
   {
@@ -78,6 +79,7 @@ export default function Premium() {
   const [currentTier, setCurrentTier] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
   const isDesktop = useIsDesktop(1200);
+  const { subscribe, busy, error, notice } = useSubscribe({ onActivated: (plan) => setCurrentTier(plan) });
 
   useEffect(() => {
     (async () => {
@@ -92,7 +94,16 @@ export default function Premium() {
   }, []);
 
   if (isDesktop) {
-    return <PremiumDesktop currentTier={currentTier || "free"} myProfile={myProfile} />;
+    return (
+      <PremiumDesktop
+        currentTier={currentTier || "free"}
+        myProfile={myProfile}
+        onSubscribe={(plan) => subscribe(plan.name)}
+        busy={busy}
+        error={error}
+        notice={notice}
+      />
+    );
   }
 
   return (
@@ -191,14 +202,19 @@ export default function Premium() {
       {selected > 0 && currentTier !== PLANS[selected].name.toLowerCase() && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
           <button
-            className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform ${
+            onClick={() => subscribe(PLANS[selected].name)}
+            disabled={!!busy}
+            className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform disabled:opacity-60 ${
               PLANS[selected].exclusive
                 ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_24px_rgba(34,211,238,0.25),0_0_60px_rgba(59,130,246,0.12)]"
                 : "gradient-blue glow-blue"
             }`}
           >
-            Subscribe to {PLANS[selected].name}
+            {busy ? "Opening checkout…" : `Subscribe to ${PLANS[selected].name}`}
           </button>
+          {(error || notice) && (
+            <p className={`mt-3 text-center text-xs ${error ? "text-red-300" : "text-emerald-300"}`}>{error || notice}</p>
+          )}
         </motion.div>
       )}
     </div>

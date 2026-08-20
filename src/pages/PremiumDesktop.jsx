@@ -28,7 +28,7 @@ const SPARK = (
   </svg>
 );
 
-export default function PremiumDesktop({ currentTier = "free", myProfile, onSubscribe }) {
+export default function PremiumDesktop({ currentTier = "free", myProfile, onSubscribe, busy, error, notice }) {
   const navigate = useNavigate();
 
   return (
@@ -42,7 +42,9 @@ export default function PremiumDesktop({ currentTier = "free", myProfile, onSubs
           </button>
           <div>
             <h1 style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 700, fontStyle: "italic", fontSize: 30, lineHeight: 1, letterSpacing: "0.02em", textTransform: "uppercase", textShadow: "0 0 20px rgba(90,180,255,.5)" }}>Unlock NEX2</h1>
-            <div style={{ marginTop: 9, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 13, lineHeight: 1.4, color: "#7fa9d4" }}>More reach, more features, more connections</div>
+            <div style={{ marginTop: 9, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 13, lineHeight: 1.4, color: error || notice ? (error ? "#ff8a80" : "#7de0b0") : "#7fa9d4" }}>
+              {error || notice || "More reach, more features, more connections"}
+            </div>
           </div>
         </header>
 
@@ -97,10 +99,11 @@ export default function PremiumDesktop({ currentTier = "free", myProfile, onSubs
                   <button
                     className="pbtn"
                     style={{ clipPath: NOTCH_SM }}
+                    disabled={!!busy}
                     {...(plan.popular ? {} : { "data-flat": "" })}
                     onClick={() => onSubscribe?.(plan)}
                   >
-                    Subscribe to {plan.name}
+                    {busy === plan.name.toLowerCase() ? "Opening checkout…" : `Subscribe to ${plan.name}`}
                   </button>
                 )}
               </div>
