@@ -4,11 +4,14 @@ import { ArrowLeft, MapPin, Eye, Bell, Ban, CreditCard, ChevronRight, Radar } fr
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import { useRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
+import SettingsDesktop from "@/pages/SettingsDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadProfile();
@@ -42,6 +45,18 @@ export default function SettingsPage() {
       <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${value ? "left-[22px]" : "left-0.5"}`} />
     </button>
   );
+
+  if (isDesktop && profile) {
+    return (
+      <SettingsDesktop
+        profile={profile}
+        toggleSetting={toggleSetting}
+        radarColor={radarColor}
+        changeColor={changeColor}
+        blockedCount={profile?.blocked_users?.length || 0}
+      />
+    );
+  }
 
   return (
     <div className="px-4 pt-4 safe-top pb-8 w-full">

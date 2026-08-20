@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Zap, Users, Network, Star, Trophy, BadgeCheck, Sparkles, CheckCircle, Crown } from "lucide-react";
 
-const ACHIEVEMENTS = [
+export const ACHIEVEMENTS = [
   { id: "first_connection", icon: Zap, label: "First Step", desc: "1 connection", check: (c) => c >= 1, color: "text-blue-400", bg: "from-blue-500/15 to-blue-600/5", border: "border-blue-500/15" },
   { id: "social_circle", icon: Users, label: "Social Circle", desc: "5 connections", check: (c) => c >= 5, color: "text-cyan-400", bg: "from-cyan-500/15 to-blue-600/5", border: "border-cyan-500/15" },
   { id: "well_connected", icon: Network, label: "Well Connected", desc: "10 connections", check: (c) => c >= 10, color: "text-violet-400", bg: "from-violet-500/15 to-purple-600/5", border: "border-violet-500/15" },

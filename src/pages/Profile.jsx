@@ -11,12 +11,15 @@ import { getUserNumber } from "@/components/nex/userDisplay";
 import AchievementGrid from "@/components/nex/AchievementGrid";
 import InterestBanner from "@/components/nex/InterestBanner";
 import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
+import ProfileDesktop from "@/pages/ProfileDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connectionCount, setConnectionCount] = useState(0);
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadProfile();
@@ -44,6 +47,10 @@ export default function Profile() {
   const handleLogout = async () => {
     await base44.auth.logout("/welcome");
   };
+
+  if (isDesktop && !loading && profile) {
+    return <ProfileDesktop profile={profile} connectionCount={connectionCount} />;
+  }
 
   if (loading) {
     return (

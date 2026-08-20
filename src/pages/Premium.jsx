@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Check, Crown, Award, Zap, X, Diamond, Globe, Trophy, EyeOff, BarChart3, Rocket, ShieldCheck, Headphones } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
+import PremiumDesktop from "@/pages/PremiumDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
-const plans = [
+export const PLANS = [
   {
     name: "Free",
     price: "$0",
@@ -74,15 +76,24 @@ export default function Premium() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(1);
   const [currentTier, setCurrentTier] = useState(null);
+  const [myProfile, setMyProfile] = useState(null);
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await base44.functions.invoke("getSubscriptionCapabilities", {});
         if (res.data?.tier) setCurrentTier(res.data.tier);
+        const me = await base44.auth.me();
+        const mine = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+        if (mine[0]) setMyProfile(mine[0]);
       } catch {}
     })();
   }, []);
+
+  if (isDesktop) {
+    return <PremiumDesktop currentTier={currentTier || "free"} myProfile={myProfile} />;
+  }
 
   return (
     <div className="px-4 pt-4 safe-top pb-8 w-full">
@@ -112,7 +123,7 @@ export default function Premium() {
       )}
 
       <div className="space-y-4">
-        {plans.map((plan, i) => {
+        {PLANS.map((plan, i) => {
           const Icon = plan.icon;
           const isSelected = selected === i;
           const isCurrent = currentTier === plan.name.toLowerCase();
@@ -177,16 +188,16 @@ export default function Premium() {
         })}
       </div>
 
-      {selected > 0 && currentTier !== plans[selected].name.toLowerCase() && (
+      {selected > 0 && currentTier !== PLANS[selected].name.toLowerCase() && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
           <button
             className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform ${
-              plans[selected].exclusive
+              PLANS[selected].exclusive
                 ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_24px_rgba(34,211,238,0.25),0_0_60px_rgba(59,130,246,0.12)]"
                 : "gradient-blue glow-blue"
             }`}
           >
-            Subscribe to {plans[selected].name}
+            Subscribe to {PLANS[selected].name}
           </button>
         </motion.div>
       )}
