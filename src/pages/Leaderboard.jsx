@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
 import boardBg from "@/assets/radar-map.webp";
+import LeaderboardDesktop from "@/pages/LeaderboardDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
 
 // Rank colours cycle the sweep palette; #1 is always gold.
 const PALETTE = ["#a98cff", "#4dffb0", "#7fc8ff", "#ff8fb0", "#ffc46b"];
@@ -65,6 +67,8 @@ function Avatar({ name, ring, glow }) {
 export default function Leaderboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [myProfile, setMyProfile] = useState(null);
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadLeaderboard();
@@ -74,6 +78,9 @@ export default function Leaderboard() {
     try {
       const res = await base44.functions.invoke("getNetworkLeaderboard", {});
       setData(res.data);
+      const me = await base44.auth.me();
+      const mine = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+      if (mine[0]) setMyProfile(mine[0]);
     } catch (err) {
       console.error(err);
     } finally {
@@ -92,6 +99,10 @@ export default function Leaderboard() {
   // Second place stands left of the winner, third to the right.
   const podiumOrder = podium.length >= 3 ? [1, 0, 2] : podium.map((_, i) => i);
   const topScore = Math.max(1, ...podium.map((p) => p.connections || 0));
+
+  if (isDesktop && !loading) {
+    return <LeaderboardDesktop data={data} myProfile={myProfile} />;
+  }
 
   return (
     <div className="relative overflow-hidden h-full flex flex-col" style={{ background: "radial-gradient(110% 34% at 50% 0%, #0a2545 0%, #04101f 42%, #01050c 100%)" }}>

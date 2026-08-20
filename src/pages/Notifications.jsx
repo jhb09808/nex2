@@ -4,6 +4,9 @@ import { Bell, MessageCircle, MapPin, Calendar, Zap, Check } from "lucide-react"
 import { base44 } from "@/api/base44Client";
 import GlassCard from "@/components/nex/GlassCard";
 import moment from "moment";
+import NotificationsDesktop from "@/pages/NotificationsDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
+import { useNavigate } from "react-router-dom";
 
 const iconMap = {
   message: MessageCircle,
@@ -14,8 +17,14 @@ const iconMap = {
 };
 
 export default function Notifications() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [waves, setWaves] = useState([]);
+  const [waveProfiles, setWaveProfiles] = useState({});
+  const [actionLoading, setActionLoading] = useState({});
+  const [myProfile, setMyProfile] = useState(null);
+  const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
     loadNotifications();
@@ -26,6 +35,22 @@ export default function Notifications() {
       const me = await base44.auth.me();
       const notifs = await base44.entities.Notification.filter({ user_id: me.id }, "-created_date", 30);
       setNotifications(notifs);
+
+      const mine = await base44.entities.UserProfile.filter({ created_by_id: me.id });
+      if (mine[0]) setMyProfile(mine[0]);
+
+      // The desktop design puts pending connection requests beside the feed.
+      const myWaves = await base44.entities.Wave.filter({ receiver_id: me.id }, "-created_date", 20);
+      const pending = myWaves.filter((w) => w.status === "pending");
+      setWaves(pending);
+      const profileMap = {};
+      for (const id of [...new Set(pending.map((w) => w.sender_id))].slice(0, 20)) {
+        try {
+          const p = await base44.entities.UserProfile.filter({ created_by_id: id });
+          if (p.length > 0) profileMap[id] = p[0];
+        } catch (e) { /* skip profiles we can't read */ }
+      }
+      setWaveProfiles(profileMap);
     } catch (err) {
       console.error(err);
     } finally {
@@ -38,6 +63,49 @@ export default function Notifications() {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
     window.dispatchEvent(new CustomEvent("nex-notifications-read"));
   };
+
+  const markAllRead = () => notifications.forEach((n) => !n.is_read && markAsRead(n.id));
+
+  const handleAcceptWave = async (waveId) => {
+    setActionLoading((prev) => ({ ...prev, [waveId]: "accepting" }));
+    try {
+      const res = await base44.functions.invoke("acceptWave", { wave_id: waveId });
+      setWaves((prev) => prev.filter((w) => w.id !== waveId));
+      if (res.data?.conversation_id) navigate(`/chat/${res.data.conversation_id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [waveId]: null }));
+    }
+  };
+
+  const handleDeclineWave = async (waveId) => {
+    setActionLoading((prev) => ({ ...prev, [waveId]: "declining" }));
+    try {
+      await base44.entities.Wave.update(waveId, { status: "declined" });
+      setWaves((prev) => prev.filter((w) => w.id !== waveId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [waveId]: null }));
+    }
+  };
+
+  if (isDesktop && !loading) {
+    return (
+      <NotificationsDesktop
+        notifications={notifications}
+        markAsRead={markAsRead}
+        markAllRead={markAllRead}
+        waves={waves}
+        waveProfiles={waveProfiles}
+        onAcceptWave={handleAcceptWave}
+        onDeclineWave={handleDeclineWave}
+        actionLoading={actionLoading}
+        myProfile={myProfile}
+      />
+    );
+  }
 
   if (loading) {
     return (

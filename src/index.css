@@ -545,6 +545,34 @@ html, body, #root { overflow-x: hidden; max-width: 100%; }
    which merely covering it would not. */
 body[data-desktop-shell] .nav-menu { display: none }
 
+/* Desktop leaderboard + alerts */
+.col-head { font: 600 9.5px/1 var(--font-chakra); letter-spacing: .2em; text-transform: uppercase; color: #7fa9d4 }
+.nav-count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: rgba(255,143,176,.2); border: 1px solid rgba(255,143,176,.5); font: 700 10px/1 var(--font-jetbrains); color: #ffb3c6 }
+.rank-row-dk { gap: 14px; padding: 11px 14px }
+.r-num-dk { flex: none; width: 26px; text-align: center; font: 500 14px/1 var(--font-jetbrains); color: #7fa9d4 }
+.r-name-dk { font: 600 15px/1 var(--font-chakra); letter-spacing: .02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.r-conn-dk { font: 500 12px/1 var(--font-jetbrains); color: #7fa9d4; white-space: nowrap }
+.pod-rank { position: absolute; right: -4px; bottom: -4px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #061428; display: flex; align-items: center; justify-content: center; font: 700 12px/1 var(--font-chakra); color: #03101f }
+.dk-ghost-btn { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 20px; border: 1px solid rgba(120,190,255,.3); background: rgba(10,30,60,.5); backdrop-filter: blur(8px); color: #bcd9f5; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease }
+.dk-ghost-btn:hover { border-color: rgba(160,215,255,.7); color: #fff }
+.seg-dk-wrap { display: flex; padding: 4px; border: 1px solid rgba(105,190,255,.28); border-radius: 999px; background: rgba(8,26,54,.66); backdrop-filter: blur(10px) }
+.seg-dk-wrap button { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: #7fa9d4; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .13em; text-transform: uppercase; cursor: pointer; transition: background .2s ease, color .2s ease }
+.seg-dk-wrap button:hover { color: #c3d8ee }
+.seg-dk-wrap button[data-on] { background: rgba(45,115,215,.55); color: #eaf6ff; box-shadow: 0 0 18px rgba(60,150,255,.5), inset 0 0 14px rgba(120,200,255,.25) }
+.seg-dk-wrap .pip { min-width: 18px; height: 18px; padding: 0 5px; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: rgba(255,143,176,.22); font: 700 9.5px/1 var(--font-jetbrains); color: #ffb3c6 }
+.alert-row { position: relative; display: flex; align-items: flex-start; gap: 14px; width: 100%; padding: 14px 16px 14px 18px; border: 1px solid rgba(105,190,255,.14); background: rgba(8,24,48,.55); color: inherit; text-align: left; cursor: pointer; transition: background .2s ease, border-color .2s ease }
+.alert-row:hover { background: rgba(20,52,98,.6); border-color: rgba(105,190,255,.3) }
+.alert-row[data-unread] { background: rgba(14,40,78,.66); border-color: rgba(105,190,255,.3) }
+.a-title { font: 600 14.5px/1.35 var(--font-chakra); letter-spacing: .01em; color: #eaf6ff }
+.a-body { margin-top: 6px; font: 400 12.5px/1.5 var(--font-chakra); color: #a6cbec }
+.a-time { flex: none; font: 500 10px/1 var(--font-jetbrains); letter-spacing: .04em; color: #7fa9d4; white-space: nowrap }
+.req-card { padding: 15px; border: 1px solid rgba(105,190,255,.24); background: linear-gradient(160deg, rgba(16,44,86,.7), rgba(7,22,46,.7)) }
+.btn-accept { flex: 1; height: 42px; border: 1.5px solid transparent; background: linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box; color: #fff; font: 700 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 18px rgba(80,110,255,.4); transition: box-shadow .2s ease, filter .2s ease }
+.btn-accept:hover:not(:disabled) { box-shadow: 0 0 34px rgba(110,140,255,.8); filter: brightness(1.1) }
+.btn-decline { flex: none; padding: 0 18px; height: 42px; border: 1px solid rgba(120,190,255,.28); background: transparent; color: #8fb9e2; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease }
+.btn-decline:hover:not(:disabled) { border-color: rgba(160,215,255,.6); color: #dceeff }
+.btn-accept:disabled, .btn-decline:disabled { opacity: .5; cursor: default }
+
 .card { display: flex; align-items: flex-start; gap: 13px; padding: 13px; background: rgba(8,24,48,.6); border: 1px solid rgba(105,190,255,.16) }
 .tag { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; border: 1px solid rgba(105,190,255,.2); background: rgba(16,44,84,.4); font: 500 10.5px/1 var(--font-chakra); letter-spacing: .05em; color: #a6cbec }
 
