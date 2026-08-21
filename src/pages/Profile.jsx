@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Settings, Edit3, Shield, Award, Crown, Diamond, ChevronRight, LogOut, Share2 } from "lucide-react";
-import ShareButton from "@/components/nex/ShareButton";
-import VerifiedBadges from "@/components/nex/VerifiedBadges";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import UserAvatar from "@/components/nex/UserAvatar";
+import PhoneShell from "@/components/nex/PhoneShell";
+import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
+import { ACHIEVEMENTS } from "@/components/nex/AchievementGrid";
+import useOpportunityInsight from "@/hooks/useOpportunityInsight";
 import { getSubInterestName } from "@/components/nex/radar/interestCategories";
-import { getUserNumber } from "@/components/nex/userDisplay";
-import AchievementGrid from "@/components/nex/AchievementGrid";
-import InterestBanner from "@/components/nex/InterestBanner";
-import ProfileOpportunitySection from "@/components/nex/ProfileOpportunitySection";
+import { getUserDisplayName, getUserNumber } from "@/components/nex/userDisplay";
 import ProfileDesktop from "@/pages/ProfileDesktop";
 import useIsDesktop from "@/hooks/useIsDesktop";
 
+const NOTCH = "polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)";
+const NOTCH_LG = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
+const NOTCH_9 = "polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)";
+
+const CHEVRON = (
+  <svg width="8" height="13" viewBox="0 0 9 14" fill="none" aria-hidden="true" style={{ flex: "none" }}>
+    <path d="M1.4 1.4L7 7l-5.6 5.6" stroke="#5f89b2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export default function Profile() {
-  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connectionCount, setConnectionCount] = useState(0);
@@ -30,10 +35,10 @@ export default function Profile() {
       const me = await base44.auth.me();
       const profiles = await base44.entities.UserProfile.filter({ created_by_id: me.id });
       if (profiles.length > 0) setProfile(profiles[0]);
-      // Compute actual connections from accepted conversations
+      // Connections are the accepted conversations; keep the stored count in
+      // step so other people see the same number.
       const conversations = await base44.entities.Conversation.filter({ participants: me.id });
       setConnectionCount(conversations.length);
-      // Sync connections_count on the profile so other users see accurate numbers
       if (profiles[0] && profiles[0].connections_count !== conversations.length) {
         await base44.entities.UserProfile.update(profiles[0].id, { connections_count: conversations.length });
       }
@@ -44,9 +49,7 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = async () => {
-    await base44.auth.logout("/welcome");
-  };
+  const { insight } = useOpportunityInsight(profile);
 
   if (isDesktop && !loading && profile) {
     return <ProfileDesktop profile={profile} connectionCount={connectionCount} />;
@@ -60,100 +63,131 @@ export default function Profile() {
     );
   }
 
-  const planBadge = {
-    free: null,
-    plus: { icon: Award, label: "Plus", color: "text-blue-400" },
-    pro: { icon: Crown, label: "Pro", color: "text-yellow-400" },
-    platinum: { icon: Diamond, label: "Platinum", color: "text-cyan-300" },
-  };
-
-  const badge = planBadge[profile?.plan];
+  const name = getUserDisplayName(profile);
+  const interests = profile?.interests || [];
+  const focusAreas = (profile?.provides?.length || 0) + (profile?.looking_for?.length || 0);
+  const earned = ACHIEVEMENTS.filter((a) => a.check(connectionCount, profile));
 
   return (
-    <div className="px-4 pt-6 safe-top space-y-4 h-full flex flex-col overflow-y-auto pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Profile</h1>
-        <ShareButton profile={profile} />
-      </div>
-
-      {/* Profile Card */}
-      <div className="cyber-frame cyber-corners relative rounded-2xl p-6 flex flex-col items-center text-center">
-        <div className="relative mb-4">
-          <UserAvatar name={profile?.username} size="xl" isOnline={true} plan={profile?.plan} />
-        </div>
-        <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-xl font-bold text-white">{profile?.username}</h2>
-          <VerifiedBadges isVerified={profile?.is_verified} isOg={profile?.is_og} size="md" />
-        </div>
-        <p className="text-white/30 text-xs font-mono mb-1">#{getUserNumber(profile)}</p>
-        {badge && (
-          <div className="flex items-center gap-1 mb-2">
-            <badge.icon className={`w-3.5 h-3.5 ${badge.color}`} />
-            <span className={`text-xs font-medium ${badge.color}`}>{badge.label}</span>
-          </div>
-        )}
-        {profile?.bio && <p className="text-white/40 text-sm max-w-xs mb-3">{profile.bio}</p>}
-
-        {profile?.interests?.length > 0 && (
-          <div className="w-full mb-4">
-            <InterestBanner interests={profile.interests} />
-          </div>
-        )}
-
-        <div className="grid grid-cols-3 gap-2 w-full">
-          <div className="text-center">
-            <p className="text-xl font-bold gradient-text">{profile?.interests?.length || 0}</p>
-            <p className="text-white/30 text-[10px] mt-0.5">Interests</p>
-          </div>
-          <div className="text-center border-x border-white/5">
-            <p className="text-xl font-bold gradient-text">{(profile?.looking_for || []).length + (profile?.provides || []).length}</p>
-            <p className="text-white/30 text-[10px] mt-0.5">Focus Areas</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold gradient-text">{profile?.badges?.length || 0}</p>
-            <p className="text-white/30 text-[10px] mt-0.5">Badges</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Opportunities */}
-      <ProfileOpportunitySection profile={profile} isOwnProfile={true} />
-
-      {/* Achievements */}
-      <AchievementGrid connectionCount={connectionCount} profile={profile} />
-
-      {/* Menu */}
-      <div className="space-y-2">
-        {[
-          { label: "Edit Profile", icon: Edit3, path: "/edit-profile", accent: "text-cyan-300" },
-          { label: "Premium Plans", icon: Crown, path: "/premium", accent: "text-amber-300" },
-          { label: "Settings", icon: Settings, path: "/settings", accent: "text-blue-300" },
-        ].map((item) => (
-          <button
-            key={item.label}
-            onClick={() => navigate(item.path)}
-            className="cyber-frame group w-full flex items-center gap-3 p-4 rounded-xl active:scale-[0.98] transition-transform"
-          >
-            <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/5 flex items-center justify-center group-hover:border-cyan-500/20 transition-colors">
-              <item.icon className={`w-4 h-4 ${item.accent}`} />
+    <PhoneShell title="Profile">
+      <div
+        className="scrollbar-hide"
+        style={{ position: "relative", flex: 1, minHeight: 0, zIndex: 1, overflowY: "auto", marginTop: 16, padding: "0 16px calc(24px + env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", gap: 14 }}
+      >
+        {/* Identity */}
+        <div style={{ flex: "none", padding: "22px 18px", textAlign: "center", clipPath: NOTCH_LG, background: "linear-gradient(170deg, rgba(16,44,86,.62), rgba(6,20,42,.62))", border: "1px solid rgba(105,190,255,.22)" }}>
+          <div style={{ position: "relative", width: 96, height: 96, margin: "0 auto" }}>
+            <div style={{ width: "100%", height: "100%", border: "2px solid rgba(255,255,255,.2)", boxShadow: "0 0 24px rgba(90,180,255,.28)", borderRadius: "50%", overflow: "hidden", boxSizing: "border-box" }}>
+              <GenerativeAvatar seed={name || "unknown"} gender={profile?.gender} isVerified={profile?.is_verified} />
             </div>
-            <span className="text-white/80 text-sm font-cyber font-medium tracking-wide flex-1 text-left">{item.label}</span>
-            <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-cyan-300/50 group-hover:translate-x-0.5 transition-all" />
-          </button>
-        ))}
-
-        <button
-          onClick={handleLogout}
-          className="cyber-frame group w-full flex items-center gap-3 p-4 rounded-xl active:scale-[0.98] transition-transform border-red-500/10"
-        >
-          <div className="w-9 h-9 rounded-lg bg-red-500/[0.06] border border-red-500/10 flex items-center justify-center">
-            <LogOut className="w-4 h-4 text-red-400/70" />
+            {profile?.is_online && (
+              <span style={{ position: "absolute", right: 1, bottom: 1, width: 18, height: 18, borderRadius: "50%", background: "#60a5fa", boxShadow: "0 0 10px rgba(96,165,250,.8)", border: "3px solid #050810" }} />
+            )}
           </div>
-          <span className="text-red-400/70 text-sm font-cyber font-medium tracking-wide flex-1 text-left">Log Out</span>
-          <ChevronRight className="w-4 h-4 text-red-400/20 group-hover:text-red-400/40 group-hover:translate-x-0.5 transition-all" />
-        </button>
+
+          <div style={{ marginTop: 14, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 21, lineHeight: 1, color: "#eaf6ff" }}>{name}</div>
+          <div style={{ marginTop: 8, fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 11, lineHeight: 1, letterSpacing: "0.06em", color: "#7fa9d4" }}>{getUserNumber(profile)}</div>
+          {profile?.bio && (
+            <div style={{ marginTop: 11, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 13, lineHeight: 1.5, color: "#a6cbec" }}>{profile.bio}</div>
+          )}
+
+          {interests.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 16 }}>
+              {interests.slice(0, 8).map((id) => (
+                <span key={id} className="chip-pr">{getSubInterestName(id)}</span>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: "flex", marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(105,190,255,.16)" }}>
+            <div style={{ flex: 1 }}><div className="stat-n">{interests.length}</div><div className="stat-l">Interests</div></div>
+            <div style={{ width: 1, background: "rgba(105,190,255,.16)" }} />
+            <div style={{ flex: 1 }}><div className="stat-n">{focusAreas}</div><div className="stat-l">Focus Areas</div></div>
+            <div style={{ width: 1, background: "rgba(105,190,255,.16)" }} />
+            <div style={{ flex: 1 }}><div className="stat-n">{earned.length}</div><div className="stat-l">Badges</div></div>
+          </div>
+        </div>
+
+        {/* Opportunities */}
+        {insight && (
+          <div style={{ flex: "none", padding: 18, clipPath: NOTCH_LG, background: "linear-gradient(150deg, rgba(30,22,72,.6), rgba(8,20,44,.6))", border: "1px solid rgba(169,140,255,.28)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, border: "1px solid rgba(169,140,255,.45)", background: "rgba(48,32,88,.6)", color: "#c7b3ff", clipPath: NOTCH_9, flex: "none" }}>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 1.4l1.7 4.4L15.1 7.5l-4.4 1.7L9 13.6 7.3 9.2 2.9 7.5l4.4-1.7L9 1.4z" fill="currentColor" />
+                </svg>
+              </span>
+              <div>
+                <div style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 13, lineHeight: 1, letterSpacing: "0.16em", textTransform: "uppercase", color: "#eaf6ff" }}>Opportunities</div>
+                <div style={{ marginTop: 6, fontFamily: "var(--font-chakra)", fontWeight: 500, fontSize: 9, lineHeight: 1, letterSpacing: "0.2em", textTransform: "uppercase", color: "#a98cff" }}>AI-powered discovery</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 16, padding: "13px 15px", clipPath: NOTCH, background: "rgba(6,20,42,.72)", border: "1px solid rgba(105,190,255,.2)" }}>
+              <div className="col-head" style={{ color: "#8fd0ff" }}>I offer</div>
+              <p style={{ margin: "9px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 12.5, lineHeight: 1.55, color: "#c3d8ee" }}>{insight.offer_summary}</p>
+            </div>
+            <div style={{ marginTop: 10, padding: "13px 15px", clipPath: NOTCH, background: "rgba(6,20,42,.72)", border: "1px solid rgba(105,190,255,.2)" }}>
+              <div className="col-head" style={{ color: "#a98cff" }}>I want</div>
+              <p style={{ margin: "9px 0 0", fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 12.5, lineHeight: 1.55, color: "#c3d8ee" }}>{insight.need_summary}</p>
+            </div>
+            {insight.connection_pitch && (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 11, marginTop: 10, padding: "13px 15px", clipPath: NOTCH, background: "rgba(24,18,58,.6)", border: "1px solid rgba(169,140,255,.24)" }}>
+                <svg width="16" height="13" viewBox="0 0 18 15" fill="none" aria-hidden="true" style={{ flex: "none", marginTop: 2 }}>
+                  <path d="M1 7.5h14.4M10.6 2.3l5.2 5.2-5.2 5.2" stroke="#a98cff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p style={{ margin: 0, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 12.5, lineHeight: 1.55, color: "#c7b3ff" }}>{insight.connection_pitch}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Achievements */}
+        <div style={{ flex: "none" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14 }}>
+            <span className="col-head">Achievements</span>
+            <span style={{ fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 11, lineHeight: 1, color: "#5f89b2" }}>{earned.length}/{ACHIEVEMENTS.length}</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginTop: 12 }}>
+            {ACHIEVEMENTS.map((a) => {
+              const on = a.check(connectionCount, profile);
+              const Icon = a.icon;
+              return (
+                <div key={a.id} className="ach" style={{ clipPath: NOTCH }} {...(on ? { "data-on": "" } : {})}>
+                  {on && (
+                    <svg width="12" height="10" viewBox="0 0 16 13" fill="none" aria-hidden="true" style={{ position: "absolute", top: 9, right: 9 }}>
+                      <path d="M1 6.6l4.4 4.4L15 1.4" stroke="#4dffb0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  <Icon className="w-[20px] h-[20px]" strokeWidth={1.4} style={{ margin: "0 auto", color: on ? "#4dffb0" : "#3f5f80" }} />
+                  <div className="ach-n">{a.label}</div>
+                  <div className="ach-s">{a.desc}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <Link to="/edit-profile" className="row-link" style={{ clipPath: NOTCH }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, border: "1px solid rgba(120,200,255,.34)", background: "rgba(16,44,86,.5)", borderRadius: "50%", color: "#7fc8ff", flex: "none" }}>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M11.2 1.6l3.2 3.2L5.6 13.6H2.4v-3.2L11.2 1.6z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span style={{ flex: 1, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em" }}>Edit Profile</span>
+          {CHEVRON}
+        </Link>
+
+        <Link to="/premium" className="row-link" style={{ clipPath: NOTCH }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, border: "1px solid rgba(255,196,107,.4)", background: "rgba(64,44,12,.5)", borderRadius: "50%", color: "#ffc46b", flex: "none" }}>
+            <svg width="15" height="15" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M1.6 4.6l3.8 3.2L9 2.2l3.6 5.6 3.8-3.2-1.6 9.2H3.2L1.6 4.6z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span style={{ flex: 1, fontFamily: "var(--font-chakra)", fontWeight: 600, fontSize: 14, lineHeight: 1, letterSpacing: "0.04em" }}>Premium Plans</span>
+          {CHEVRON}
+        </Link>
       </div>
-    </div>
+    </PhoneShell>
   );
 }

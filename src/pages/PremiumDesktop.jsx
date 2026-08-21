@@ -1,32 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import DesktopShell from "@/components/nex/desktop/DesktopShell";
-import { PLANS } from "@/pages/Premium";
+import { PLANS, TICK, CROSS, SPARK } from "@/pages/Premium";
 
 const NOTCH_SM = "polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px)";
 const NOTCH_LG = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
 const NOTCH_10 = "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)";
-
-// The design gives each tier its own accent.
-const TONE = { Free: "#8fb9e2", Plus: "#5cb2ff", Pro: "#ffc46b", Platinum: "#a98cff" };
-
-const TICK = (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <circle cx="8" cy="8" r="7.2" fill="#2d7dff" />
-    <path d="M4.8 8.2l2.2 2.2 4.2-4.6" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const CROSS = (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <circle cx="8" cy="8" r="7.2" fill="rgba(120,160,200,.16)" />
-    <path d="M5.4 5.4l5.2 5.2M10.6 5.4l-5.2 5.2" stroke="#4a6785" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-const SPARK = (
-  <svg width="9" height="9" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-    <path d="M1.6 4.6l3.8 3.2L9 2.2l3.6 5.6 3.8-3.2-1.6 9.2H3.2L1.6 4.6z" fill="currentColor" />
-  </svg>
-);
 
 export default function PremiumDesktop({ currentTier = "free", myProfile, onSubscribe, busy, error, notice }) {
   const navigate = useNavigate();
@@ -50,9 +29,8 @@ export default function PremiumDesktop({ currentTier = "free", myProfile, onSubs
 
         <div className="scrollbar-hide" style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 26, alignContent: "start", alignItems: "stretch" }}>
           {PLANS.map((plan) => {
-            const tone = TONE[plan.name] || "#8fb9e2";
+            const tone = plan.tone;
             const isCurrent = currentTier === plan.name.toLowerCase();
-            const Icon = plan.icon;
             const flags = {
               ...(isCurrent ? { "data-current": "" } : {}),
               ...(plan.popular ? { "data-popular": "" } : {}),
@@ -72,7 +50,7 @@ export default function PremiumDesktop({ currentTier = "free", myProfile, onSubs
 
                 <div style={{ display: "flex", alignItems: "center", gap: 11, marginTop: (plan.popular || plan.exclusive) && !isCurrent ? 10 : 0 }}>
                   <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, border: `1px solid ${tone}55`, background: `${tone}1f`, color: tone, clipPath: NOTCH_10, flex: "none" }}>
-                    <Icon className="w-[18px] h-[18px]" strokeWidth={1.4} />
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">{plan.glyph}</svg>
                   </span>
                   <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 16, lineHeight: 1, letterSpacing: "0.03em", color: "#eaf6ff" }}>{plan.name}</span>
                 </div>

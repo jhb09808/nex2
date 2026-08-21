@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Check, Crown, Award, Zap, X, Diamond, Globe, Trophy, EyeOff, BarChart3, Rocket, ShieldCheck, Headphones } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import GlassCard from "@/components/nex/GlassCard";
+import PhoneShell from "@/components/nex/PhoneShell";
 import PremiumDesktop from "@/pages/PremiumDesktop";
 import useIsDesktop from "@/hooks/useIsDesktop";
 import useSubscribe from "@/hooks/useSubscribe";
 
+const NOTCH = "polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)";
+const NOTCH_LG = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
+const NOTCH_9 = "polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)";
+
+// Each tier carries its own accent and glyph so the phone and desktop cards
+// stay in step from one source.
 export const PLANS = [
   {
     name: "Free",
     price: "$0",
     period: "forever",
-    icon: Zap,
-    color: "text-white/50",
+    tone: "#8fb9e2",
+    glyph: <path d="M10.4 1.4L3.6 10.4h4.2l-1 6.2 6.8-9h-4.2l1-6.2z" fill="currentColor" />,
     features: [
       { label: "1 mile radius", included: true },
       { label: "3 chats per day", included: true },
@@ -28,9 +31,14 @@ export const PLANS = [
     name: "Plus",
     price: "$9.99",
     period: "/month",
-    icon: Award,
-    color: "text-blue-400",
+    tone: "#5cb2ff",
     popular: true,
+    glyph: (
+      <>
+        <path d="M9 1.4l6.4 2.4v5.4c0 4-2.7 6.6-6.4 7.4-3.7-.8-6.4-3.4-6.4-7.4V3.8L9 1.4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        <circle cx="9" cy="8" r="1.8" stroke="currentColor" strokeWidth="1.3" />
+      </>
+    ),
     features: [
       { label: "10 mile radius", included: true },
       { label: "Unlimited chats", included: true },
@@ -44,8 +52,8 @@ export const PLANS = [
     name: "Pro",
     price: "$19.99",
     period: "/month",
-    icon: Crown,
-    color: "text-yellow-400",
+    tone: "#ffc46b",
+    glyph: <path d="M1.6 4.6l3.8 3.2L9 2.2l3.6 5.6 3.8-3.2-1.6 9.2H3.2L1.6 4.6z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />,
     features: [
       { label: "Everything in Plus", included: true },
       { label: "20 mile radius", included: true },
@@ -59,9 +67,9 @@ export const PLANS = [
     name: "Platinum",
     price: "$1,000",
     period: "/month",
-    icon: Diamond,
-    color: "text-cyan-300",
+    tone: "#a98cff",
     exclusive: true,
+    glyph: <path d="M9 1.6l6.4 7.4L9 16.4 2.6 9 9 1.6z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />,
     features: [
       { label: "Everything in Pro", included: true },
       { label: "Global radius — no limits", included: true },
@@ -73,8 +81,25 @@ export const PLANS = [
   },
 ];
 
+export const TICK = (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <circle cx="8" cy="8" r="7.2" fill="#2d7dff" />
+    <path d="M4.8 8.2l2.2 2.2 4.2-4.6" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+export const CROSS = (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <circle cx="8" cy="8" r="7.2" fill="rgba(120,160,200,.16)" />
+    <path d="M5.4 5.4l5.2 5.2M10.6 5.4l-5.2 5.2" stroke="#4a6785" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+export const SPARK = (
+  <svg width="8" height="8" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+    <path d="M1.6 4.6l3.8 3.2L9 2.2l3.6 5.6 3.8-3.2-1.6 9.2H3.2L1.6 4.6z" fill="currentColor" />
+  </svg>
+);
+
 export default function Premium() {
-  const navigate = useNavigate();
   const [selected, setSelected] = useState(1);
   const [currentTier, setCurrentTier] = useState(null);
   const [myProfile, setMyProfile] = useState(null);
@@ -106,117 +131,110 @@ export default function Premium() {
     );
   }
 
-  return (
-    <div className="px-4 pt-4 safe-top pb-8 w-full">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl glass flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5 text-white/60" />
-        </button>
-        <h1 className="text-xl font-bold text-white">Premium</h1>
-      </div>
+  const plan = PLANS[selected];
+  const isCurrent = currentTier === plan.name.toLowerCase();
+  const payable = selected > 0 && !isCurrent;
+  const ctaLabel = busy ? "Opening checkout…" : isCurrent ? "Current plan" : selected === 0 ? "Free plan" : `Subscribe to ${plan.name}`;
 
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Unlock NEX2</h2>
-        <p className="text-white/40 text-sm">More reach, more features, more connections</p>
-      </div>
-
-      {selected === 3 && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-5 flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-violet-500/10 border border-cyan-500/15"
-        >
-          <Globe className="w-5 h-5 text-cyan-300 flex-shrink-0" />
-          <p className="text-cyan-200/80 text-xs leading-relaxed">
-            Platinum sells <span className="font-semibold">status and exclusivity</span> — global reach, a verified badge, and a network of members who mean business.
-          </p>
-        </motion.div>
-      )}
-
-      <div className="space-y-4">
-        {PLANS.map((plan, i) => {
-          const Icon = plan.icon;
-          const isSelected = selected === i;
-          const isCurrent = currentTier === plan.name.toLowerCase();
-          return (
-            <motion.div key={plan.name} whileTap={{ scale: 0.98 }}>
-              <GlassCard
-                strong={isSelected}
-                className={`relative ${isSelected ? (plan.exclusive ? "ring-1 ring-cyan-400/40" : "ring-1 ring-blue-500/40") : ""} ${plan.exclusive ? "border-cyan-500/10" : ""}`}
-                onClick={() => setSelected(i)}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full gradient-blue text-[10px] font-semibold text-white uppercase tracking-wider">
-                    Most Popular
-                  </div>
-                )}
-                {plan.exclusive && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[10px] font-semibold text-white uppercase tracking-wider flex items-center gap-1">
-                    <Trophy className="w-2.5 h-2.5" />
-                    Exclusive
-                  </div>
-                )}
-                {isCurrent && (
-                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-medium text-green-400">
-                    Current
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? "gradient-blue" : "bg-white/5"}`}>
-                    <Icon className={`w-5 h-5 ${isSelected ? "text-white" : plan.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">{plan.name}</p>
-                    <p className="text-white/40 text-xs">
-                      <span className="text-white text-lg font-bold">{plan.price}</span>
-                      <span className="text-white/30">{plan.period}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  {plan.features.map((feature) => (
-                    <div key={feature.label} className="flex items-center gap-2.5">
-                      {feature.included ? (
-                        <div className="w-5 h-5 rounded-full gradient-blue flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-                          <X className="w-3 h-3 text-white/20" />
-                        </div>
-                      )}
-                      <span className={`text-sm ${feature.included ? "text-white/70" : "text-white/20"}`}>
-                        {feature.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </GlassCard>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {selected > 0 && currentTier !== PLANS[selected].name.toLowerCase() && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <button
-            onClick={() => subscribe(PLANS[selected].name)}
-            disabled={!!busy}
-            className={`w-full py-4 rounded-2xl text-white font-semibold text-base active:scale-[0.98] transition-transform disabled:opacity-60 ${
-              PLANS[selected].exclusive
-                ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_24px_rgba(34,211,238,0.25),0_0_60px_rgba(59,130,246,0.12)]"
-                : "gradient-blue glow-blue"
-            }`}
-          >
-            {busy ? "Opening checkout…" : `Subscribe to ${PLANS[selected].name}`}
-          </button>
-          {(error || notice) && (
-            <p className={`mt-3 text-center text-xs ${error ? "text-red-300" : "text-emerald-300"}`}>{error || notice}</p>
-          )}
-        </motion.div>
+  const footer = (
+    <div
+      style={{
+        position: "relative",
+        flex: "none",
+        zIndex: 3,
+        padding: "12px 16px calc(16px + env(safe-area-inset-bottom, 0px))",
+        borderTop: "1px solid rgba(105,190,255,.14)",
+        background: "rgba(2,10,24,.82)",
+        backdropFilter: "blur(12px)",
+      }}
+    >
+      <button className="cta cta-plan" style={{ clipPath: NOTCH }} disabled={!payable || !!busy} onClick={() => subscribe(plan.name)}>
+        <span
+          aria-hidden="true"
+          style={{ position: "absolute", top: -1, left: "50%", width: 70, height: 2, marginLeft: -35, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(200,225,255,.95), rgba(255,255,255,0))", filter: "blur(.5px)" }}
+        />
+        {payable && !busy && <span className="sheen" aria-hidden="true" />}
+        <span style={{ position: "relative" }}>{ctaLabel}</span>
+      </button>
+      {(error || notice) && (
+        <p style={{ margin: "10px 0 0", textAlign: "center", fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 11.5, lineHeight: 1.4, color: error ? "#ff8a80" : "#7de0b0" }}>
+          {error || notice}
+        </p>
       )}
     </div>
+  );
+
+  return (
+    <PhoneShell title="Premium" back footer={footer}>
+      <div
+        className="scrollbar-hide"
+        style={{ position: "relative", flex: 1, minHeight: 0, zIndex: 1, overflowY: "auto", marginTop: 18, padding: "0 16px 16px", display: "flex", flexDirection: "column", gap: 12 }}
+      >
+        <div style={{ flex: "none", textAlign: "center", padding: "0 4px 6px" }}>
+          <div style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 20, lineHeight: 1.2, letterSpacing: "0.02em", color: "#eaf6ff", textShadow: "0 0 20px rgba(90,180,255,.5)" }}>
+            Unlock NEX2
+          </div>
+          <div style={{ marginTop: 9, fontFamily: "var(--font-chakra)", fontWeight: 400, fontSize: 12.5, lineHeight: 1.4, color: "#7fa9d4" }}>
+            More reach, more features, more connections
+          </div>
+        </div>
+
+        <div style={{ flex: "none", display: "flex", flexDirection: "column", gap: 14 }}>
+          {PLANS.map((p, i) => {
+            const current = currentTier === p.name.toLowerCase();
+            const badged = (p.popular || p.exclusive) && !current;
+            const flags = {
+              ...(current ? { "data-current": "" } : {}),
+              ...(p.popular ? { "data-popular": "" } : {}),
+              ...(p.exclusive ? { "data-exclusive": "" } : {}),
+              ...(selected === i ? { "data-sel": "" } : {}),
+            };
+            return (
+              <button
+                key={p.name}
+                type="button"
+                className="plan"
+                aria-pressed={selected === i}
+                style={{ clipPath: NOTCH_LG, textAlign: "left", cursor: "pointer" }}
+                onClick={() => setSelected(i)}
+                {...flags}
+              >
+                {p.popular && !current && (
+                  <span className="plan-tag" style={{ background: "rgba(45,125,255,.9)", color: "#fff" }}>Most popular</span>
+                )}
+                {p.exclusive && !current && (
+                  <span className="plan-tag" style={{ background: "rgba(169,140,255,.9)", color: "#160f2e" }}>{SPARK}Exclusive</span>
+                )}
+                {current && (
+                  <span style={{ position: "absolute", top: 12, right: 12, padding: "3px 7px", border: "1px solid rgba(77,255,176,.45)", background: "rgba(20,72,52,.6)", fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 8, lineHeight: 1, letterSpacing: "0.14em", textTransform: "uppercase", color: "#7de0b0" }}>
+                    Current
+                  </span>
+                )}
+
+                <div style={{ display: "flex", alignItems: "center", gap: 11, marginTop: badged ? 8 : 0 }}>
+                  <span style={{ flex: "none", display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, border: `1px solid ${p.tone}55`, background: `${p.tone}1f`, color: p.tone, clipPath: NOTCH_9 }}>
+                    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">{p.glyph}</svg>
+                  </span>
+                  <span style={{ flex: 1, fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 15, lineHeight: 1, letterSpacing: "0.03em", color: "#eaf6ff" }}>{p.name}</span>
+                  <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                    <span style={{ fontFamily: "var(--font-chakra)", fontWeight: 700, fontSize: 20, lineHeight: 1, color: p.tone }}>{p.price}</span>
+                    <span style={{ fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 9.5, lineHeight: 1, color: "#7fa9d4" }}>{p.period}</span>
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 14, paddingTop: 13, borderTop: "1px solid rgba(105,190,255,.14)" }}>
+                  {p.features.map((f) => (
+                    <span key={f.label} className="feat" {...(f.included ? {} : { "data-off": "" })}>
+                      {f.included ? TICK : CROSS}
+                      {f.label}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </PhoneShell>
   );
 }
