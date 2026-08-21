@@ -9,7 +9,7 @@ const SCRIM = "linear-gradient(180deg, rgba(3,12,26,.68) 0%, rgba(2,9,20,.92) 20
  * city-lights background under its scrim, the HUD frame, and a header that
  * clears NavMenu's floating hamburger.
  */
-export default function PhoneShell({ title, back = false, children, footer }) {
+export default function PhoneShell({ title, back = false, badge, children, footer }) {
   const navigate = useNavigate();
 
   return (
@@ -27,7 +27,7 @@ export default function PhoneShell({ title, back = false, children, footer }) {
       <div aria-hidden="true" style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
 
       {/* Header — paddingRight clears the hamburger fixed at right:16 */}
-      <header style={{ position: "relative", flex: "none", zIndex: 3, display: "flex", alignItems: "center", gap: 12, padding: "calc(14px + env(safe-area-inset-top, 0px)) 72px 0 16px" }}>
+      <header style={{ position: "relative", flex: "none", zIndex: 3, display: "flex", alignItems: "center", gap: badge ? 10 : 12, padding: "calc(14px + env(safe-area-inset-top, 0px)) 72px 0 16px" }}>
         {back && (
           <button className="circ" aria-label="Back" onClick={() => navigate(-1)}>
             <svg width="15" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
@@ -35,9 +35,10 @@ export default function PhoneShell({ title, back = false, children, footer }) {
             </svg>
           </button>
         )}
-        <h1 style={{ margin: 0, flex: 1, fontFamily: "var(--font-chakra)", fontWeight: 700, fontStyle: "italic", fontSize: back ? 23 : 25, lineHeight: 1, letterSpacing: "0.02em", textTransform: "uppercase", textShadow: "0 0 18px rgba(90,180,255,.5)" }}>
+        <h1 style={{ margin: 0, flex: badge ? "none" : 1, fontFamily: "var(--font-chakra)", fontWeight: 700, fontStyle: "italic", fontSize: back ? 23 : 25, lineHeight: 1, letterSpacing: "0.02em", textTransform: "uppercase", textShadow: "0 0 18px rgba(90,180,255,.5)" }}>
           {title}
         </h1>
+        {badge}
       </header>
 
       {children}
