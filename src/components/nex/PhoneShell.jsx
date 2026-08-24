@@ -27,7 +27,9 @@ export default function PhoneShell({ title, back = false, badge, children, foote
       <div aria-hidden="true" style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderRight: "1.5px solid rgba(125,205,255,.55)", borderBottom: "1.5px solid rgba(125,205,255,.55)", pointerEvents: "none", zIndex: 5 }} />
 
       {/* Header — paddingRight clears the hamburger fixed at right:16 */}
-      <header style={{ position: "relative", flex: "none", zIndex: 3, display: "flex", alignItems: "center", gap: badge ? 10 : 12, padding: "calc(14px + env(safe-area-inset-top, 0px)) 72px 0 16px" }}>
+      {/* The title row is 44px tall — the height of NavMenu's floating
+          hamburger — so nothing below it can slide under the button. */}
+      <header style={{ position: "relative", flex: "none", zIndex: 3, display: "flex", alignItems: "center", minHeight: "calc(58px + env(safe-area-inset-top, 0px))", gap: badge ? 10 : 12, padding: "calc(14px + env(safe-area-inset-top, 0px)) 72px 0 16px" }}>
         {back && (
           <button className="circ" aria-label="Back" onClick={() => navigate(-1)}>
             <svg width="15" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
