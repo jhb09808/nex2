@@ -581,6 +581,54 @@ body[data-desktop-shell] .nav-menu { display: none }
 .a-acts button:hover:not(:disabled) { border-color: rgba(160,215,255,.75) }
 .a-acts button:disabled { opacity: .5; cursor: default }
 .a-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 56px 24px; text-align: center }
+
+/* Onboarding — every class is ob- prefixed so nothing here can reach the rest
+   of the app (the design reuses .rail and .tag, which mean other things). */
+.ob-rail { position: relative; z-index: 2; display: flex; gap: 5px }
+.ob-rail i { flex: 1; height: 3px; background: rgba(105,190,255,.14) }
+.ob-rail i[data-done] { background: rgba(80,160,255,.5) }
+.ob-rail i[data-now] { background: linear-gradient(90deg,#3f9dff,#7fc8ff); box-shadow: 0 0 10px rgba(90,180,255,.7) }
+.ob-meta { position: relative; z-index: 2; display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px }
+.ob-step-n { font: 500 9px/1 var(--font-jetbrains); letter-spacing: .2em; text-transform: uppercase; color: #5f89b2 }
+.ob-h1 { margin: 0; font: 700 italic 27px/1.04 var(--font-chakra); letter-spacing: .02em; text-transform: uppercase; text-shadow: 0 0 18px rgba(90,180,255,.5) }
+.ob-sub { margin: 11px 0 0; font: 400 13px/1.5 var(--font-chakra); color: #8fb9e2; text-wrap: pretty }
+.ob-lbl { font: 600 9.5px/1 var(--font-chakra); letter-spacing: .2em; text-transform: uppercase; color: #8fb9e2 }
+.ob-fld { width: 100%; height: 50px; margin-top: 8px; padding: 0 14px; box-sizing: border-box; background: rgba(8,26,54,.72); border: 1px solid rgba(105,190,255,.32); outline: none; color: #dceeff; font: 500 15px/1 var(--font-chakra) }
+.ob-fld:focus { border-color: rgba(140,205,255,.7) }
+textarea.ob-fld { height: 98px; padding: 13px 14px; resize: none; font: 400 14px/1.5 var(--font-chakra) }
+.ob-mono { font: 500 9.5px/1 var(--font-jetbrains); color: #5f89b2 }
+.ob-cat { flex: none; background: rgba(8,24,48,.55); border: 1px solid rgba(105,190,255,.14) }
+.ob-cat[data-has] { border-color: rgba(105,190,255,.4) }
+.ob-cat-hd { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border: 0; background: transparent; cursor: pointer; text-align: left }
+.ob-cat-ico { flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(16,44,84,.6); color: #7fa9d4; font: 600 14px/1 var(--font-chakra) }
+.ob-cat[data-has] .ob-cat-ico { background: rgba(45,115,215,.6); color: #eaf6ff }
+.ob-tag { height: 32px; padding: 0 12px; border: 1px solid rgba(105,190,255,.2); border-radius: 999px; background: rgba(16,44,84,.35); color: #a6cbec; font: 500 12px/1 var(--font-chakra); cursor: pointer; transition: background .2s ease, border-color .2s ease }
+.ob-tag[data-on] { border-color: rgba(90,175,255,.75); background: rgba(45,115,215,.55); color: #eaf6ff }
+.ob-tag:disabled { opacity: .4; cursor: default }
+.ob-vis { display: flex; align-items: flex-start; gap: 13px; width: 100%; padding: 15px; text-align: left; background: rgba(8,24,48,.5); border: 1px solid rgba(105,190,255,.14); cursor: pointer; transition: background .2s ease, border-color .2s ease }
+.ob-vis[data-on] { background: rgba(20,54,104,.7); border-color: rgba(105,190,255,.55) }
+.ob-vis-ico { flex: none; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(16,44,84,.6); color: #7fa9d4; font: 700 15px/1 var(--font-chakra) }
+.ob-vis[data-on] .ob-vis-ico { background: rgba(45,115,215,.7); color: #eaf6ff }
+.ob-doc { flex: 1; height: 44px; border: 1px solid rgba(105,190,255,.2); background: rgba(8,26,54,.6); color: #8fb9e2; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .06em; cursor: pointer; transition: background .2s ease, border-color .2s ease }
+.ob-doc[data-on] { border-color: rgba(90,175,255,.75); background: rgba(45,115,215,.55); color: #eaf6ff }
+.ob-note { display: flex; align-items: flex-start; gap: 11px; font: 400 12px/1.5 var(--font-chakra); color: #a6cbec }
+.ob-note svg { flex: none; margin-top: 1px }
+.ob-nav { position: relative; z-index: 3; display: flex; gap: 10px; margin-top: 14px }
+.ob-back { flex: none; width: 52px; height: 54px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(105,190,255,.26); background: rgba(8,26,54,.66); color: #bfe2ff; cursor: pointer; transition: border-color .2s ease }
+.ob-back:hover { border-color: rgba(160,215,255,.7) }
+.ob-next { position: relative; overflow: hidden; flex: 1; height: 54px; border: 1.5px solid transparent; background: linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box; color: #fff; font: 700 13.5px/1 var(--font-chakra); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 22px rgba(80,110,255,.42), inset 0 0 22px rgba(70,120,255,.26); transition: box-shadow .25s ease, filter .25s ease }
+.ob-next:hover:not(:disabled) { box-shadow: 0 0 40px rgba(110,140,255,.8); filter: brightness(1.1) }
+/* Not in the design — the app gates Continue until each step is valid. */
+.ob-next:disabled { opacity: .42; box-shadow: none; cursor: default }
+.ob-next span.sheen { position: absolute; top: 0; bottom: 0; width: 56px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.28), rgba(255,255,255,0)); animation: nxsheen 4.5s ease-in-out infinite }
+.ob-skip { display: flex; align-items: center; justify-content: center; height: 44px; margin-top: 4px; border: 0; background: transparent; color: #7fa9d4; font: 500 11px/1 var(--font-chakra); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: color .2s ease }
+.ob-skip:hover { color: #dceeff }
+.ob-pad { position: relative; z-index: 2; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none }
+.ob-pad::-webkit-scrollbar { display: none; width: 0 }
+/* The design references these but never defines them; the app's own nxscan
+   travels 100vh, which would leave the 150px ID frame entirely. */
+@keyframes ob-scan { 0% { transform: translateY(0); opacity: 0 } 10%, 90% { opacity: 1 } 100% { transform: translateY(148px); opacity: 0 } }
+@keyframes ob-ping { 0% { transform: scale(1); opacity: .75 } 100% { transform: scale(1.6); opacity: 0 } }
 .btn-accept { flex: 1; height: 42px; border: 1.5px solid transparent; background: linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box; color: #fff; font: 700 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 18px rgba(80,110,255,.4); transition: box-shadow .2s ease, filter .2s ease }
 .btn-accept:hover:not(:disabled) { box-shadow: 0 0 34px rgba(110,140,255,.8); filter: brightness(1.1) }
 .btn-decline { flex: none; padding: 0 18px; height: 42px; border: 1px solid rgba(120,190,255,.28); background: transparent; color: #8fb9e2; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease }
