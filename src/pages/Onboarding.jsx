@@ -86,7 +86,12 @@ export default function Onboarding() {
 
   const [doc, setDoc] = useState(DOCS[0]);
   const [scanned, setScanned] = useState(false);
+  // "live" puts the camera in the frame; the file input is only a fallback for
+  // when there is no camera or permission was refused.
+  const [cam, setCam] = useState("idle");
   const scanInput = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   const [visibility, setVisibility] = useState("full_profile");
   const [saving, setSaving] = useState(false);
@@ -173,18 +178,61 @@ export default function Onboarding() {
     }
   };
 
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  };
+
+  // The frame is a live viewfinder while step 3 is on screen. Leaving the step
+  // — forward, back or by unmounting — releases the camera immediately.
+  useEffect(() => {
+    if (step !== 3) { stopCamera(); return undefined; }
+    let cancelled = false;
+    (async () => {
+      if (!navigator.mediaDevices?.getUserMedia) { setCam("unsupported"); return; }
+      setCam("starting");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+        setCam("live");
+      } catch {
+        if (!cancelled) setCam("denied");
+      }
+    })();
+    return () => { cancelled = true; stopCamera(); };
+  }, [step]);
+
   /**
-   * Capture of the chosen document. The image is read from the file input and
-   * dropped as soon as this returns — it is never uploaded or persisted.
+   * Grabs the current viewfinder frame. The image lives only as a canvas blob
+   * for the length of this call — it is never uploaded, stored or attached to
+   * the profile.
    *
-   * TODO: hand `file` to the verification provider here and use its verdict to
+   * TODO: hand `image` to the verification provider here and use its verdict to
    * set verification_method. Until then no document is inspected, so nothing
    * about the user's age or identity is confirmed by this step.
    */
-  const runIdCheck = async (file) => {
-    if (!file) return;
+  const runIdCheck = async (image) => {
+    if (!image) return;
     setScanned(true);
+    stopCamera();
     setStep((s) => s + 1);
+  };
+
+  const captureFrame = async () => {
+    const v = videoRef.current;
+    if (!v?.videoWidth) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = v.videoWidth;
+    canvas.height = v.videoHeight;
+    canvas.getContext("2d").drawImage(v, 0, 0);
+    const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.9));
+    await runIdCheck(blob);
   };
 
   const canProceed = () => {
@@ -360,7 +408,7 @@ export default function Onboarding() {
                     key={i}
                     aria-hidden="true"
                     style={{
-                      position: "absolute", width: 22, height: 22,
+                      position: "absolute", width: 22, height: 22, zIndex: 1,
                       left: c.left, right: c.right, top: c.top, bottom: c.bottom,
                       borderLeft: c.bl ? "2px solid #7fc8ff" : undefined,
                       borderRight: c.br ? "2px solid #7fc8ff" : undefined,
@@ -369,18 +417,33 @@ export default function Onboarding() {
                     }}
                   />
                 ))}
+                {/* The live viewfinder sits under the brackets and scan line. */}
+                <video
+                  ref={videoRef}
+                  playsInline
+                  muted
+                  aria-label="Camera viewfinder"
+                  style={{ position: "absolute", inset: 0, zIndex: 0, width: "100%", height: "100%", objectFit: "cover", opacity: cam === "live" ? 1 : 0, transition: "opacity .3s ease" }}
+                />
                 <div aria-hidden="true" style={{ position: "absolute", left: 14, right: 14, top: 0, height: 2, background: "linear-gradient(90deg, transparent, rgba(140,215,255,.9), transparent)", boxShadow: "0 0 14px rgba(120,200,255,.8)", animation: "ob-scan 3.4s linear infinite" }} />
-                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <svg width="52" height="38" viewBox="0 0 52 38" fill="none" aria-hidden="true">
-                    <rect x="1.2" y="1.2" width="49.6" height="35.6" rx="3" stroke="#5f9dd4" strokeWidth="1.6" />
-                    <circle cx="15" cy="15" r="6" stroke="#5f9dd4" strokeWidth="1.6" />
-                    <path d="M6 30c0-4.4 4-6.6 9-6.6s9 2.2 9 6.6" stroke="#5f9dd4" strokeWidth="1.6" />
-                    <path d="M31 12h15M31 19h15M31 26h9" stroke="#5f9dd4" strokeWidth="1.6" strokeLinecap="round" />
-                  </svg>
-                  <span style={{ marginTop: 12, font: "500 10px/1 var(--font-jetbrains)", letterSpacing: "0.18em", textTransform: "uppercase", color: "#6f9dc8" }}>
-                    {scanned ? "Captured" : "Align your ID in frame"}
+
+                {cam === "live" ? (
+                  <span style={{ position: "absolute", left: 0, right: 0, bottom: 12, textAlign: "center", font: "500 10px/1 var(--font-jetbrains)", letterSpacing: "0.18em", textTransform: "uppercase", color: "#cfe9ff", textShadow: "0 1px 6px rgba(1,6,14,.9)" }}>
+                    Align your ID in frame
                   </span>
-                </div>
+                ) : (
+                  <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <svg width="52" height="38" viewBox="0 0 52 38" fill="none" aria-hidden="true">
+                      <rect x="1.2" y="1.2" width="49.6" height="35.6" rx="3" stroke="#5f9dd4" strokeWidth="1.6" />
+                      <circle cx="15" cy="15" r="6" stroke="#5f9dd4" strokeWidth="1.6" />
+                      <path d="M6 30c0-4.4 4-6.6 9-6.6s9 2.2 9 6.6" stroke="#5f9dd4" strokeWidth="1.6" />
+                      <path d="M31 12h15M31 19h15M31 26h9" stroke="#5f9dd4" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                    <span style={{ marginTop: 12, font: "500 10px/1 var(--font-jetbrains)", letterSpacing: "0.18em", textTransform: "uppercase", color: "#6f9dc8", textAlign: "center", padding: "0 16px" }}>
+                      {cam === "starting" ? "Starting camera" : cam === "denied" ? "Camera blocked — use a photo" : cam === "unsupported" ? "No camera — use a photo" : "Align your ID in frame"}
+                    </span>
+                  </div>
+                )}
               </div>
               <div style={{ display: "flex", gap: 9, marginTop: 14 }}>
                 {DOCS.map((d) => (
@@ -425,7 +488,13 @@ export default function Onboarding() {
             hidden
             onChange={(e) => { runIdCheck(e.target.files?.[0]); e.target.value = ""; }}
           />
-          <Nav step={3} onBack={back} onNext={() => scanInput.current?.click()} label={<>Scan {doc.toLowerCase()} →</>} />
+          <Nav
+            step={3}
+            onBack={back}
+            onNext={cam === "live" ? captureFrame : () => scanInput.current?.click()}
+            label={cam === "live" ? <>Scan {doc.toLowerCase()} →</> : cam === "starting" ? <>Starting camera…</> : <>Photograph {doc.toLowerCase()} →</>}
+            disabled={cam === "starting"}
+          />
           <button className="ob-skip" onClick={next}>Skip — browse unverified</button>
         </section>
       )}
