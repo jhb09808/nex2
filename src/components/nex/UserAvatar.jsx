@@ -1,5 +1,5 @@
 import React from "react";
-import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
+import AuraAvatar from "@/components/nex/aura/AuraAvatar";
 
 const TIER_STYLES = {
   free: {
@@ -20,7 +20,7 @@ const TIER_STYLES = {
   },
 };
 
-export default function UserAvatar({ name, size = "md", isOnline, plan = "free", interests, isVerified, gender, className = "" }) {
+export default function UserAvatar({ name, size = "md", isOnline, plan = "free", interests, isVerified, gender, profile, className = "" }) {
   const sizes = {
     xs: "w-8 h-8",
     sm: "w-10 h-10",
@@ -38,7 +38,11 @@ export default function UserAvatar({ name, size = "md", isOnline, plan = "free",
   };
 
   const tier = TIER_STYLES[plan] || TIER_STYLES.free;
-  const seed = name || "unknown";
+  // A full profile gives the richest Aura; otherwise build one from the props
+  // this avatar was given so every surface stays consistent.
+  const auraProfile = profile || { aura_seed: name || "unknown", plan, interests, is_verified: isVerified, gender };
+  // Tiny avatars stay static — dozens of animated orbs on the radar is waste.
+  const animated = size === "lg" || size === "xl";
 
   return (
     <div className={`relative ${className}`}>
@@ -49,7 +53,7 @@ export default function UserAvatar({ name, size = "md", isOnline, plan = "free",
           boxShadow: `0 0 12px ${tier.glow}`,
         }}
       >
-        <GenerativeAvatar seed={seed} gender={gender} plan={plan} interests={interests} isVerified={isVerified} />
+        <AuraAvatar profile={auraProfile} animated={animated} />
       </div>
       {isOnline !== undefined && (
         <div

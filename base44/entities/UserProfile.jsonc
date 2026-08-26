@@ -19,6 +19,15 @@
       "type": "boolean",
       "default": false
     },
+    "aura_variant": {
+      "type": "number",
+      "default": 0,
+      "description": "Which of the generated NEX2 Aura variations the user chose"
+    },
+    "aura_seed": {
+      "type": "string",
+      "description": "Optional override seed for the user's Aura; defaults to their account id"
+    },
     "age": {
       "type": "number"
     },

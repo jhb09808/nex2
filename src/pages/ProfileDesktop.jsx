@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import DesktopShell from "@/components/nex/desktop/DesktopShell";
-import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
+import AuraAvatar from "@/components/nex/aura/AuraAvatar";
 import { ACHIEVEMENTS } from "@/components/nex/AchievementGrid";
 import useOpportunityInsight from "@/hooks/useOpportunityInsight";
 import { getSubInterestName } from "@/components/nex/radar/interestCategories";
@@ -39,7 +39,7 @@ export default function ProfileDesktop({ profile, connectionCount }) {
             <div style={{ flex: "none", padding: "26px 22px", textAlign: "center", clipPath: NOTCH_LG, background: "linear-gradient(170deg, rgba(16,44,86,.62), rgba(6,20,42,.62))", border: "1px solid rgba(105,190,255,.22)", animation: "nxrise .38s cubic-bezier(.16,1,.3,1)" }}>
               <div style={{ position: "relative", width: 112, height: 112, margin: "0 auto" }}>
                 <div style={{ width: "100%", height: "100%", border: "2px solid rgba(255,255,255,.2)", boxShadow: "0 0 26px rgba(90,180,255,.28)", borderRadius: "50%", overflow: "hidden", boxSizing: "border-box" }}>
-                  <GenerativeAvatar seed={name || "unknown"} gender={profile?.gender} isVerified={profile?.is_verified} />
+                  <AuraAvatar profile={profile} />
                 </div>
                 {profile?.is_online && (
                   <span style={{ position: "absolute", right: 2, bottom: 2, width: 20, height: 20, borderRadius: "50%", background: "#60a5fa", boxShadow: "0 0 10px rgba(96,165,250,.8)", border: "3px solid #050810" }} />

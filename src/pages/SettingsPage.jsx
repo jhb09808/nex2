@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import AuraAvatar from "@/components/nex/aura/AuraAvatar";
+import AuraPickerSheet from "@/components/nex/aura/AuraPickerSheet";
 import PhoneShell from "@/components/nex/PhoneShell";
 import { useRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepColor";
 import SettingsDesktop from "@/pages/SettingsDesktop";
@@ -57,6 +60,7 @@ const META = { fontFamily: "var(--font-jetbrains)", fontWeight: 500, fontSize: 1
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
+  const [showAura, setShowAura] = useState(false);
   const isDesktop = useIsDesktop(1200);
 
   useEffect(() => {
@@ -107,6 +111,24 @@ export default function SettingsPage() {
         className="scrollbar-hide"
         style={{ position: "relative", flex: 1, minHeight: 0, zIndex: 1, overflowY: "auto", marginTop: 18, padding: "0 16px calc(24px + env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", gap: 20 }}
       >
+        <section>
+          <span className="col-head">Profile picture</span>
+          <div className="grp">
+            <button
+              onClick={() => setShowAura(true)}
+              className="set-row"
+              style={{ clipPath: NOTCH, width: "100%", textAlign: "left", cursor: "pointer" }}
+            >
+              <span style={{ flex: "none", width: 38, height: 38, borderRadius: "50%", overflow: "hidden", border: "1px solid rgba(120,200,255,.34)", boxSizing: "border-box" }}>
+                <AuraAvatar profile={profile} animated={false} />
+              </span>
+              <span className="set-label">Your Aura</span>
+              <span style={META}>Preview · Refresh</span>
+              {CHEVRON}
+            </button>
+          </div>
+        </section>
+
         <section>
           <span className="col-head">Privacy</span>
           <div className="grp">
@@ -178,6 +200,16 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
+
+      <AnimatePresence>
+        {showAura && profile && (
+          <AuraPickerSheet
+            profile={profile}
+            onClose={() => setShowAura(false)}
+            onSave={(variant) => toggleSetting("aura_variant", variant)}
+          />
+        )}
+      </AnimatePresence>
     </PhoneShell>
   );
 }
