@@ -340,6 +340,16 @@
   100% { transform: translate(var(--dx, 10px), var(--dy, -30px)); opacity: 0; }
 }
 
+/* City lights behind the radar — soft breathing glow with an occasional
+   deeper dip so the field feels alive rather than uniformly pulsing. */
+@keyframes nex-city-flicker {
+  0%, 100% { opacity: calc(var(--peak, .5) * .35); }
+  28% { opacity: var(--peak, .5); }
+  46% { opacity: calc(var(--peak, .5) * .5); }
+  63% { opacity: calc(var(--peak, .5) * .92); }
+  80% { opacity: calc(var(--peak, .5) * .28); }
+}
+
 @keyframes nex-ambient-breathe {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 0.35; }

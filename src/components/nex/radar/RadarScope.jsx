@@ -3,6 +3,7 @@ import { getRadarSweepColor, RADAR_SWEEP_COLORS } from "@/hooks/useRadarSweepCol
 import { getCategoryForSubInterest } from "@/components/nex/radar/interestCategories";
 import radarMap from "@/assets/radar-map.webp";
 import useIsDesktop from "@/hooks/useIsDesktop";
+import CityLights from "@/components/nex/radar/CityLights";
 
 const PALETTE = {
   bg: "#000000",
@@ -279,6 +280,9 @@ export default function RadarScope({
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(1,6,14,.86) 0%, rgba(1,6,14,.42) 24%, rgba(1,6,14,.46) 70%, rgba(1,5,12,.94) 100%)" }} />
           </div>
         )}
+      {/* City lights — aerial-view glow behind everything */}
+      <CityLights count={isDesktop ? 120 : 80} />
+
       {/* Atmospheric ambient haze */}
       <div
         className="absolute inset-0 pointer-events-none"
