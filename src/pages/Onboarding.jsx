@@ -14,11 +14,25 @@ const BIO_MAX = 140;
 const DOCS = ["Driver licence", "Passport", "State ID"];
 
 /**
- * Flip to true when the verification provider's webhook is live and actually
- * writes verification_method: "id_verified". Until then step 3 captures a
- * frame that nothing inspects, so it must not claim a check took place.
+ * Flip to true once Stripe Identity is enabled on the account and
+ * STRIPE_SECRET_KEY is set. It switches step 3 from the local placeholder
+ * capture to the real hosted flow, and switches the copy with it — while
+ * false the step must not claim a check took place.
  */
 const VERIFICATION_LIVE = false;
+
+// The hosted flow leaves the app, so the half-filled profile has to survive
+// the round trip.
+const DRAFT_KEY = "nex2_onboarding_draft";
+
+function readDraft() {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 const VISIBILITY = [
   { value: "anonymous", label: "Anonymous", glyph: "◍", desc: "A fingerprint and a distance. No name, no photo, nothing traceable." },
@@ -80,19 +94,26 @@ function Nav({ step, onBack, onNext, label, disabled }) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  // Coming back from the hosted flow, the draft is the source of truth.
+  const returning = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("verify") === "return";
+  const draft = returning ? readDraft() : null;
 
-  const [username, setUsername] = useState("");
-  const [age, setAge] = useState("");
-  const [bio, setBio] = useState("");
+  const [step, setStep] = useState(draft ? 4 : 1);
+
+  const [username, setUsername] = useState(draft?.username || "");
+  const [age, setAge] = useState(draft?.age || "");
+  const [bio, setBio] = useState(draft?.bio || "");
   const [nameState, setNameState] = useState("");
 
-  const [interests, setInterests] = useState([]);
+  const [interests, setInterests] = useState(draft?.interests || []);
   const [query, setQuery] = useState("");
   const [openCat, setOpenCat] = useState(null);
 
-  const [doc, setDoc] = useState(DOCS[0]);
-  const [scanned, setScanned] = useState(false);
+  const [doc, setDoc] = useState(draft?.doc || DOCS[0]);
+  const [scanned, setScanned] = useState(!!draft?.sessionId);
+  // Set once, when the draft comes back from the hosted flow.
+  const verifySessionId = draft?.sessionId || null;
+  const [starting, setStarting] = useState(false);
   // "live" puts the camera in the frame; the file input is only a fallback for
   // when there is no camera or permission was refused.
   const [cam, setCam] = useState("idle");
@@ -100,9 +121,16 @@ export default function Onboarding() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  const [visibility, setVisibility] = useState("full_profile");
+  const [visibility, setVisibility] = useState(draft?.visibility || "full_profile");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // The draft has been consumed; drop it so a later visit starts clean.
+  useEffect(() => {
+    if (!returning) return;
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* private mode */ }
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [returning]);
 
   // Availability is a real lookup, debounced — the design only checks length.
   useEffect(() => {
@@ -172,10 +200,26 @@ export default function Onboarding() {
         blocked_users: [],
         is_adult: true,
         adult_verified_at: new Date().toISOString(),
-        // Stays self_attested until a verification provider is wired into
-        // runIdCheck below — nothing has actually inspected a document.
+        // Only ever self_attested from the client. confirmIdVerification is
+        // the one thing that may raise this to id_verified, and it does so
+        // server-side after reading the verdict from Stripe.
         verification_method: "self_attested",
       });
+
+      if (verifySessionId) {
+        try {
+          const res = await base44.functions.invoke("confirmIdVerification", { session_id: verifySessionId });
+          if (res.data?.under_age) {
+            setError("That document shows you are under 18, so we cannot let you in.");
+            return;
+          }
+        } catch (err) {
+          // A failed confirmation leaves the account self-attested, which is
+          // the same place skipping lands. Not worth blocking entry over.
+          console.error("Verification confirm failed:", err);
+        }
+      }
+
       navigate("/map");
     } catch (err) {
       console.error(err);
@@ -194,7 +238,8 @@ export default function Onboarding() {
   // The frame is a live viewfinder while step 3 is on screen. Leaving the step
   // — forward, back or by unmounting — releases the camera immediately.
   useEffect(() => {
-    if (step !== 3) { stopCamera(); return undefined; }
+    // With the hosted flow live, Stripe does the capture — no local camera.
+    if (step !== 3 || VERIFICATION_LIVE) { stopCamera(); return undefined; }
     let cancelled = false;
     (async () => {
       if (!navigator.mediaDevices?.getUserMedia) { setCam("unsupported"); return; }
@@ -229,6 +274,37 @@ export default function Onboarding() {
     setScanned(true);
     stopCamera();
     setStep((s) => s + 1);
+  };
+
+  /**
+   * Hands off to Stripe's hosted flow. The document is captured there and goes
+   * straight to Stripe — it never reaches this app or its backend.
+   */
+  const startStripeVerification = async () => {
+    setStarting(true);
+    setError("");
+    try {
+      const draftOut = { username, age, bio, interests, visibility, doc };
+      try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draftOut)); } catch { /* private mode */ }
+
+      const res = await base44.functions.invoke("createVerificationSession", {
+        origin: window.location.origin,
+        return_to: "/onboarding",
+      });
+      if (res.data?.url) {
+        // Keep the id alongside the draft so the verdict can be confirmed on
+        // the way back.
+        try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draftOut, sessionId: res.data.session_id })); } catch { /* private mode */ }
+        stopCamera();
+        window.location.assign(res.data.url);
+        return;
+      }
+      setError(res.data?.error || "Could not start verification.");
+    } catch (err) {
+      setError(err?.response?.data?.error || err.message || "Could not start verification.");
+    } finally {
+      setStarting(false);
+    }
   };
 
   const captureFrame = async () => {
@@ -495,6 +571,8 @@ export default function Onboarding() {
                 Verified accounts get the blue check that shows next to your name.
               </span>
             </div>
+
+            {error && <p style={{ margin: "14px 0 0", font: "400 12px/1.5 var(--font-chakra)", color: "#ff8a80" }}>{error}</p>}
           </div>
 
           <input
@@ -505,13 +583,23 @@ export default function Onboarding() {
             hidden
             onChange={(e) => { runIdCheck(e.target.files?.[0]); e.target.value = ""; }}
           />
-          <Nav
-            step={3}
-            onBack={back}
-            onNext={cam === "live" ? captureFrame : () => scanInput.current?.click()}
-            label={cam === "live" ? <>Scan {doc.toLowerCase()} →</> : cam === "starting" ? <>Starting camera…</> : <>Photograph {doc.toLowerCase()} →</>}
-            disabled={cam === "starting"}
-          />
+          {VERIFICATION_LIVE ? (
+            <Nav
+              step={3}
+              onBack={back}
+              onNext={startStripeVerification}
+              label={starting ? <>Opening…</> : <>Scan {doc.toLowerCase()} →</>}
+              disabled={starting}
+            />
+          ) : (
+            <Nav
+              step={3}
+              onBack={back}
+              onNext={cam === "live" ? captureFrame : () => scanInput.current?.click()}
+              label={cam === "live" ? <>Scan {doc.toLowerCase()} →</> : cam === "starting" ? <>Starting camera…</> : <>Photograph {doc.toLowerCase()} →</>}
+              disabled={cam === "starting"}
+            />
+          )}
           <button className="ob-skip" onClick={next}>Skip — browse unverified</button>
         </section>
       )}
