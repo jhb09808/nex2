@@ -13,6 +13,13 @@ const STEP_COUNT = 6;
 const BIO_MAX = 140;
 const DOCS = ["Driver licence", "Passport", "State ID"];
 
+/**
+ * Flip to true when the verification provider's webhook is live and actually
+ * writes verification_method: "id_verified". Until then step 3 captures a
+ * frame that nothing inspects, so it must not claim a check took place.
+ */
+const VERIFICATION_LIVE = false;
+
 const VISIBILITY = [
   { value: "anonymous", label: "Anonymous", glyph: "◍", desc: "A fingerprint and a distance. No name, no photo, nothing traceable." },
   { value: "first_name", label: "First name only", glyph: "◑", desc: null },
@@ -397,7 +404,11 @@ export default function Onboarding() {
           <Header step={3} />
           <div style={{ position: "relative", zIndex: 2, marginTop: 22 }}>
             <h1 className="ob-h1">Verify your ID</h1>
-            <p className="ob-sub">One scan confirms you are a real person over 18. It is how NEX2 keeps the radar free of fakes.</p>
+            <p className="ob-sub">
+              {VERIFICATION_LIVE
+                ? "One scan confirms you are a real person over 18. It is how NEX2 keeps the radar free of fakes."
+                : "NEX2 is 18+. Document checks are not switched on yet — skip this step and carry on."}
+            </p>
           </div>
 
           <div className="ob-pad" style={{ marginTop: 20 }}>
@@ -458,14 +469,18 @@ export default function Onboarding() {
                   <path d="M8.5 1.2l6.4 2.6v5.4c0 4-2.7 6.6-6.4 7.6-3.7-1-6.4-3.6-6.4-7.6V3.8l6.4-2.6z" stroke="#4dffb0" strokeWidth="1.4" strokeLinejoin="round" />
                   <path d="M5.8 9.2l2 2 3.6-3.9" stroke="#4dffb0" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                The scan is checked once, then deleted. We never store the image or your document number.
+                {VERIFICATION_LIVE
+                  ? "Your ID goes straight to our verification partner. NEX2 never receives or stores the image."
+                  : "Nothing you capture here leaves your phone — it is not uploaded or stored anywhere."}
               </span>
               <span className="ob-note">
                 <svg width="16" height="17" viewBox="0 0 17 18" fill="none" aria-hidden="true">
                   <circle cx="8.5" cy="8.5" r="7.3" stroke="#7fc8ff" strokeWidth="1.4" />
                   <path d="M8.5 4.6v4.6l3 1.8" stroke="#7fc8ff" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
-                Takes about ten seconds. Only your age and gender are kept — never your name or address.
+                {VERIFICATION_LIVE
+                  ? "We keep only your verified age — never your name, address or document number."
+                  : "Skipping changes nothing today. You can verify from Settings once checks are on."}
               </span>
             </div>
 
@@ -475,7 +490,9 @@ export default function Onboarding() {
                 <path d="M6 10.2l2.7 2.7 5.3-5.7" stroke="#4da6ff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span style={{ flex: 1, font: "400 12px/1.45 var(--font-chakra)", color: "#c3d8ee" }}>
-                Verified accounts get the blue check and can filter the radar to verified people only.
+                {/* The radar has no verified-only filter yet, so that half of
+                    the design's promise is left out until it exists. */}
+                Verified accounts get the blue check that shows next to your name.
               </span>
             </div>
           </div>
@@ -631,7 +648,7 @@ export default function Onboarding() {
               {[
                 ["Username", username.trim() || "Not set"],
                 ["Interests", `${interests.length} picked`],
-                ["Verified", scanned ? doc : "Skipped"],
+                ["Verified", VERIFICATION_LIVE && scanned ? doc : "Not verified"],
                 ["Visibility", VISIBILITY.find((v) => v.value === visibility)?.label],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 2px", borderBottom: "1px solid rgba(105,190,255,.1)" }}>
