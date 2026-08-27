@@ -5,46 +5,14 @@ import GenerativeAvatar from "@/components/nex/GenerativeAvatar";
 import { INTEREST_CATEGORIES } from "@/components/nex/radar/interestCategories";
 import { MIN_INTEREST_SELECTIONS, MAX_INTEREST_SELECTIONS } from "@/components/nex/radar/constants";
 import wordmark from "@/assets/wordmark.webp";
-
-const NOTCH = "polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)";
-const NOTCH_LG = "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)";
-
-const STEP_COUNT = 6;
-const BIO_MAX = 140;
-const DOCS = ["Driver licence", "Passport", "State ID"];
-
-/**
- * Flip to true once Stripe Identity is enabled on the account and
- * STRIPE_SECRET_KEY is set. It switches step 3 from the local placeholder
- * capture to the real hosted flow, and switches the copy with it — while
- * false the step must not claim a check took place.
- */
-const VERIFICATION_LIVE = false;
-
-// The hosted flow leaves the app, so the half-filled profile has to survive
-// the round trip.
-const DRAFT_KEY = "nex2_onboarding_draft";
-
-function readDraft() {
-  try {
-    const raw = sessionStorage.getItem(DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-const VISIBILITY = [
-  { value: "anonymous", label: "Anonymous", glyph: "◍", desc: "A fingerprint and a distance. No name, no photo, nothing traceable." },
-  { value: "first_name", label: "First name only", glyph: "◑", desc: null },
-  { value: "full_profile", label: "Full profile", glyph: "●", desc: "Username, age and bio are visible to anyone on your radar." },
-];
-
-const ARROW_BACK = (
-  <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
-    <path d="M15 5H1M5 1L1 5l4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+import OnboardingDesktop from "@/pages/OnboardingDesktop";
+import useIsDesktop from "@/hooks/useIsDesktop";
+import {
+  STEP_COUNT, BIO_MAX, DOCS, VISIBILITY, VERIFICATION_LIVE, NOTCH, NOTCH_LG,
+  ARROW_BACK, readDraft, writeDraft, clearDraft, verifyCopy, summaryRows,
+  ICON_SHIELD_CHECK, ICON_CLOCK, ICON_CHECK_RING, ICON_SEARCH, ICON_SHIELD,
+  LocationDial, EnterDisc,
+} from "@/components/nex/onboardingCommon";
 
 const Wordmark = () => <img src={wordmark} alt="NEX2" style={{ display: "block", width: 64, height: 10.3, opacity: 0.65 }} />;
 
@@ -94,6 +62,7 @@ function Nav({ step, onBack, onNext, label, disabled }) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const isDesktop = useIsDesktop(1200);
   // Coming back from the hosted flow, the draft is the source of truth.
   const returning = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("verify") === "return";
   const draft = returning ? readDraft() : null;
@@ -128,7 +97,7 @@ export default function Onboarding() {
   // The draft has been consumed; drop it so a later visit starts clean.
   useEffect(() => {
     if (!returning) return;
-    try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* private mode */ }
+    clearDraft();
     window.history.replaceState({}, "", window.location.pathname);
   }, [returning]);
 
@@ -285,7 +254,7 @@ export default function Onboarding() {
     setError("");
     try {
       const draftOut = { username, age, bio, interests, visibility, doc };
-      try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draftOut)); } catch { /* private mode */ }
+      writeDraft(draftOut);
 
       const res = await base44.functions.invoke("createVerificationSession", {
         origin: window.location.origin,
@@ -294,7 +263,7 @@ export default function Onboarding() {
       if (res.data?.url) {
         // Keep the id alongside the draft so the verdict can be confirmed on
         // the way back.
-        try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draftOut, sessionId: res.data.session_id })); } catch { /* private mode */ }
+        writeDraft({ ...draftOut, sessionId: res.data.session_id });
         stopCamera();
         window.location.assign(res.data.url);
         return;
@@ -333,8 +302,24 @@ export default function Onboarding() {
     }
   };
 
+  const copy = verifyCopy("scan");
   const back = () => setStep((s) => Math.max(1, s - 1));
   const next = () => setStep((s) => Math.min(STEP_COUNT, s + 1));
+
+  if (isDesktop) {
+    return (
+      <OnboardingDesktop
+        ob={{
+          step, back, next, canProceed,
+          username, setUsername, nameState, age, setAge, bio, setBio,
+          interests, toggleInterest, atMax, cats, query, setQuery, openCat, setOpenCat,
+          doc, setDoc, scanned, starting, startStripeVerification, runIdCheck,
+          visibility, setVisibility, firstName,
+          requestLocation, handleComplete, saving, error,
+        }}
+      />
+    );
+  }
 
   return (
     <main
@@ -409,10 +394,7 @@ export default function Onboarding() {
 
           <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
             <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", gap: 10, height: 46, padding: "0 14px", background: "rgba(8,26,54,.72)", border: "1px solid rgba(105,190,255,.28)", clipPath: NOTCH }}>
-              <svg width="15" height="15" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <circle cx="7.8" cy="7.8" r="6" stroke="#6fb8ff" strokeWidth="1.4" />
-                <path d="M12.2 12.2l4 4" stroke="#6fb8ff" strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
+              {ICON_SEARCH}
               <input
                 id="obQuery"
                 aria-label="Search interests"
@@ -481,9 +463,7 @@ export default function Onboarding() {
           <div style={{ position: "relative", zIndex: 2, marginTop: 22 }}>
             <h1 className="ob-h1">Verify your ID</h1>
             <p className="ob-sub">
-              {VERIFICATION_LIVE
-                ? "One scan confirms you are a real person over 18. It is how NEX2 keeps the radar free of fakes."
-                : "NEX2 is 18+. Document checks are not switched on yet — skip this step and carry on."}
+              {copy.sub}
             </p>
           </div>
 
@@ -541,34 +521,19 @@ export default function Onboarding() {
 
             <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 11 }}>
               <span className="ob-note">
-                <svg width="16" height="17" viewBox="0 0 17 18" fill="none" aria-hidden="true">
-                  <path d="M8.5 1.2l6.4 2.6v5.4c0 4-2.7 6.6-6.4 7.6-3.7-1-6.4-3.6-6.4-7.6V3.8l6.4-2.6z" stroke="#4dffb0" strokeWidth="1.4" strokeLinejoin="round" />
-                  <path d="M5.8 9.2l2 2 3.6-3.9" stroke="#4dffb0" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {VERIFICATION_LIVE
-                  ? "Your ID goes straight to our verification partner. NEX2 never receives or stores the image."
-                  : "Nothing you capture here leaves your phone — it is not uploaded or stored anywhere."}
+                {ICON_SHIELD_CHECK}
+                {copy.privacy}
               </span>
               <span className="ob-note">
-                <svg width="16" height="17" viewBox="0 0 17 18" fill="none" aria-hidden="true">
-                  <circle cx="8.5" cy="8.5" r="7.3" stroke="#7fc8ff" strokeWidth="1.4" />
-                  <path d="M8.5 4.6v4.6l3 1.8" stroke="#7fc8ff" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-                {VERIFICATION_LIVE
-                  ? "We keep only your verified age — never your name, address or document number."
-                  : "Skipping changes nothing today. You can verify from Settings once checks are on."}
+                {ICON_CLOCK}
+                {copy.kept}
               </span>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16, padding: "13px 15px", background: "rgba(20,54,104,.5)", border: "1px solid rgba(105,190,255,.3)", clipPath: NOTCH }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" style={{ flex: "none" }}>
-                <circle cx="10" cy="10" r="8.4" stroke="#4da6ff" strokeWidth="1.5" />
-                <path d="M6 10.2l2.7 2.7 5.3-5.7" stroke="#4da6ff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              {ICON_CHECK_RING}
               <span style={{ flex: 1, font: "400 12px/1.45 var(--font-chakra)", color: "#c3d8ee" }}>
-                {/* The radar has no verified-only filter yet, so that half of
-                    the design's promise is left out until it exists. */}
-                Verified accounts get the blue check that shows next to your name.
+                {copy.callout}
               </span>
             </div>
 
@@ -664,24 +629,7 @@ export default function Onboarding() {
         <section style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <Header step={5} />
           <div style={{ position: "relative", zIndex: 2, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ position: "relative", width: 200, height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div aria-hidden="true" style={{ position: "absolute", inset: -20, borderRadius: "50%", background: "radial-gradient(circle, rgba(50,135,255,.22) 0%, rgba(4,16,31,0) 70%)" }} />
-              <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(115,195,255,.28)" }} />
-              <div aria-hidden="true" style={{ position: "absolute", inset: 38, borderRadius: "50%", border: "1px solid rgba(115,195,255,.2)" }} />
-              <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "50%", overflow: "hidden" }}>
-                <div style={{ position: "absolute", inset: 0, background: "conic-gradient(from 0deg, rgba(130,210,255,.3), rgba(130,210,255,0) 56%)", animation: "nxsweep 5s linear infinite" }} />
-              </div>
-              <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(150,220,255,.42)", animation: "ob-ping 4s ease-out infinite" }} />
-              <svg width="34" height="42" viewBox="0 0 34 42" fill="none" aria-hidden="true" style={{ position: "relative" }}>
-                <path d="M17 40S32 25.5 32 16A15 15 0 0 0 2 16c0 9.5 15 24 15 24z" stroke="#7fc8ff" strokeWidth="2" strokeLinejoin="round" />
-                <circle cx="17" cy="15.6" r="5.4" fill="#7fc8ff" />
-              </svg>
-              {/* 78px, not the design's 76 — the label needs 77px once the
-                  0.08em tracking is counted, so at 76 it wraps to two lines. */}
-              <div style={{ position: "absolute", bottom: -6, left: "50%", marginLeft: -39, width: 78, textAlign: "center", whiteSpace: "nowrap", padding: "5px 0", background: "rgba(8,26,54,.9)", border: "1px solid rgba(105,190,255,.4)", font: "500 10px/1 var(--font-jetbrains)", letterSpacing: "0.08em", color: "#8fd0ff" }}>
-                2 mi radius
-              </div>
-            </div>
+            <LocationDial />
 
             <h1 className="ob-h1" style={{ marginTop: 36, textAlign: "center" }}>Enable location</h1>
             <p className="ob-sub" style={{ maxWidth: 290, textAlign: "center" }}>
@@ -689,9 +637,7 @@ export default function Onboarding() {
             </p>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 22, padding: "11px 14px", background: "rgba(6,20,42,.6)", border: "1px solid rgba(105,190,255,.2)", clipPath: NOTCH }}>
-              <svg width="15" height="16" viewBox="0 0 17 18" fill="none" aria-hidden="true" style={{ flex: "none" }}>
-                <path d="M8.5 1.2l6.4 2.6v5.4c0 4-2.7 6.6-6.4 7.6-3.7-1-6.4-3.6-6.4-7.6V3.8l6.4-2.6z" stroke="#4dffb0" strokeWidth="1.4" strokeLinejoin="round" />
-              </svg>
+              {ICON_SHIELD}
               <span style={{ font: "400 11.5px/1.4 var(--font-chakra)", color: "#a6cbec" }}>Turn the radar off any time — you go invisible instantly.</span>
             </div>
           </div>
@@ -705,40 +651,14 @@ export default function Onboarding() {
         <section style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <Header step={6} />
           <div className="ob-pad" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <button
-              onClick={handleComplete}
-              disabled={saving}
-              aria-label="Enter NEX2"
-              style={{ position: "relative", width: 212, height: 212, padding: 0, border: 0, background: "transparent", cursor: saving ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}
-            >
-              <span aria-hidden="true" style={{ position: "absolute", inset: -26, borderRadius: "50%", background: "radial-gradient(circle, rgba(60,150,255,.26) 0%, rgba(4,16,31,0) 70%)" }} />
-              <span aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(150,220,255,.4)", animation: "ob-ping 3.4s ease-out infinite" }} />
-              <span aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1px solid rgba(150,220,255,.3)", animation: "ob-ping 3.4s ease-out 1.7s infinite" }} />
-              <span aria-hidden="true" style={{ position: "absolute", inset: 14, borderRadius: "50%", overflow: "hidden", background: "linear-gradient(160deg,#1f7bff,#0a3f9e)", boxShadow: "0 0 44px rgba(60,150,255,.6), inset 0 0 40px rgba(140,215,255,.28)" }}>
-                <span style={{ position: "absolute", inset: 0, background: "conic-gradient(from 0deg, rgba(200,240,255,.34), rgba(200,240,255,0) 52%)", animation: "nxsweep 3.4s linear infinite" }} />
-              </span>
-              <span style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <svg width="30" height="38" viewBox="0 0 26 34" fill="none" aria-hidden="true">
-                  <path d="M15.4 1L3 18.6h7.2L9.4 33 23 14.4h-7.8L15.4 1z" fill="#fff" />
-                </svg>
-                <span style={{ marginTop: 9, font: "700 21px/1 var(--font-chakra)", letterSpacing: "0.16em", color: "#fff" }}>NEX2</span>
-                <span style={{ marginTop: 8, font: "600 9px/1 var(--font-chakra)", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,.72)" }}>
-                  {saving ? "Setting up…" : "Tap to enter"}
-                </span>
-              </span>
-            </button>
+            <EnterDisc onClick={handleComplete} saving={saving} />
 
             <h1 className="ob-h1" style={{ marginTop: 34, textAlign: "center" }}>You are all set</h1>
             <p className="ob-sub" style={{ textAlign: "center" }}>Your radar is live. Tap NEX2 to discover people nearby.</p>
             {error && <p style={{ margin: "12px 0 0", font: "400 12px/1.5 var(--font-chakra)", color: "#ff8a80", textAlign: "center" }}>{error}</p>}
 
             <div style={{ width: "100%", marginTop: 26, borderTop: "1px solid rgba(105,190,255,.14)" }}>
-              {[
-                ["Username", username.trim() || "Not set"],
-                ["Interests", `${interests.length} picked`],
-                ["Verified", VERIFICATION_LIVE && scanned ? doc : "Not verified"],
-                ["Visibility", VISIBILITY.find((v) => v.value === visibility)?.label],
-              ].map(([k, v]) => (
+              {summaryRows({ username, interests, scanned, doc, visibility }).map(([k, v]) => (
                 <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 2px", borderBottom: "1px solid rgba(105,190,255,.1)" }}>
                   <span style={{ font: "500 10px/1 var(--font-chakra)", letterSpacing: "0.18em", textTransform: "uppercase", color: "#5f89b2" }}>{k}</span>
                   <span style={{ font: "600 13px/1 var(--font-chakra)", color: "#c3d8ee" }}>{v}</span>

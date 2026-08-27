@@ -639,6 +639,34 @@ textarea.ob-fld { height: 98px; padding: 13px 14px; resize: none; font: 400 14px
    travels 100vh, which would leave the 150px ID frame entirely. */
 @keyframes ob-scan { 0% { transform: translateY(0); opacity: 0 } 10%, 90% { opacity: 1 } 100% { transform: translateY(148px); opacity: 0 } }
 @keyframes ob-ping { 0% { transform: scale(1); opacity: .75 } 100% { transform: scale(1.6); opacity: 0 } }
+
+/* Desktop onboarding — same classes, larger metrics, scoped under .obd so the
+   phone screen keeps its own. */
+.obd .ob-h1 { font-size: 34px }
+.obd .ob-sub { margin-top: 13px; font-size: 14.5px; line-height: 1.55 }
+.obd .ob-fld { height: 54px }
+.obd textarea.ob-fld { height: 104px }
+.obd .ob-card { position: relative; z-index: 5; width: min(620px, 100%); max-height: 100%; display: flex; flex-direction: column; padding: 32px 40px 28px; background: rgba(5,17,35,.72); backdrop-filter: blur(18px); border: 1px solid rgba(105,190,255,.2); box-shadow: 0 30px 90px rgba(1,6,14,.6); animation: nxrise .4s cubic-bezier(.16,1,.3,1) }
+/* Progress trail across the header */
+.ob-trail { flex: none; display: flex; align-items: center }
+.ob-tstep { display: flex; align-items: center; gap: 11px; flex: none }
+.ob-tdot { flex: none; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(105,190,255,.24); background: rgba(8,26,54,.7); font: 600 11px/1 var(--font-jetbrains); color: #5f89b2; transition: border-color .25s ease, background .25s ease, color .25s ease }
+.ob-tstep[data-done] .ob-tdot { border-color: rgba(80,160,255,.5); background: rgba(30,80,160,.5); color: #bfe2ff }
+.ob-tstep[data-now] .ob-tdot { border-color: #7fc8ff; background: #1f5fd0; color: #fff; box-shadow: 0 0 18px rgba(90,180,255,.6) }
+.ob-tlabel { font: 600 10.5px/1 var(--font-chakra); letter-spacing: .15em; text-transform: uppercase; color: #4a6785; transition: color .25s ease; white-space: nowrap }
+.ob-tstep[data-done] .ob-tlabel { color: #7fa9d4 }
+.ob-tstep[data-now] .ob-tlabel { color: #eaf6ff }
+.ob-tbar { flex: 1; min-width: 14px; height: 1px; margin: 0 13px; background: rgba(105,190,255,.16) }
+.ob-tbar[data-done] { background: linear-gradient(90deg, rgba(80,160,255,.6), rgba(80,160,255,.3)) }
+/* Desktop takes a file rather than a camera frame */
+.ob-drop { position: relative; width: 100%; height: 172px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: rgba(3,12,26,.7); border: 1px dashed rgba(105,190,255,.34); cursor: pointer; transition: border-color .2s ease, background .2s ease }
+.ob-drop:hover { border-color: rgba(140,215,255,.6) }
+.ob-drop[data-over] { border-color: rgba(140,215,255,.8); background: rgba(16,44,86,.6) }
+.ob-drop[data-has] { border-color: rgba(77,255,176,.4) }
+.ob-picked { display: flex; align-items: center; gap: 13px; margin-top: 12px; padding: 13px 15px; background: rgba(16,50,40,.5); border: 1px solid rgba(77,255,176,.36); clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px) }
+.ob-tag:hover:not(:disabled) { border-color: rgba(140,205,255,.5) }
+.ob-vis:hover { border-color: rgba(140,205,255,.4) }
+.ob-doc:hover { border-color: rgba(140,205,255,.5) }
 .btn-accept { flex: 1; height: 42px; border: 1.5px solid transparent; background: linear-gradient(180deg,#0a1c3e,#071228) padding-box, linear-gradient(100deg,#3b6bff,#9b4dff 48%,#2fd4d4) border-box; color: #fff; font: 700 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 18px rgba(80,110,255,.4); transition: box-shadow .2s ease, filter .2s ease }
 .btn-accept:hover:not(:disabled) { box-shadow: 0 0 34px rgba(110,140,255,.8); filter: brightness(1.1) }
 .btn-decline { flex: none; padding: 0 18px; height: 42px; border: 1px solid rgba(120,190,255,.28); background: transparent; color: #8fb9e2; font: 600 11.5px/1 var(--font-chakra); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease }
