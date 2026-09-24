@@ -14,6 +14,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'reported_user_id and reason required' }, { status: 400 });
     }
 
+    if (reported_user_id === user.id) {
+      return Response.json({ error: 'You cannot report yourself' }, { status: 400 });
+    }
+
+    // One open report per reporter/reported pair — stops queue flooding.
+    const openReports = await base44.asServiceRole.entities.Report.filter({
+      reporter_id: user.id,
+      reported_user_id,
+      status: 'pending',
+    });
+    if (openReports.length > 0) {
+      return Response.json({ report: openReports[0], routed_to_manual_review: openReports[0].requires_manual_review, duplicate: true });
+    }
+
     const isHighSeverity = HIGH_SEVERITY_REASONS.includes(reason);
     const requiresManualReview = isHighSeverity;
 
@@ -28,15 +42,8 @@ Deno.serve(async (req) => {
       conversation_id: conversation_id || null,
     });
 
-    // If underage suspicion, flag the reported user for re-verification
-    if (reason === 'underage_suspicion') {
-      const reportedProfiles = await base44.asServiceRole.entities.UserProfile.filter({ created_by_id: reported_user_id });
-      if (reportedProfiles.length > 0) {
-        await base44.asServiceRole.entities.UserProfile.update(reportedProfiles[0].id, {
-          requires_reverification: true,
-        });
-      }
-    }
+    // Underage suspicion is high severity → manual review. A moderator decides
+    // whether to require re-verification; a report alone never flags the user.
 
     return Response.json({ report, routed_to_manual_review: requiresManualReview });
   } catch (error) {

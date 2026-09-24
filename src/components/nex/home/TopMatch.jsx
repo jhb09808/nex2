@@ -39,21 +39,10 @@ export default function TopMatch({ nearbyUsers = [], myInterests = [], profile }
       setMatch(top);
 
       try {
-        const res = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are NEX AI. A user (${profile?.username || "User"}, interests: ${(myInterests || []).join(", ")}) wants to connect with ${top.user.username} (bio: ${(top.user.bio || "").substring(0, 100)}, interests: ${(top.user.interests || []).join(", ")}).
-
-Generate:
-1. A one-sentence reason WHY they should connect (specific, referencing shared interests).
-2. A natural, personalized icebreaker message (1-2 sentences, conversational, not cheesy).
-3. Their likely profession/role (short, 2-3 words).`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              reason: { type: "string" },
-              icebreaker: { type: "string" },
-              profession: { type: "string" },
-            },
-          },
+        const { data: res } = await base44.functions.invoke("aiAssist", {
+          action: "matchInsight",
+          me: { username: profile?.username, interests: myInterests },
+          user: { username: top.user.username, bio: top.user.bio, interests: top.user.interests },
         });
         setInsight(res);
       } catch (err) {

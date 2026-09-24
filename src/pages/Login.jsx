@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
 import VerifyEmailPanel from "@/components/nex/auth/VerifyEmailPanel";
+import { safeReturnTo } from "@/lib/authReturnTo";
 
 const BG_IMAGE = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/6b451b6af_login_bg.png";
 const LOGO_URL = "https://media.base44.com/images/public/6a4d6cb08bae15f4dac3aca3/37125597e_NEX2.png";
@@ -33,7 +34,7 @@ export default function Login() {
       await base44.auth.loginViaEmailPassword(email, password);
       // Standalone (home-screen) iOS doesn't always follow the SDK's own
       // redirect, which left the button doing nothing. Navigate explicitly.
-      const dest = returnTo.startsWith("/") ? returnTo : "/map";
+      const dest = safeReturnTo();
       window.location.href = dest;
       return;
     } catch (err) {

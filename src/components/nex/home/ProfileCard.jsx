@@ -50,20 +50,9 @@ export default function ProfileCard({ user, myInterests, index = 0 }) {
   const generateIcebreaker = async () => {
     setIceLoading(true);
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate a personalized icebreaker message from ${"the user"} to ${user.username}.
-
-Their interests: ${(user.interests || []).join(", ")}
-Their bio: ${user.bio || "No bio"}
-
-Find a specific, natural common ground. Make it feel authentic, not generic. Reference something specific about their profile. Keep it under 2 sentences.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            message: { type: "string" },
-            context: { type: "string" }
-          }
-        }
+      const { data: res } = await base44.functions.invoke("aiAssist", {
+        action: "profileIcebreaker",
+        user: { username: user.username, bio: user.bio, interests: user.interests },
       });
       setIcebreaker(res);
     } catch (err) {

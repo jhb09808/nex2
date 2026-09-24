@@ -237,8 +237,7 @@ export default function Chat({ conversationId: conversationIdProp, embedded = fa
           const botRes = await base44.functions.invoke("generateBotReply", {
             conversation_id: conversationId,
             bot_user_id: botId,
-            bot_profile: botProfile,
-            recent_messages: [...messages, { sender_id: me.id, content: msgText }],
+            bot_profile: { username: botProfile?.username, bio: botProfile?.bio, interests: botProfile?.interests },
           });
           if (botRes.data?.reply && !botRes.data?.reply?.error) {
             // Real-time subscription should pick it up; this is a fallback

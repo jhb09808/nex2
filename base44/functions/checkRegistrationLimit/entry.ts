@@ -4,8 +4,12 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || req.headers.get("x-real-ip")
+    // True-Client-IP is set (and overwritten) by the platform edge, so callers
+    // can't spoof it. X-Forwarded-For is client-extendable: only the entry the
+    // edge appended (3rd from the end) is trustworthy.
+    const xff = (req.headers.get("x-forwarded-for") || "").split(",").map((s) => s.trim()).filter(Boolean);
+    const ip = req.headers.get("true-client-ip")?.trim()
+      || (xff.length >= 3 ? xff[xff.length - 3] : null)
       || "unknown";
 
     const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({

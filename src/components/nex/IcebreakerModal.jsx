@@ -45,35 +45,10 @@ export default function IcebreakerModal({ open, onClose, myProfile, otherUser, o
     try {
       const myInterests = myProfile?.interests || [];
       const theirInterests = otherUser?.interests || [];
-      const shared = myInterests.filter((i) => theirInterests.includes(i));
-
-      const prompt = `You are a witty, friendly conversation starter for a social networking app called NEX2.
-
-User A's interests: ${myInterests.join(", ") || "not specified"}
-User B's interests: ${theirInterests.join(", ") || "not specified"}
-Shared interests: ${shared.join(", ") || "none directly shared"}
-
-Generate ONE short, casual icebreaker message that User A could send to User B to start a conversation.
-
-Rules:
-- Keep it under 2 sentences, natural and casual (like a real text message)
-- If there are shared interests, reference one naturally
-- If there are no shared interests, find a creative, playful connection between their different interests
-- Be warm and engaging, NOT cheesy, cringey, or formal
-- Don't use hashtags or emojis
-- Don't start with "Hey" or "Hi" — be specific and interesting
-- Speak as User A talking TO User B
-
-Return ONLY the message text.`;
-
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            message: { type: "string" },
-          },
-        },
+      const { data: res } = await base44.functions.invoke("aiAssist", {
+        action: "chatIcebreaker",
+        my_interests: myInterests,
+        their_interests: theirInterests,
       });
       const text = typeof res === "string" ? res : res?.message;
       setSuggestion(typeof text === "string" ? text : null);

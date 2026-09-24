@@ -58,23 +58,7 @@ function TypeField({ label, placeholder, values, accent, onChange }) {
     }
     setLoading(true);
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an autocomplete engine for a professional networking app.
-The user is typing in the "${label}" field. Based on what they've typed so far, predict 3-5 likely completions.
-
-Input so far: "${query}"
-
-Return a JSON object with a "suggestions" array of short phrases (2-6 words each) that complete or relate to what the user is typing. Make them specific and practical. Do not include the input text itself — just the completions.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            suggestions: {
-              type: "array",
-              items: { type: "string" },
-            },
-          },
-        },
-      });
+      const { data: res } = await base44.functions.invoke("aiAssist", { action: "autocomplete", field: label, query });
       setSuggestions((res.suggestions || []).filter((s) => !values.includes(s)));
     } catch {
       setSuggestions([]);
