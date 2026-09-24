@@ -89,8 +89,10 @@
     "looking_for"
   ],
   "rls": {
-    "create": true,
-    "read": true,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": null,
     "update": {
       "$or": [
         {
