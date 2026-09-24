@@ -1,10 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { normalizeEmail } from '../../shared/emailQuality.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const email = body?.email?.trim()?.toLowerCase();
+    // Auto-corrects common provider typos (gamil.com, gmail.con, …).
+    const email = body?.email ? normalizeEmail(body.email) : undefined;
     const phone = body?.phone?.trim() || undefined;
     const zip_code = body?.zip_code?.trim();
     const is_international = body?.is_international === true;
